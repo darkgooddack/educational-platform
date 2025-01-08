@@ -4,27 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8e0dd32a-2bde-41a2-8e26-5770e0c29989" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/educational-platform.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/core/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/core/init_db.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/core/path_settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/core/run_app.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/router.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/routers/router.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/utils/app_logging.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/utils/singleton.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+    <list default="true" id="8e0dd32a-2bde-41a2-8e26-5770e0c29989" name="Changes" comment="base">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,12 +44,12 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "demo"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -85,6 +66,19 @@
       <option name="presentableId" value="Default" />
       <updated>1736327781317</updated>
     </task>
+    <task id="LOCAL-00001" summary="base">
+      <option name="closed" value="true" />
+      <created>1736350574688</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1736350574688</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="base" />
+    <option name="LAST_COMMIT_MESSAGE" value="base" />
   </component>
 </project>
