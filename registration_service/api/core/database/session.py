@@ -114,7 +114,7 @@ class SessionContextManager:
         """
         Инициализирует экземпляр SessionContextManager.
         """
-        self.db_session = DatabaseSession(settings)
+        self.db_session = DatabaseSession()
         self.session_factory = self.db_session.create_async_session_factory()
         self.session = None
 

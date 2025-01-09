@@ -50,8 +50,6 @@ class UserSchema(BaseInputSchema):
         email (str): Email пользователя.
         hashed_password (str | None): Хешированный пароль пользователя.
     """
-
-    id: Optional[int] = None
     name: str
     email: str
     hashed_password: str | None = None

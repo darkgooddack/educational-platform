@@ -7,7 +7,7 @@ from api.errors.v1.users import (
     InvalidEmailFormatError,
 )
 from api.core.database.session import get_db_session
-from api.schemas.v1.users import UserSchema
+from api.schemas.v1.users import CreateUserSchema
 from api.services.v1.users import RegistrationService
 from api.core.config import app_config
 
@@ -15,7 +15,7 @@ router = APIRouter(**app_config.SERVICES["registration"].to_dict())
 
 @router.post("/")
 async def registration_user(
-    user: UserSchema,
+    user: CreateUserSchema,
     session: AsyncSession = Depends(get_db_session),
 ) -> None:
     """

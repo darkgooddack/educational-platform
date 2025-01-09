@@ -3,7 +3,7 @@ import socket
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
-
+from sqlalchemy import text
 from api.core.database.session import get_db_session
 from api.core.config import app_config
 
@@ -25,7 +25,10 @@ async def health(session: AsyncSession = Depends(get_db_session)):
     """
     try:
         # Пробуем выполнить простой запрос с таймаутом в 1 секунду
-        await asyncio.wait_for(session.execute("SELECT 1"), timeout=1)
+        await asyncio.wait_for(
+            session.execute(text("SELECT 1")),
+            timeout=1
+        )
     except (asyncio.TimeoutError, socket.gaierror):
         # Если таймаут или ошибка сети - возвращаем 503 Service Unavailable
         return Response(status_code=503)
