@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8e0dd32a-2bde-41a2-8e26-5770e0c29989" name="Changes" comment="add requirements2">
-      <change afterPath="$PROJECT_DIR$/backend/app/controllers/vk_controller.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/crud/crud_course.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/models/course.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/schemas/user.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/app/tests/test_app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="8e0dd32a-2bde-41a2-8e26-5770e0c29989" name="Changes" comment="feat: add some file" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,6 +27,13 @@
     &quot;assignee&quot;: &quot;darkgooddack&quot;
   }
 }</component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="main" />
+      </list>
+    </option>
+  </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/darkgooddack/educational-platform.git&quot;,
@@ -79,11 +79,20 @@
       <option name="project" value="LOCAL" />
       <updated>1736350574688</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="feat: add some file">
+      <option name="closed" value="true" />
+      <created>1736402096341</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1736402096341</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="base" />
-    <option name="LAST_COMMIT_MESSAGE" value="base" />
+    <MESSAGE value="feat: add some file" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: add some file" />
   </component>
 </project>
