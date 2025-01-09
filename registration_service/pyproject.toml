@@ -1,0 +1,16 @@
+[project]
+name = "registration-service"
+version = "0.1.0"
+description = "Registration service for educational platform"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "alembic>=1.14.0",
+    "fastapi[all]>=0.115.6",
+    "pydantic>=2.10.4",
+    "pydantic-settings>=2.7.1",
+    "redis>=5.2.1",
+    "sqlalchemy>=2.0.36",
+    "uvicorn>=0.34.0",
+]
