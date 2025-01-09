@@ -1,6 +1,6 @@
-# educational-platform
+# Educational platform
 
-## описание
+## Educational platform — это платформа для онлайн-обучения, которая предоставляет пользователям доступ к курсам, материалам и инструментам для обучения. Проект разработан с использованием современных технологий и методологий, чтобы обеспечить высокое качество и удобство использования.
 
 ![Static Badge](https://img.shields.io/badge/React-18-yellow)
 ![Static Badge](https://img.shields.io/badge/Python-3.11-blue)
