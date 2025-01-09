@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8e0dd32a-2bde-41a2-8e26-5770e0c29989" name="Changes" comment="base">
+    <list default="true" id="8e0dd32a-2bde-41a2-8e26-5770e0c29989" name="Changes" comment="add requirements2">
+      <change afterPath="$PROJECT_DIR$/backend/app/controllers/vk_controller.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/app/crud/crud_course.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/app/models/course.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/app/schemas/user.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/app/tests/test_app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -47,7 +52,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "demo"
+    "git-widget-placeholder": "main"
   }
 }]]></component>
   <component name="SharedIndexes">
