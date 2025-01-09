@@ -2,8 +2,8 @@ import logging
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-from app.exceptions.v1.users import BaseAPIException
-from registration_service.app.core.config.env_config import settings
+from api.errors.v1.users import BaseAPIException
+from api.core.config import env_config
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next):
-        if settings.logging_level == "DEBUG":
+        if env_config.logging_level == "DEBUG":
             logger.debug("Request path: %s", request.url.path)
             logger.debug("Headers: %s", request.headers)
 

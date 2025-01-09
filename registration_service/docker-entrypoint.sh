@@ -5,4 +5,4 @@ echo "Применение миграции для сервиса регистр
 uv run alembic upgrade head
 
 echo "Запуск сервера uvicorn сервиса регистрации"
-uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips=*
+uv run uvicorn api.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips=*

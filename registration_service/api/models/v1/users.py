@@ -13,11 +13,9 @@
 Этот модуль предназначен для использования в сочетании с SQLAlchemy ORM
 для выполнения операций с базой данных, связанных с пользователями.
 """
-
-from typing import List
 from sqlalchemy.orm import Mapped, mapped_column
-from app.models.v1.base import BaseModel
-from app.schemas.v1.users import UserRole
+from api.models.v1.base import BaseModel
+from api.schemas.v1.users import UserRole
 
 
 class UserModel(BaseModel):

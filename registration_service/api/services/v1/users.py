@@ -3,9 +3,6 @@
 В данном модуле реализованы функции для работы с пользователями,
 включая аутентификацию и авторизацию.
 """
-
-import logging
-import json
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -13,7 +10,6 @@ from passlib.context import CryptContext
 from api.schemas.v1.users import UserSchema, CreateUserSchema
 from api.services.v1.base import BaseService, BaseDataManager
 from api.models.v1.users import UserModel
-from api.core.config import env_config
 from api.errors.v1.users import (
     UserNotFoundError,
     UserExistsError,

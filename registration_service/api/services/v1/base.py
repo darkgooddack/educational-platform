@@ -1,11 +1,11 @@
 from typing import TypeVar, Generic, Type, Any, List
 import logging
-from sqlalchemy import select, func, desc, asc, delete
+from sqlalchemy import select, delete
 from sqlalchemy.sql.expression import Executable
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from api.models.v1.base import BaseModel
-from api.schemas.v1.base import BaseSchema, PaginationParams
+from api.schemas.v1.base import BaseSchema
 
 M = TypeVar("M", bound=BaseModel)
 T = TypeVar("T", bound=BaseSchema)

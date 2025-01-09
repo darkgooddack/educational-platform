@@ -14,7 +14,6 @@
 """
 
 from typing import Any, Dict, List, Type, TypeVar
-import json
 from datetime import datetime, timezone
 from sqlalchemy import MetaData, DateTime
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped

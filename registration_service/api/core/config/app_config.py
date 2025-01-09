@@ -1,6 +1,5 @@
 from typing import Dict, List, Any
 from pathlib import Path
-from app.core.redis.lifespan import lifespan
 
 
 class ServiceConfig:
@@ -25,9 +24,9 @@ class PathConfig:
     """
 
     ENV_FILE = Path(".env")
-    APP_DIR = Path("app")
+    APP_DIR = Path("api")
 
-    BASE_PATH = Path(__file__).resolve().parents[4] # /microservice/app/core/config
+    BASE_PATH = Path(__file__).resolve().parents[4] # /microservice/app/core/config - #! проверить
     ENV_PATH = BASE_PATH / ENV_FILE
     APP_PATH = BASE_PATH / APP_DIR
 
@@ -46,9 +45,8 @@ class AppConfig:
     API_VERSIONS = ["v1"]  # Поддерживаемые версии API
 
     SERVICES = {
+        "health": ServiceConfig("health", ["Health"]),
         "registration": ServiceConfig("registration", ["Registration"]),
-        "oauth": ServiceConfig("oauth", ["OAuth"]),
-        "verification": ServiceConfig("verification", ["Verification"]),
     }
 
     PATHS = PathConfig()
@@ -63,7 +61,6 @@ class AppConfig:
                 "defaultModelsExpandDepth": -1
             },  # Сворачивание моделей в Swagger UI
             "root_path": "",  # Пустой путь для корневого маршрута
-            "lifespan": lifespan,
         }
 
     @property

@@ -7,8 +7,8 @@
 """
 
 from fastapi import APIRouter
-from app.core.config import app_config
-from app.routers import v1  # , v2  # будет добавлено позже
+from api.core.config import app_config
+from api.routers import v1  # , v2  # будет добавлено позже
 
 VERSIONS_MAP = BASE_ROUTERS = {
     "v1": v1,

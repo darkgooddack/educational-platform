@@ -7,7 +7,7 @@ from api.errors.v1.users import (
     InvalidEmailFormatError,
 )
 from api.core.database.session import get_db_session
-from api.schemas.v1.users import RegistrationUserSchema
+from api.schemas.v1.users import UserSchema
 from api.services.v1.users import RegistrationService
 from api.core.config import app_config
 
@@ -15,7 +15,7 @@ router = APIRouter(**app_config.SERVICES["registration"].to_dict())
 
 @router.post("/")
 async def registration_user(
-    user: RegistrationUserSchema,
+    user: UserSchema,
     session: AsyncSession = Depends(get_db_session),
 ) -> None:
     """
@@ -33,7 +33,7 @@ async def registration_user(
         InvalidEmailFormatError: Неверный формат email
     """
     try:
-        return await RegistrationService(session).registration_user(user)
+        return await RegistrationService(session).create_user(user)
     except ValidationError as e:
         if "password" in str(e):
             raise WeakPasswordError() from e

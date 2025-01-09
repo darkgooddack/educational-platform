@@ -1,7 +1,7 @@
 from typing import Optional
 from enum import Enum
 from pydantic import Field, EmailStr
-from app.schemas.v1.base import BaseInputSchema
+from api.schemas.v1.base import BaseInputSchema
 
 
 class UserRole(str, Enum):
@@ -19,7 +19,7 @@ class UserRole(str, Enum):
     USER = "user"
 
 
-class RegistrationUserSchema(BaseInputSchema):
+class CreateUserSchema(BaseInputSchema):
     """
     Схема создания пользователя.
     #! Для примера
@@ -41,7 +41,7 @@ class RegistrationUserSchema(BaseInputSchema):
     )
 
 
-class RegistrationSchema(BaseInputSchema):
+class UserSchema(BaseInputSchema):
     """
     Схема пользователя.
     #! Для примера

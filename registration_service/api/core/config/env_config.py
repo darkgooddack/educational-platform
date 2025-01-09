@@ -1,7 +1,6 @@
 from typing import Dict, List, Any
-from pydantic import Field, SecretStr, RedisDsn
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from functools import lru_cache
 from .app_config import AppConfig
 
 
