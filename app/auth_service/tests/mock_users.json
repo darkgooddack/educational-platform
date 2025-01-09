@@ -1,0 +1,13 @@
+[
+    {
+      "email": "testuser1@example.com",
+      "password": "hashedpassword1",
+      "is_active": true
+    },
+    
+    {
+      "email": "testuser2@example.com",
+      "password": "hashedpassword2",
+      "is_active": false
+    }
+  ]
