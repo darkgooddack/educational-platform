@@ -23,7 +23,6 @@ COPY . /usr/src/app/
 
 RUN uv sync --frozen --no-cache
 
-COPY ./docker-entrypoint.sh /usr/src/app/docker-entrypoint.sh
 RUN chmod +x /usr/src/app/docker-entrypoint.sh
 
 ENTRYPOINT ["sh", "/usr/src/app/docker-entrypoint.sh"]
