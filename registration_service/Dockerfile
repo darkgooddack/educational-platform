@@ -1,6 +1,6 @@
 FROM python:3.11.11-alpine3.21
 
-WORKDIR /usr/src/
+WORKDIR /usr/src/app/
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -17,13 +17,13 @@ RUN apk add --no-cache --virtual .build-deps \
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-EXPOSE 8001
+EXPOSE 8000
 
-COPY . /usr/src/
+COPY . /usr/src/app/
 
 RUN uv sync --frozen --no-cache
 
-COPY ./docker-entrypoint.sh /usr/src/docker-entrypoint.sh
-RUN chmod +x /usr/src/docker-entrypoint.sh
+COPY ./docker-entrypoint.sh /usr/src/app/docker-entrypoint.sh
+RUN chmod +x /usr/src/app/docker-entrypoint.sh
 
-ENTRYPOINT ["sh", "/usr/src/docker-entrypoint.sh"]
+ENTRYPOINT ["sh", "/usr/src/app/docker-entrypoint.sh"]
