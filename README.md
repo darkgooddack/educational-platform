@@ -1,6 +1,4 @@
-# educational-platform
-
-## описание
+# Educational platform
 
 ![Static Badge](https://img.shields.io/badge/React-18-yellow)
 ![Static Badge](https://img.shields.io/badge/Python-3.11-blue)
@@ -8,6 +6,8 @@
 ![Static Badge](https://img.shields.io/badge/SQLAlchemy-2.0.34-blue)
 ![Static Badge](https://img.shields.io/badge/PostgreSQL-16.4-blue)
 ![Static Badge](https://img.shields.io/badge/Redis-5.0.3-blue)
+
+## Educational platform — это платформа для онлайн-обучения, которая предоставляет пользователям доступ к курсам, материалам и инструментам для обучения. 
 
 # Этап 1: Планирование и определение требований
 
