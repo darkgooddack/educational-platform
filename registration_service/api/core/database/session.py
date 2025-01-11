@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy import URL
-from api.core.config import env_config
+from registration_service.api.core.config import env_config
 
 
 class DatabaseSession:

@@ -12,7 +12,7 @@
 - UserExistsError: Исключение, которое вызывается, когда пользователь с таким именем или email уже существует.
 """
 
-from api.errors.v1.base import BaseAPIException
+from registration_service.api.errors.v1.base import BaseAPIException
 
 class UserNotFoundError(BaseAPIException):
     """

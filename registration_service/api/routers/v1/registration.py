@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic_core import ValidationError
 
-from api.errors.v1.users import (
+from registration_service.api.errors.v1.users import (
     WeakPasswordError,
     InvalidEmailFormatError,
 )
-from api.core.database.session import get_db_session
-from api.schemas.v1.users import CreateUserSchema
-from api.services.v1.users import RegistrationService
-from api.core.config import app_config
+from registration_service.api.core.database.session import get_db_session
+from registration_service.api.schemas.v1.users import CreateUserSchema
+from registration_service.api.services.v1.users import RegistrationService
+from registration_service.api.core.config import app_config
 
 router = APIRouter(**app_config.SERVICES["registration"].to_dict())
 

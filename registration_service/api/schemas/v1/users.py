@@ -1,7 +1,7 @@
 from typing import Optional
 from enum import Enum
 from pydantic import Field, EmailStr
-from api.schemas.v1.base import BaseInputSchema
+from registration_service.api.schemas.v1.base import BaseInputSchema
 
 
 class UserRole(str, Enum):

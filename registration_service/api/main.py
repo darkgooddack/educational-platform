@@ -1,9 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import all_routers
-from api.middlewares.logging import LoggingMiddleware
-from api.core.config import app_config, env_config
+from registration_service.api.routers import all_routers
+from registration_service.api.middlewares.logging import LoggingMiddleware
+from registration_service.api.core.config import app_config, env_config
 
 app = FastAPI(**app_config.app_params)
 app.add_middleware(LoggingMiddleware)

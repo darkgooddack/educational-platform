@@ -2,8 +2,8 @@ import logging
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-from api.errors.v1.users import BaseAPIException
-from api.core.config import env_config
+from registration_service.api.errors.v1.base import BaseAPIException
+from registration_service.api.core.config import env_config
 
 logger = logging.getLogger(__name__)
 

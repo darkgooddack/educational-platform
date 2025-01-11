@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
 from sqlalchemy import text
-from api.core.database.session import get_db_session
-from api.core.config import app_config
+from registration_service.api.core.database.session import get_db_session
+from registration_service.api.core.config import app_config
 
 router = APIRouter(**app_config.SERVICES["health"].to_dict())
 
