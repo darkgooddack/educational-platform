@@ -1,20 +1,40 @@
 version: "3.8"
 
 services:
-  api:
+  api_gateway:
     build:
-      context: .
+      context: ./api_gateway
       dockerfile: Dockerfile
     env_file:
       - ./.env
     ports:
-      - "8000:8000"
-      - "8443:8443"
+      - "8001:8000"
     restart: unless-stopped
     networks:
       - dokploy-network
-    depends_on:
-      - frontend
+
+  auth_service:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    ports:
+      - "8002:8000"
+    restart: unless-stopped
+    networks:
+      - dokploy-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - ./.env
+    networks:
+      - dokploy-network
+
 networks:
   dokploy-network:
     external: true
