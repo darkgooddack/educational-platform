@@ -6,14 +6,17 @@
 - logout: выход из системы
 - health_check: проверка работоспособности
 """
+
 import json
-from aio_pika import connect_robust, IncomingMessage
-from app.services import AuthenticationService
+
+from aio_pika import IncomingMessage, connect_robust
+
 from app.core.config import config
+from app.services import AuthenticationService
+
 
 async def process_auth_message(
-    message: IncomingMessage,
-    auth_service: AuthenticationService
+    message: IncomingMessage, auth_service: AuthenticationService
 ) -> None:
     """
     Обрабатывает сообщения аутентификации.
@@ -40,6 +43,7 @@ async def process_auth_message(
 
         # Отправляем ответ
         await message.reply(json.dumps(result).encode())
+
 
 async def start_consuming():
     """

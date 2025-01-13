@@ -3,10 +3,14 @@
 
 Содержит настройки FastAPI приложения, логирования и параметры запуска сервера.
 """
+
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 from pydantic import Field
+
 from app.core.lifespan import lifespan
+
 
 class ServiceConfig:
     """
@@ -40,6 +44,7 @@ class ServiceConfig:
         """
         return {"prefix": self.prefix, "tags": self.tags}
 
+
 class PathConfig:
     """
     Конфигурация путей проекта.
@@ -55,9 +60,10 @@ class PathConfig:
     ENV_FILE = Path(".env")
     APP_DIR = Path("app")
 
-    BASE_PATH = Path(__file__).resolve().parents[2] #! проверить
+    BASE_PATH = Path(__file__).resolve().parents[2]  #! проверить
     ENV_PATH = BASE_PATH / ENV_FILE
     APP_PATH = BASE_PATH / APP_DIR
+
 
 class AppConfig:
     """
@@ -85,11 +91,14 @@ class AppConfig:
         >>> config.app_params
         {'title': 'Auth microoservice', 'description': ... }
     """
+
     logging_level: str = "DEBUG"
     logging_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     TITLE: str = "Auth microoservice"
-    DESCRIPTION: str = "Service of authentication and registration for educational platform"
+    DESCRIPTION: str = (
+        "Service of authentication and registration for educational platform"
+    )
     VERSION: str = "0.1.0"
     HOST: str = "0.0.0.0"
     PORT: int = 8001
@@ -105,37 +114,28 @@ class AppConfig:
     PATHS = PathConfig()
 
     auth_url: str = Field(
-    default="api/v1/authenticate",
-    description="URL для аутентификации пользователя"
+        default="api/v1/authenticate", description="URL для аутентификации пользователя"
     )
 
-    token_type: str = Field(
-        default="bearer",
-        description="Тип токена авторизации"
-    )
+    token_type: str = Field(default="bearer", description="Тип токена авторизации")
 
     token_algorithm: str = Field(
-        default="HS256",
-        description="Алгоритм шифрования JWT токена"
+        default="HS256", description="Алгоритм шифрования JWT токена"
     )
 
     token_expire_minutes: int = Field(
-        default=1440,
-        description="Время жизни токена в минутах"
+        default=1440, description="Время жизни токена в минутах"
     )
 
     redis_pool_size: int = Field(
-        default=10,
-        description="Размер пула подключений к Redis"
+        default=10, description="Размер пула подключений к Redis"
     )
 
     rabbitmq_connection_timeout: int = Field(
-        default=30,
-        description="Таймаут подключения к RabbitMQ"
+        default=30, description="Таймаут подключения к RabbitMQ"
     )
     rabbitmq_exchange: str = Field(
-        default="educational_platform",
-        description="Название exchange в RabbitMQ"
+        default="educational_platform", description="Название exchange в RabbitMQ"
     )
 
     @property
@@ -170,5 +170,6 @@ class AppConfig:
             "port": self.PORT,
             "proxy_headers": True,  # Для корректной работы с прокси-серверами
         }
+
 
 app_config = AppConfig()

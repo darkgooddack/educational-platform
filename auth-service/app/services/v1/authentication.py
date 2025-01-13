@@ -6,22 +6,18 @@
 
 import json
 from datetime import datetime
-from sqlalchemy.ext.asyncio import AsyncSession
+
 from redis.exceptions import RedisError
-from app.schemas import UserSchema, TokenSchema, AuthenticationSchema
-from app.services import BaseService, BaseDataManager
-from app.services import UserDataManager
-from app.models import UserModel
-from app.core.dependencies.redis import RedisClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.config import config
-from app.core.exceptions import (
-    InvalidCredentialsError,
-    TokenExpiredError,
-    TokenMissingError,
-)
+from app.core.dependencies.redis import RedisClient
+from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
+                                 TokenMissingError)
 from app.core.security import HashingMixin, TokenMixin
-
-
+from app.models import UserModel
+from app.schemas import AuthenticationSchema, TokenSchema, UserSchema
+from app.services import BaseDataManager, BaseService, UserDataManager
 
 
 class AuthenticationService(HashingMixin, TokenMixin, BaseService):
@@ -39,13 +35,14 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
         authenticate: Аутентифицирует пользователя.
         get_token: Получает токен доступа.
     """
+
     def __init__(self, session: AsyncSession):
         super().__init__(session)
         self._data_manager = AuthenticationDataManager(session)
 
-
-
-    async def authenticate(self, authentication_data: AuthenticationSchema) -> TokenSchema:
+    async def authenticate(
+        self, authentication_data: AuthenticationSchema
+    ) -> TokenSchema:
         """
         Аутентифицирует пользователя по логину и паролю.
 
@@ -55,11 +52,13 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
         Returns:
             Токен доступа.
         """
-        user_model = await UserDataManager(self.session) \
-            .get_user_by_email(authentication_data.email)
+        user_model = await UserDataManager(self.session).get_user_by_email(
+            authentication_data.email
+        )
 
-        if not user_model or \
-            not self.verify(user_model.hashed_password, authentication_data.password):
+        if not user_model or not self.verify(
+            user_model.hashed_password, authentication_data.password
+        ):
             raise InvalidCredentialsError()
 
         user_schema = UserSchema.model_validate(user_model)
@@ -147,7 +146,7 @@ class AuthenticationDataManager(BaseDataManager):
             await redis.set(
                 f"token:{token}",
                 json.dumps(user_data),
-                ex=TokenMixin.get_token_expiration()
+                ex=TokenMixin.get_token_expiration(),
             )
             # Добавляем в список сессий пользователя
             await redis.sadd(f"sessions:{user.email}", token)
@@ -243,8 +242,6 @@ class AuthenticationDataManager(BaseDataManager):
             raise TokenExpiredError()
 
         return email
-
-
 
     async def verify_and_get_user(self, token: str) -> UserSchema:
         """

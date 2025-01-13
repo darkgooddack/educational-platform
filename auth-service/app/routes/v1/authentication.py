@@ -3,21 +3,20 @@
 
 Предоставляет эндпоинты для входа и выхода из системы.
 """
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
+from app.core.config import config
 from app.core.dependencies.authentication import oauth2_schema
 from app.core.dependencies.database import get_db_session
+from app.core.exceptions import (InvalidCredentialsError, InvalidPasswordError,
+                                 UserNotFoundError)
 from app.schemas import AuthenticationSchema, TokenSchema
 from app.services import AuthenticationService
-from app.core.config import config
-from app.core.exceptions import (
-    UserNotFoundError,
-    InvalidCredentialsError,
-    InvalidPasswordError,
-)
+
 router = APIRouter(**config.SERVICES["authentication"].to_dict())
+
 
 @router.post("")
 async def authenticate(
@@ -44,6 +43,7 @@ async def authenticate(
         raise UserNotFoundError("email", credentials.email) from e
     except InvalidCredentialsError as e:
         raise InvalidPasswordError() from e
+
 
 @router.post("/logout")
 async def logout(

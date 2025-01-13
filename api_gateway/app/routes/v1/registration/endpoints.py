@@ -4,21 +4,24 @@
 Этот модуль содержит эндпоинт для:
 - Регистрации новых пользователей через auth_service
 """
+
 import json
-from fastapi import APIRouter, Depends
+
 from aio_pika import Connection, Message
+from fastapi import APIRouter, Depends
+
+from app.core.config import config
 from app.core.dependencies.rabbitmq import get_rabbitmq
 from app.core.dependencies.redis import get_redis
-from app.core.config import config
-
 
 router = APIRouter(**config.SERVICES["registration"].to_dict())
+
 
 @router.post("/")
 async def register_user(
     user_data: dict,
-    redis = Depends(get_redis),
-    rabbitmq: Connection = Depends(get_rabbitmq)
+    redis=Depends(get_redis),
+    rabbitmq: Connection = Depends(get_rabbitmq),
 ) -> dict:
     """
     Регистрирует нового пользователя.
@@ -37,12 +40,9 @@ async def register_user(
         # Отправляем запрос регистрации в auth_service
         await channel.default_exchange.publish(
             Message(
-                body=json.dumps({
-                    "action": "register",
-                    "data": user_data
-                }).encode()
+                body=json.dumps({"action": "register", "data": user_data}).encode()
             ),
-            routing_key="auth_queue"
+            routing_key="auth_queue",
         )
 
         # Получаем и обрабатываем ответ
@@ -53,8 +53,6 @@ async def register_user(
                     # Кэшируем данные пользователя если регистрация успешна
                     if "user_id" in response:
                         await redis.setex(
-                            f"user:{response['user_id']}",
-                            3600,
-                            json.dumps(user_data)
+                            f"user:{response['user_id']}", 3600, json.dumps(user_data)
                         )
                     return response

@@ -1,9 +1,11 @@
-from typing import TypeVar, Generic, Type, Any, List
 import logging
-from sqlalchemy import select, delete
-from sqlalchemy.sql.expression import Executable
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any, Generic, List, Type, TypeVar
+
+from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import Executable
+
 from app.models import BaseModel
 from app.schemas import BaseSchema
 
@@ -170,6 +172,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             await self.session.rollback()
             logging.error("Ошибка при обновлении: %s", e)
             raise
+
 
 class BaseEntityManager(BaseDataManager[T]):
     """Базовый менеджер для работы с сущностями.

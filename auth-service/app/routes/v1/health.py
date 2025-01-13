@@ -1,14 +1,17 @@
 """
 Роутер для проверки работоспособности сервиса.
 """
+
 import asyncio
 import socket
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
-from app.core.dependencies.database import get_db_session
+
 from app.core.config import config
+from app.core.dependencies.database import get_db_session
 
 router = APIRouter(**config.SERVICES["health"].to_dict())
 
@@ -28,10 +31,7 @@ async def health(session: AsyncSession = Depends(get_db_session)):
     """
     try:
         # Пробуем выполнить простой запрос с таймаутом в 1 секунду
-        await asyncio.wait_for(
-            session.execute(text("SELECT 1")),
-            timeout=1
-        )
+        await asyncio.wait_for(session.execute(text("SELECT 1")), timeout=1)
     except (asyncio.TimeoutError, socket.gaierror):
         # Если таймаут или ошибка сети - возвращаем 503 Service Unavailable
         return Response(status_code=503)

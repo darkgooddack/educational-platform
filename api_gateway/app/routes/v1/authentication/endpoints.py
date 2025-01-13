@@ -5,21 +5,24 @@
 - Аутентификации пользователей
 - Выхода из системы
 """
+
 import json
-from fastapi import APIRouter, Depends
+
 from aio_pika import Connection, Message
+from fastapi import APIRouter, Depends
+
+from app.core.config import config
 from app.core.dependencies.rabbitmq import get_rabbitmq
 from app.core.dependencies.redis import get_redis
-from app.core.config import config
-
 
 router = APIRouter(**config.SERVICES["authentication"].to_dict())
+
 
 @router.post("")
 async def authenticate(
     credentials: dict,
-    redis = Depends(get_redis),
-    rabbitmq: Connection = Depends(get_rabbitmq)
+    redis=Depends(get_redis),
+    rabbitmq: Connection = Depends(get_rabbitmq),
 ) -> dict:
     """
     Аутентифицирует пользователя.
@@ -38,12 +41,11 @@ async def authenticate(
         # Отправляем запрос в auth_service
         await channel.default_exchange.publish(
             Message(
-                body=json.dumps({
-                    "action": "authenticate",
-                    "data": credentials
-                }).encode()
+                body=json.dumps(
+                    {"action": "authenticate", "data": credentials}
+                ).encode()
             ),
-            routing_key="auth_queue"
+            routing_key="auth_queue",
         )
 
         # Получаем и обрабатываем ответ
@@ -56,16 +58,15 @@ async def authenticate(
                         await redis.setex(
                             f"token:{response['access_token']}",
                             3600,
-                            credentials['email']
+                            credentials["email"],
                         )
                     return response
 
+
 @router.post("/logout")
 async def logout(
-    token: str,
-    redis = Depends(get_redis),
-    rabbitmq: Connection = Depends(get_rabbitmq)
-) ->  dict:
+    token: str, redis=Depends(get_redis), rabbitmq: Connection = Depends(get_rabbitmq)
+) -> dict:
     """
     Выход пользователя из системы.
 
@@ -85,13 +86,8 @@ async def logout(
 
         # Отправляем запрос в auth_service
         await channel.default_exchange.publish(
-            Message(
-                body=json.dumps({
-                    "action": "logout",
-                    "token": token
-                }).encode()
-            ),
-            routing_key="auth_queue"
+            Message(body=json.dumps({"action": "logout", "token": token}).encode()),
+            routing_key="auth_queue",
         )
 
         # Получаем и возвращаем ответ

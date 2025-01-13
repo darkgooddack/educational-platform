@@ -5,6 +5,6 @@
 """
 
 from .v1.base import BaseModel
-from .v1.cache import TokenCacheModel, RouteCacheModel
+from .v1.cache import RouteCacheModel, TokenCacheModel
 
 __all__ = ["BaseModel", "TokenCacheModel", "RouteCacheModel"]

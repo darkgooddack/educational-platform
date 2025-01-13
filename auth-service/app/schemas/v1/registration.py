@@ -2,8 +2,10 @@
 Схемы для регистрации пользователей.
 """
 
-from pydantic import Field, EmailStr
+from pydantic import EmailStr, Field
+
 from .base import BaseInputSchema
+
 
 class CreateUserSchema(BaseInputSchema):
     """
@@ -18,28 +20,17 @@ class CreateUserSchema(BaseInputSchema):
         password (str): Пароль пользователя.
     """
 
-    first_name: str = Field(
-        min_length=2,
-        max_length=50,
-        description="Имя пользователя"
-    )
+    first_name: str = Field(min_length=2, max_length=50, description="Имя пользователя")
     last_name: str = Field(
-        min_length=2,
-        max_length=50,
-        description="Фамилия пользователя"
+        min_length=2, max_length=50, description="Фамилия пользователя"
     )
     middle_name: str | None = Field(
-        None,
-        max_length=50,
-        description="Отчество пользователя"
+        None, max_length=50, description="Отчество пользователя"
     )
     email: EmailStr = Field(description="Email пользователя")
     phone: str = Field(
-        pattern=r'^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$',
+        pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$",
         description="Телефон в формате +7 (XXX) XXX-XX-XX",
-        examples=["+7 (999) 123-45-67"]
+        examples=["+7 (999) 123-45-67"],
     )
-    password: str = Field(
-        min_length=8,
-        description="Пароль минимум 8 символов"
-    )
+    password: str = Field(min_length=8, description="Пароль минимум 8 символов")

@@ -12,12 +12,15 @@ Example:
     >>>     def create_user(self, password: str):
     >>>         hashed = self.bcrypt(password)
 """
-from datetime import datetime, timezone, timedelta
-from jose import jwt, JWTError
+
+from datetime import datetime, timedelta, timezone
+
+from jose import JWTError, jwt
 from passlib.context import CryptContext
-from app.schemas import UserSchema
-from app.core.exceptions import AuthenticationError
+
 from app.core.config import config
+from app.core.exceptions import AuthenticationError
+from app.schemas import UserSchema
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -62,6 +65,7 @@ class TokenMixin:
 
     Предоставляет методы для генерации и проверки токенов.
     """
+
     @staticmethod
     def generate_token(payload: dict) -> str:
         """
@@ -74,9 +78,7 @@ class TokenMixin:
             JWT токен
         """
         return jwt.encode(
-            payload,
-            key=TokenMixin.get_token_key(),
-            algorithm=config.token_algorithm
+            payload, key=TokenMixin.get_token_key(), algorithm=config.token_algorithm
         )
 
     @staticmethod
@@ -97,7 +99,7 @@ class TokenMixin:
             return jwt.decode(
                 token,
                 key=TokenMixin.get_token_key(),
-                algorithms=[config.token_algorithm]
+                algorithms=[config.token_algorithm],
             )
         except JWTError as exc:
             raise AuthenticationError() from exc
@@ -113,10 +115,8 @@ class TokenMixin:
         Returns:
             Payload для JWT
         """
-        return {
-            "sub": user.email,
-            "expires_at": TokenMixin.get_token_expiration()
-        }
+        return {"sub": user.email, "expires_at": TokenMixin.get_token_expiration()}
+
     @staticmethod
     def get_token_key() -> str:
         """

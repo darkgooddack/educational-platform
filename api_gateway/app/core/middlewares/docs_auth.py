@@ -6,12 +6,15 @@ Middleware для защиты доступа к документации API.
 - Проверку включения документации через config.docs_access
 - Валидацию логина/пароля из конфига
 """
-from fastapi import Request, HTTPException, Response
+
+from fastapi import HTTPException, Request, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
+
 from app.core.config import config
 
 security = HTTPBasic(description="Credentials for API documentation access")
+
 
 class DocsAuthMiddleware(BaseHTTPMiddleware):
     """
@@ -27,6 +30,7 @@ class DocsAuthMiddleware(BaseHTTPMiddleware):
             - 401 при неверных credentials
             - 403 если docs_access выключен
     """
+
     async def dispatch(self, request: Request, call_next) -> Response:
         if request.url.path in ["/docs", "/redoc", "/openapi.json"]:
             if not config.docs_access:
@@ -43,7 +47,10 @@ class DocsAuthMiddleware(BaseHTTPMiddleware):
 
             try:
                 auth: HTTPBasicCredentials = await security(request)
-                if auth.username != config.docs_username or auth.password != config.docs_password:
+                if (
+                    auth.username != config.docs_username
+                    or auth.password != config.docs_password
+                ):
                     raise HTTPException(status_code=401)
             except HTTPException:
                 return Response(

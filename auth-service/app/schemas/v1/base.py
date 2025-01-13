@@ -15,6 +15,7 @@
 
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -30,10 +31,12 @@ class CommonBaseSchema(BaseModel):
     Methods:
         to_dict(): Преобразует объект в словарь.
     """
+
     model_config = ConfigDict(from_attributes=True)
 
     def to_dict(self) -> dict:
         return self.model_dump()
+
 
 class BaseSchema(CommonBaseSchema):
     """
@@ -48,9 +51,11 @@ class BaseSchema(CommonBaseSchema):
         created_at (datetime): Дата и время создания записи.
         updated_at (datetime): Дата и время последнего обновления записи.
     """
+
     id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
 
 class BaseInputSchema(CommonBaseSchema):
     """
@@ -58,4 +63,5 @@ class BaseInputSchema(CommonBaseSchema):
     Этот класс наследуется от `CommonBaseSchema`
     и предоставляет общую конфигурацию для всех схем входных данных.
     """
+
     pass

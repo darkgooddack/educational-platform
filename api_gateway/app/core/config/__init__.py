@@ -17,16 +17,21 @@ Example:
     >>> config.PORT
     8001
 """
+
 from functools import lru_cache
-from .settings import Settings
+
 from .app import AppConfig
+from .settings import Settings
+
 
 class Config(Settings, AppConfig):
     """
     Объединенная конфигурация приложения.
     Наследует все настройки из Settings и AppConfig.
     """
+
     pass
+
 
 @lru_cache
 def get_config() -> Config:

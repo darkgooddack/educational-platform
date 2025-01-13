@@ -7,10 +7,11 @@
 Модуль обеспечивает удобную работу с моделями данных и их преобразование в различные форматы.
 """
 
-from typing import Any, Dict, List, Type, TypeVar
 from datetime import datetime, timezone
-from sqlalchemy import MetaData, DateTime
-from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
+from typing import Any, Dict, List, Type, TypeVar
+
+from sqlalchemy import DateTime, MetaData
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 T = TypeVar("T", bound="BaseModel")
 

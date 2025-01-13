@@ -7,10 +7,14 @@
 - Конфигурацию CORS политик
 - Управление доступом к документации API
 """
-from typing import Dict, List, Any
-from pydantic import Field, RedisDsn, AmqpDsn
+
+from typing import Any, Dict, List
+
+from pydantic import AmqpDsn, Field, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from .app import AppConfig
+
 
 class Settings(BaseSettings):
     """
@@ -43,47 +47,44 @@ class Settings(BaseSettings):
             'allow_headers': ['*']
         }
     """
+
     docs_access: bool = Field(
-        default=True,
-        description="Разрешение доступа к документации API")
+        default=True, description="Разрешение доступа к документации API"
+    )
 
     docs_username: str = Field(
-        default="admin",
-        description="Имя пользователя для доступа к docs/redoc")
+        default="admin", description="Имя пользователя для доступа к docs/redoc"
+    )
 
     docs_password: str = Field(
-        default="admin",
-        description="Паспорт для доступа к docs/redoc")
+        default="admin", description="Паспорт для доступа к docs/redoc"
+    )
 
     redis_url: RedisDsn = Field(
-        default="redis://localhost:6379/0",
-        description="Ссылка для подключения к Redis")
+        default="redis://localhost:6379/0", description="Ссылка для подключения к Redis"
+    )
 
     database_dsn: str = Field(
         default="sqlite+aiosqlite:///./test.db",
-        description="Ссылка для подключения к базе данных"
+        description="Ссылка для подключения к базе данных",
     )
 
     rabbitmq_dsn: AmqpDsn = Field(
         default="amqp://guest:guest@localhost:5672/",
-        description="URL подключения к RabbitMQ"
+        description="URL подключения к RabbitMQ",
     )
 
     allow_origins: List[str] = Field(
-        default_factory=list,
-        description="Список разрешенных origins для CORS"
+        default_factory=list, description="Список разрешенных origins для CORS"
     )
     allow_credentials: bool = Field(
-        default=True,
-        description="Allow credentials для CORS"
+        default=True, description="Allow credentials для CORS"
     )
     allow_methods: List[str] = Field(
-        default=["*"],
-        description="Разрешенные HTTP methods для CORS"
+        default=["*"], description="Разрешенные HTTP methods для CORS"
     )
     allow_headers: List[str] = Field(
-        default=["*"],
-        description="Разрешенные headers для CORS"
+        default=["*"], description="Разрешенные headers для CORS"
     )
 
     @property
@@ -97,7 +98,7 @@ class Settings(BaseSettings):
         return {
             "url": str(self.rabbitmq_dsn),
             "connection_timeout": AppConfig.rabbitmq_connection_timeout,
-            "exchange": AppConfig.rabbitmq_exchange
+            "exchange": AppConfig.rabbitmq_exchange,
         }
 
     @property
@@ -118,8 +119,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=AppConfig.PATHS.ENV_PATH,
         env_file_encoding="utf-8",
+        env_prefix="GATEWAY__",
         env_nested_delimiter="__",  # Разделитель вложенных переменных окружения
         extra="allow",  # Разрешить дополнительные параметры
     )
+
 
 config = Settings()

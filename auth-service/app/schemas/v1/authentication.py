@@ -1,8 +1,11 @@
 """
 Схемы для аутентификации и управления пользователями.
 """
-from pydantic import Field, EmailStr
+
+from pydantic import EmailStr, Field
+
 from app.schemas import BaseInputSchema
+
 
 class AuthenticationSchema(BaseInputSchema):
     """
@@ -12,11 +15,13 @@ class AuthenticationSchema(BaseInputSchema):
         email: Email для входа
         password: Пароль пользователя
     """
+
     email: EmailStr
     password: str = Field(
         min_length=8,
         description="Пароль должен быть минимум 8 символов",
     )
+
 
 class TokenSchema(BaseInputSchema):
     """

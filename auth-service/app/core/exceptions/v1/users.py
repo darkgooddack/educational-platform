@@ -14,6 +14,7 @@
 
 from .base import BaseAPIException
 
+
 class UserNotFoundError(BaseAPIException):
     """
     Пользователь не найден.
@@ -42,6 +43,7 @@ class UserNotFoundError(BaseAPIException):
             extra={"user_" + field: value},
         )
 
+
 class UserExistsError(BaseAPIException):
     """
     Пользователь с таким именем существует.
@@ -69,6 +71,7 @@ class UserExistsError(BaseAPIException):
             error_type="user_exists",
             extra={"user_" + field: value},
         )
+
 
 class InvalidEmailFormatError(BaseAPIException):
     """

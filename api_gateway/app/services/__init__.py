@@ -7,7 +7,6 @@
 from .v1.base import BaseService
 from .v1.cache import CacheService
 
-
 __all__ = [
     "BaseService",
     "CacheService",

@@ -11,7 +11,8 @@ API_MODULES - с префиксом api/v1:
 """
 
 from fastapi import APIRouter
-from . import health, authentication, registration
+
+from . import authentication, health, registration
 
 BASE_MODULES = {
     "health": health,
@@ -21,6 +22,7 @@ VERSIONS_MODULES = {
     "authentication": authentication,
     "registration": registration,
 }
+
 
 def _include_modules(modules: dict) -> APIRouter:
     """
@@ -37,6 +39,7 @@ def _include_modules(modules: dict) -> APIRouter:
         router.include_router(module.router)
     return router
 
+
 def get_base_routes() -> APIRouter:
     """
     Возвращает роутеры для базовых модулей
@@ -45,6 +48,7 @@ def get_base_routes() -> APIRouter:
         APIRouter - роутер
     """
     return _include_modules(BASE_MODULES)
+
 
 def get_api_routes() -> APIRouter:
     """

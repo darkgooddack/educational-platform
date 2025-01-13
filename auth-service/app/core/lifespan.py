@@ -6,7 +6,9 @@
 """
 
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -20,9 +22,10 @@ async def lifespan(_app: FastAPI):
         _app: Экземпляр FastAPI приложения.
 
     """
-    from app.core.dependencies.redis import RedisClient
     from app.core.dependencies.rabbitmq import RabbitMQClient
+    from app.core.dependencies.redis import RedisClient
     from app.core.rabbit.consumer import start_consuming
+
     await RedisClient.get_instance()
     await RabbitMQClient.get_instance()
     await start_consuming()

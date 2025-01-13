@@ -7,6 +7,7 @@
 """
 
 from fastapi import APIRouter
+
 from app.core.config import config
 from app.routes import v1  # , v2  # будет добавлено позже
 

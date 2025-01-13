@@ -10,9 +10,11 @@
     - Кэширование маршрутов
     - Получение маршрутов из кэша
 """
+
+from app.models import RouteCacheModel, TokenCacheModel
+from app.schemas import RouteCacheSchema, TokenCacheSchema
 from app.services import BaseService
-from app.models import TokenCacheModel, RouteCacheModel
-from app.schemas import TokenCacheSchema, RouteCacheSchema
+
 
 class CacheService:
     """
@@ -22,6 +24,7 @@ class CacheService:
         token_service (BaseService): Сервис для работы с токенами
         route_service (BaseService): Сервис для работы с маршрутами
     """
+
     def __init__(self, session):
         self.token_service = BaseService(session, TokenCacheSchema, TokenCacheModel)
         self.route_service = BaseService(session, RouteCacheSchema, RouteCacheModel)

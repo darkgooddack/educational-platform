@@ -8,6 +8,7 @@
 """
 
 from redis import Redis, from_url
+
 from app.core.config import config
 
 
@@ -46,6 +47,7 @@ class RedisClient:
         if cls._instance:
             cls._instance.close()
             cls._instance = None
+
 
 async def get_redis():
     """

@@ -7,16 +7,13 @@ Example:
     >>> from app.core.exceptions import UserNotFoundError, UserExistsError
     >>> raise UserNotFoundError(user_id=42)
 """
-from .v1.base import BaseAPIException
-from .v1.users import UserNotFoundError, UserExistsError, InvalidEmailFormatError, WeakPasswordError
-from .v1.authentication import (
-    TokenMissingError,
-    TokenExpiredError,
-    InvalidCredentialsError,
-    AuthenticationError,
-    InvalidPasswordError
-)
 
+from .v1.authentication import (AuthenticationError, InvalidCredentialsError,
+                                InvalidPasswordError, TokenExpiredError,
+                                TokenMissingError)
+from .v1.base import BaseAPIException
+from .v1.users import (InvalidEmailFormatError, UserExistsError,
+                       UserNotFoundError, WeakPasswordError)
 
 __all__ = [
     "BaseAPIException",
@@ -28,5 +25,5 @@ __all__ = [
     "UserNotFoundError",
     "UserExistsError",
     "InvalidEmailFormatError",
-    "WeakPasswordError"
+    "WeakPasswordError",
 ]

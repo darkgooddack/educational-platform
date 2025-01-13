@@ -3,8 +3,11 @@
 
 Предоставляет единый интерфейс подключения к RabbitMQ через паттерн Singleton.
 """
-from aio_pika import connect_robust, Connection
+
+from aio_pika import Connection, connect_robust
+
 from app.core.config import config
+
 
 class RabbitMQClient:
     """
@@ -12,6 +15,7 @@ class RabbitMQClient:
 
     Реализует паттерн Singleton для поддержания единственного подключения.
     """
+
     _instance: Connection = None
 
     @classmethod
@@ -34,6 +38,7 @@ class RabbitMQClient:
         if cls._instance:
             await cls._instance.close()
             cls._instance = None
+
 
 async def get_rabbitmq():
     """

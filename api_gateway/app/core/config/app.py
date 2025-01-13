@@ -3,10 +3,14 @@
 
 Содержит настройки FastAPI приложения, логирования и параметры запуска сервера.
 """
+
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 from pydantic import Field
+
 from app.core.lifespan import lifespan
+
 
 class ServiceConfig:
     """
@@ -40,6 +44,7 @@ class ServiceConfig:
         """
         return {"prefix": self.prefix, "tags": self.tags}
 
+
 class PathConfig:
     """
     Конфигурация путей проекта.
@@ -55,14 +60,16 @@ class PathConfig:
     ENV_FILE = Path(".env")
     APP_DIR = Path("app")
 
-    BASE_PATH = Path(__file__).resolve().parents[2] #! проверить
+    BASE_PATH = Path(__file__).resolve().parents[2]  #! проверить
     ENV_PATH = BASE_PATH / ENV_FILE
     APP_PATH = BASE_PATH / APP_DIR
+
 
 class AppConfig:
     """
     Основная конфигурация приложения.
     """
+
     logging_level: str = "DEBUG"
     logging_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
@@ -83,17 +90,14 @@ class AppConfig:
     PATHS = PathConfig()
 
     redis_pool_size: int = Field(
-        default=10,
-        description="Размер пула подключений к Redis"
+        default=10, description="Размер пула подключений к Redis"
     )
 
     rabbitmq_connection_timeout: int = Field(
-        default=30,
-        description="Таймаут подключения к RabbitMQ"
+        default=30, description="Таймаут подключения к RabbitMQ"
     )
     rabbitmq_exchange: str = Field(
-        default="educational_platform",
-        description="Название exchange в RabbitMQ"
+        default="educational_platform", description="Название exchange в RabbitMQ"
     )
 
     @property
@@ -114,5 +118,6 @@ class AppConfig:
             "port": self.PORT,
             "proxy_headers": True,
         }
+
 
 app_config = AppConfig()

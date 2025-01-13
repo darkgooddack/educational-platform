@@ -70,6 +70,7 @@ class AuthenticationError(BaseAPIException):
             extra={},
         )
 
+
 class InvalidPasswordError(BaseAPIException):
     """
     Исключение при неверном пароле во время входа

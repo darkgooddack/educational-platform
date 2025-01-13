@@ -16,17 +16,16 @@
     user = await service.create_user(user_data)
     user_by_email = await service.get_by_email("test@test.com")
 """
+
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.exceptions import UserExistsError, UserNotFoundError
 from app.core.security import HashingMixin
-from app.schemas import UserSchema, CreateUserSchema
-from app.services import BaseService, BaseEntityManager
 from app.models import UserModel
-from app.core.exceptions import (
-    UserNotFoundError,
-    UserExistsError,
-)
+from app.schemas import CreateUserSchema, UserSchema
+from app.services import BaseEntityManager, BaseService
 
 
 class UserService(HashingMixin, BaseService):
@@ -48,6 +47,7 @@ class UserService(HashingMixin, BaseService):
         update_user: Обновление данных пользователя
         delete_user: Удаление пользователя
     """
+
     def __init__(self, session: AsyncSession):
         super().__init__(session)
         self._data_manager = UserDataManager(self.session)
@@ -82,7 +82,7 @@ class UserService(HashingMixin, BaseService):
             middle_name=user.middle_name,
             email=user.email,
             phone=user.phone,
-            hashed_password=self.bcrypt(user.password)
+            hashed_password=self.bcrypt(user.password),
         )
         return await data_manager.add_user(user_model)
 
@@ -109,7 +109,6 @@ class UserService(HashingMixin, BaseService):
             UserSchema: Данные пользователя.
         """
         return await self._data_manager.get_user_by_phone(phone)
-
 
     async def update_user(self, user_id: int, data: dict) -> UserSchema:
         """
@@ -138,6 +137,7 @@ class UserService(HashingMixin, BaseService):
             #! Можно рассмотреть реализацию мягкого удаления.
         """
         return await self._data_manager.delete_user(user_id)
+
 
 class UserDataManager(BaseEntityManager[UserSchema]):
     """

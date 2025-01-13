@@ -22,12 +22,15 @@ Dependencies:
     - app.core.config для конфигурации
     - app.core.exceptions для обработки ошибок
 """
+
 import logging
-from fastapi import Request, HTTPException
+
+from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-from app.core.exceptions import BaseAPIException
+
 from app.core.config import config
+from app.core.exceptions import BaseAPIException
 
 logger = logging.getLogger(__name__)
 

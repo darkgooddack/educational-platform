@@ -17,6 +17,7 @@
 """
 
 from datetime import datetime
+
 from .base import BaseSchema
 
 
@@ -29,6 +30,7 @@ class TokenCacheSchema(BaseSchema):
         user_id (str): Уникальный идентификатор пользователя
         expires_at (datetime): Время истечения срока действия токена в UTC
     """
+
     token: str
     user_id: str
     expires_at: datetime
@@ -43,6 +45,7 @@ class RouteCacheSchema(BaseSchema):
         service (str): Название микросервиса-обработчика
         method (str): HTTP метод (GET, POST, PUT, DELETE и т.д.)
     """
+
     path: str
     service: str
     method: str

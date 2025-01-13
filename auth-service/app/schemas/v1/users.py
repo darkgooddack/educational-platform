@@ -1,7 +1,9 @@
 """
 Модуль схем пользователя.
 """
+
 from enum import Enum
+
 from app.schemas import BaseInputSchema
 
 
@@ -19,6 +21,7 @@ class UserRole(str, Enum):
     MODERATOR = "moderator"
     USER = "user"
 
+
 class UserSchema(BaseInputSchema):
     """
     Схема пользователя.
@@ -28,6 +31,7 @@ class UserSchema(BaseInputSchema):
         email (str): Email пользователя.
         hashed_password (str | None): Хешированный пароль пользователя.
     """
+
     name: str
     email: str
     hashed_password: str | None = None

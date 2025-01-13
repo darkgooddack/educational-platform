@@ -11,16 +11,20 @@
     - Автоматическая обработка ошибок БД
     - Автоматический роллбэк при ошибках
 """
-from typing import TypeVar, Generic, Type
+
 import logging
-from sqlalchemy import select, delete
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Generic, Type, TypeVar
+
+from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models import BaseModel
 from app.schemas import BaseSchema
 
 M = TypeVar("M", bound=BaseModel)
 T = TypeVar("T", bound=BaseSchema)
+
 
 class BaseService(Generic[T, M]):
     """
@@ -35,6 +39,7 @@ class BaseService(Generic[T, M]):
         T: Тип схемы, наследник BaseSchema
         M: Тип модели, наследник BaseModel
     """
+
     def __init__(self, session: AsyncSession, schema: Type[T], model: Type[M]):
         self.session = session
         self.schema = schema
