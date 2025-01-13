@@ -12,7 +12,7 @@ Example:
     >>> raise UserExistsError("email", "user@example.com")
 """
 
-from app.core.exceptions import BaseAPIException
+from .base import BaseAPIException
 
 
 class TokenMissingError(BaseAPIException):
