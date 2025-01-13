@@ -17,7 +17,8 @@ from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
 from app.schemas import AuthenticationSchema, TokenSchema, UserSchema
-from app.services import BaseDataManager, BaseService, UserDataManager
+from .base import BaseDataManager, BaseService
+from .users import UserDataManager
 
 
 class AuthenticationService(HashingMixin, TokenMixin, BaseService):
