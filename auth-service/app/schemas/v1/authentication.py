@@ -4,7 +4,7 @@
 
 from pydantic import EmailStr, Field
 
-from app.schemas import BaseInputSchema
+from .base import BaseInputSchema
 
 
 class AuthenticationSchema(BaseInputSchema):

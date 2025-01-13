@@ -4,7 +4,7 @@
 
 from enum import Enum
 
-from app.schemas import BaseInputSchema
+from .base import BaseInputSchema
 
 
 class UserRole(str, Enum):
