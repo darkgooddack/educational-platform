@@ -5,13 +5,14 @@ WORKDIR /usr/src/app/
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apk add --no-cache --virtual .build-deps \
+RUN apk update && \
+    apk add --no-cache --virtual .build-deps \
     gcc \
     python3-dev \
     musl-dev \
     postgresql16-dev \
     && apk add --no-cache \
-    postgresql-client \
+    postgresql16-client \
     libpq \
     poppler-utils
 
