@@ -28,5 +28,5 @@ async def setup_health_check(_app: FastAPI, channel):
             return
 
     # Создаем очередь и подписываемся
-    queue = await channel.declare_queue("health_check", auto_delete=True)
+    queue = await channel.declare_queue("health_check", auto_delete=False)
     await queue.consume(health_callback)
