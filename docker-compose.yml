@@ -10,6 +10,9 @@ services:
     ports:
       - "8001:8000"
     restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - dokploy-network
 
@@ -22,6 +25,11 @@ services:
     ports:
       - "8002:8000"
     restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      api_gateway:
+        condition: service_started
     networks:
       - dokploy-network
 
@@ -33,8 +41,14 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-admin}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-admin}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - dokploy-network
+
 
 networks:
   dokploy-network:
