@@ -126,3 +126,23 @@ def start_all():
     """Запускает миграции и сервер"""
     migrate()
     serve()
+
+def infra_up():
+    """Поднимаем всю инфраструктуру"""
+    subprocess.run(["cd", "..", "&&", "docker-compose", "-f", "docker-compose.dev.yml", "up", "-d"], shell=True, check=True)
+
+def infra_down():
+    """Останавливаем инфраструктуру"""
+    subprocess.run(["cd", "..", "&&", "docker-compose", "-f", "docker-compose.dev.yml", "down"], shell=True, check=True)
+
+def infra_build():
+    """Пересобираем контейнеры"""
+    subprocess.run(["cd", "..", "&&", "docker-compose", "-f", "docker-compose.dev.yml", "build"], shell=True, check=True)
+
+def infra_logs():
+    """Смотрим логи"""
+    subprocess.run(["cd", "..", "&&", "docker-compose", "-f", "docker-compose.dev.yml", "logs"], shell=True, check=True)
+
+def infra_restart():
+    """Перезапускаем сервисы"""
+    subprocess.run(["cd", "..", "&&", "docker-compose", "-f", "docker-compose.dev.yml", "restart"], shell=True, check=True)

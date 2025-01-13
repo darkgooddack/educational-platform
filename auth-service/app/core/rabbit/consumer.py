@@ -58,7 +58,10 @@ async def start_consuming():
 
     # Очереди для обработки
     auth_queue = await channel.declare_queue("auth_queue")
-    health_queue = await channel.declare_queue("health_check")
+    health_queue = await channel.declare_queue(
+        "health_check",
+        auto_delete=False
+    )
 
     await auth_queue.consume(process_auth_message)
     await health_queue.consume(lambda x: x.ack())

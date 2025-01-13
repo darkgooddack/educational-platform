@@ -44,6 +44,11 @@ check = "scripts.commands:check"
 test = "scripts.commands:test"
 serve = "scripts.commands:serve"
 start = "scripts.commands:start_all"
+infra-up = "scripts.commands:infra_up"
+infra-down = "scripts.commands:infra_down"
+infra-build = "scripts.commands:infra_build"
+infra-logs = "scripts.commands:infra_logs"
+infra-restart = "scripts.commands:infra_restart"
 
 [tool.setuptools]
 packages = ["app", "scripts"]

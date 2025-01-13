@@ -61,16 +61,16 @@ class Settings(BaseSettings):
     )
 
     redis_url: RedisDsn = Field(
-        default="redis://localhost:6379/0", description="Ссылка для подключения к Redis"
+        default="redis://default:gateway_pass@redis_gateway:6379", description="Ссылка для подключения к Redis"
     )
 
     database_dsn: str = Field(
-        default="sqlite+aiosqlite:///./test.db",
+        default="postgresql+asyncpg://postgres:postgres@postgres_gateway:5432/gateway_db",
         description="Ссылка для подключения к базе данных",
     )
 
     rabbitmq_dsn: AmqpDsn = Field(
-        default="amqp://guest:guest@localhost:5672/",
+        default="amqp://admin:admin@rabbitmq:5672/",
         description="URL подключения к RabbitMQ",
     )
 
