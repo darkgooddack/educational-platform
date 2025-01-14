@@ -28,14 +28,15 @@ https://{domain.ru}/api/v1/oauth/{provider}/callback
 
 """
 import json
+from aio_pika import Connection, Message
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 import aiohttp
-from typing import Optional
-from app.core.dependencies import get_redis, get_rebbitmq
+from typing import Annotated
+from app.core.dependencies import get_redis, get_rabbitmq
 from app.core.config import config
-from app.schemas import OAuthResponse, TokenSchema
-
+from app.schemas import OAuthResponse
+from redis import Redis
 
 router = APIRouter(prefix="/oauth", tags=["oauth"])
 
@@ -72,8 +73,8 @@ async def oauth_login(provider: str) -> RedirectResponse:
 async def oauth_callback(
     provider: str,
     code: str,
-    redis=Depends(get_redis),
-    rabbitmq: Connection = Depends(get_rabbitmq)
+    redis: Annotated[Redis, Depends(get_redis)],
+    rabbitmq: Annotated[Connection, Depends(get_rabbitmq)]
 ) -> OAuthResponse:
     """
     Обработка ответа от OAuth провайдера.
@@ -85,7 +86,7 @@ async def oauth_callback(
         rabbitmq: RabbitMQ соединение для общения с auth-service
         
     Returns:
-        dict: Ответ от auth-service с токеном доступа
+        OAuthResponse: Токен доступа и провайдер
         
     Raises:
         HTTPException: При ошибке получения токена или данных пользователя
