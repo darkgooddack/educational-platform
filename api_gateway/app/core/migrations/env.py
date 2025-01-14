@@ -14,8 +14,10 @@ from app.models import BaseModel, RouteCacheModel, TokenCacheModel
 config = context.config
 
 section = config.config_ini_section
-
-config.set_section_option(section, "sqlalchemy.url", c.database_dsn)
+# Для быстрых миграций без запуска бд, но сначала alembic upgrade head
+# SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./auth_service.db"
+# config.set_section_option(section, "sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+config.set_section_option(section, "sqlalchemy.url", str(c.database_dsn))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
