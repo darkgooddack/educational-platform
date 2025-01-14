@@ -154,5 +154,6 @@ uv run infra-restart
 или
 ```bash
 uv run infra-down
+docker system prune -f
 uv run infra-up
 ```

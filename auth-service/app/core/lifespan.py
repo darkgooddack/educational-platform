@@ -24,10 +24,14 @@ async def lifespan(_app: FastAPI):
     """
     from app.core.dependencies import RedisClient, RabbitMQClient
     from app.core.rabbit.consumer import start_consuming
+    from app.core.health import setup_health_check
 
     await RedisClient.get_instance()
-    await RabbitMQClient.get_instance()
+    rabbitmq = await RabbitMQClient.get_instance()
+    channel = await rabbitmq.channel()
+
     await start_consuming()
+    await setup_health_check(_app, channel)
 
     yield
 

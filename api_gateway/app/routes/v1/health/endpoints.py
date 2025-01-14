@@ -6,20 +6,22 @@
 - Проверки соединений с Redis и RabbitMQ
 """
 
-from aio_pika import Connection, Message
+from aio_pika import Connection
 from fastapi import APIRouter, Depends
 from starlette.responses import Response
 
 from app.core.config import config
 from app.core.dependencies import get_redis, get_rabbitmq
+from app.core.rabbit.producer import check_service_health
 
 router = APIRouter(**config.SERVICES["health"].to_dict())
 
 
 @router.get("/", status_code=204)
 async def health_check(
-    redis=Depends(get_redis), rabbitmq: Connection = Depends(get_rabbitmq)
-):
+    redis=Depends(get_redis),
+    rabbitmq: Connection = Depends(get_rabbitmq)
+) -> Response:
     """
     Проверяет здоровье всех сервисов.
 
@@ -36,10 +38,9 @@ async def health_check(
 
         # Проверяем микросервисы через RabbitMQ
         async with rabbitmq.channel() as channel:
-            # Только публикуем, ответ не важен
-            await channel.default_exchange.publish(
-                Message(body=b"health_check"), routing_key="health_check"
-            )
+            is_healthy = await check_service_health(channel)
+            if not is_healthy:
+                return Response(status_code=503)
 
             return Response(status_code=204)
     except:

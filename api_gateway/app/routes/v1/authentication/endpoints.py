@@ -6,12 +6,11 @@
 - Выхода из системы
 """
 
-import json
-
-from aio_pika import Connection, Message
+from aio_pika import Connection
 from fastapi import APIRouter, Depends
 
 from app.core.config import config
+from app.core.rabbit.producer import send_auth_message
 from app.core.dependencies import get_redis, get_rabbitmq
 from app.schemas import AuthenticationSchema, TokenSchema
 
@@ -34,46 +33,31 @@ async def authenticate(
 
     Returns:
         TokenSchema с access_token и token_type
-    
+
     Raises:
         UserNotFoundError: Если пользователь не найден
     """
     async with rabbitmq.channel() as channel:
-        queue = await channel.declare_queue("auth_queue")
 
-        # Преобразуем данные в словарь
-        credentials_dict = credentials.model_dump()
-
-        # Отправляем запрос в auth_service
-        await channel.default_exchange.publish(
-            Message(
-                body=json.dumps({
-                        "action": "authenticate", 
-                        "data": credentials_dict
-                    }).encode()
-            ),
-            routing_key="auth_queue",
+        response = await send_auth_message(
+            channel,
+            "authenticate",
+            credentials.model_dump()
         )
 
-        # Получаем и обрабатываем ответ
-        async with queue.iterator() as queue_iter:
-            async for message in queue_iter:
-                async with message.process():
-                    response = json.loads(message.body.decode())
-                    # Кэшируем токен если аутентификация успешна
-                    if "access_token" in response:
-                        await redis.setex(
-                            f"token:{response['access_token']}",
-                            3600,
-                            credentials["email"],
-                        )
-                    return response
+        if "access_token" in response:
+            await redis.setex(
+                f"token:{response['access_token']}",
+                3600,
+                credentials.email
+            )
+        return response
 
 
 @router.post("/logout")
 async def logout(
-    token: str, 
-    redis=Depends(get_redis), 
+    token: str,
+    redis=Depends(get_redis),
     rabbitmq: Connection = Depends(get_rabbitmq)
 ) -> dict:
     """
@@ -93,14 +77,6 @@ async def logout(
     async with rabbitmq.channel() as channel:
         queue = await channel.declare_queue("auth_queue")
 
-        # Отправляем запрос в auth_service
-        await channel.default_exchange.publish(
-            Message(body=json.dumps({"action": "logout", "token": token}).encode()),
-            routing_key="auth_queue",
-        )
-
-        # Получаем и возвращаем ответ
-        async with queue.iterator() as queue_iter:
-            async for message in queue_iter:
-                async with message.process():
-                    return json.loads(message.body.decode())
+    # Отправляем запрос в auth_service
+    async with rabbitmq.channel() as channel:
+        return await send_auth_message(channel, "logout", {"token": token})

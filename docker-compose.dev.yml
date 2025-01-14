@@ -10,6 +10,8 @@ services:
     ports:
       - "8001:8000"
     depends_on:
+      auth_service:
+        condition: service_started
       rabbitmq:
         condition: service_healthy
       postgres_gateway:
@@ -34,8 +36,6 @@ services:
         condition: service_healthy
       redis_auth:
         condition: service_healthy
-      api_gateway:
-        condition: service_started
     networks:
       - dev-network
 

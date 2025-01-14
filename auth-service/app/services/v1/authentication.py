@@ -3,7 +3,7 @@
 В данном модуле реализованы функции для работы с пользователями,
 включая аутентификацию и авторизацию.
 """
-
+import secrets
 import json
 from datetime import datetime
 
@@ -16,7 +16,7 @@ from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
                                  TokenMissingError)
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
-from app.schemas import AuthenticationSchema, TokenSchema, UserSchema, OAuthUserSchema
+from app.schemas import AuthenticationSchema, TokenSchema, UserSchema, UserRole,OAuthUserSchema
 from .base import BaseDataManager, BaseService
 from .users import UserDataManager
 
@@ -55,10 +55,10 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
         provider_id = str(user_data["id"])
-        
-        user = await UserDataManager(self.session).get_by_field(provider_field, provider_id)
-        
-        if not user:
+
+        user_schema = await UserDataManager(self.session).get_by_field(provider_field, provider_id)
+
+        if not user_schema:
             # Создаем нового пользователя
             oauth_user = OAuthUserSchema(
                 email=user_data.get("email"),
@@ -73,7 +73,7 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
                 hashed_password=self.bcrypt(secrets.token_hex(16)),
                 role=UserRole.USER
             )
-            user_schema = await UserDataManager(self.session).add_user(new_user) 
+            user_schema = await UserDataManager(self.session).add_user(new_user)
 
         # Генерируем токен как в обычной аутентификации
         payload = self.create_payload(user_schema)
@@ -81,7 +81,7 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
         await self._data_manager.save_token(user_schema, token)
 
         return TokenSchema(access_token=token, token_type=config.token_type)
-        
+
     async def authenticate(
         self, authentication_data: AuthenticationSchema
     ) -> TokenSchema:

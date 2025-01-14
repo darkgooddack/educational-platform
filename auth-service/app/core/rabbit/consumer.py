@@ -9,56 +9,85 @@
 
 import json
 
-from aio_pika import IncomingMessage, connect_robust
+from aio_pika import IncomingMessage, Message, connect_robust
 
 from app.core.config import config
 from app.services import AuthenticationService, UserService
-from app.schemas import TokenSchema
 from app.core.dependencies.database import SessionContextManager
+from .handlers import (
+    handle_authenticate,
+    handle_logout,
+    handle_oauth,
+    handle_register
+)
 
 async def process_auth_message(
-    message: IncomingMessage, 
+    message: IncomingMessage,
     auth_service: AuthenticationService,
     user_service: UserService
 ) -> None:
     """
-    Обрабатывает сообщения аутентификации.
+    Процессинг сообщения из RabbitMQ.
 
     Args:
-        message: Входящее сообщение из RabbitMQ
+        message: Сообщение из RabbitMQ
         auth_service: Сервис аутентификации
+        user_service: Сервис пользователей
 
     Message format:
         {
-            "action": "authenticate" | "logout",
-            "data": {...} | "token": "..."
+            "action": "authenticate",
+            "data": {
+                "email": "user@example.com",
+                "password": "password123"
+            }
+        }
+        {
+            "action": "logout",
+            "token": "your_access_token"
+        }
+        {
+            "action": "oauth_authenticate",
+            "provider": "google",
+            "user_data": {
+                "email": "user@example.com",
+                "name": "John Doe"
+            }
+        }
+        {
+            "action": "register",
+            "data": {
+                "first_name": "John",
+                "last_name": "Doe",
+                "middle_name": "A.",
+                "email": "user@example.com",
+                "phone": "1234567890",
+                "password": "password123"
+            }
         }
     """
+    body = json.loads(message.body.decode())
+    action = body.get("action")
+
+    handlers = {
+        "authenticate": lambda: handle_authenticate(body.get("data"), auth_service),
+        "logout": lambda: handle_logout(body["token"], auth_service),
+        "oauth_authenticate": lambda: handle_oauth(body["provider"], body["user_data"], auth_service),
+        "register": lambda: handle_register(body["data"], user_service)
+    }
+
+    handler = handlers.get(action)
+
     async with message.process():
-        result = None
-        body = json.loads(message.body.decode())
-        action = body.get("action")
+        if not handler:
+            result = {"error": f"Unknown action: {action}"}
+        else:
+            result = await handler()
 
-        if action == "authenticate":
-            result = await auth_service.authenticate(body["data"])
-        elif action == "logout":
-            result = await auth_service.logout(body["token"])
-        elif action == "oauth_authenticate":
-            result = await auth_service.oauth_authenticate(
-                body["provider"],
-                body["user_data"]
-            )
-        elif action == "register":
-            # Используем UserService для регистрации
-            user = await user_service.create_user(body["data"])
-            # Генерируем токен через AuthService
-            payload = auth_service.create_payload(user)
-            token = auth_service.generate_token(payload)
-            await auth_service._data_manager.save_token(user, token)
-            result = TokenSchema(access_token=token, token_type=config.token_type)
-
-        # Отправляем ответ
-        await message.reply(json.dumps(result).encode())
+        await message.channel.default_exchange.publish(
+            Message(body=json.dumps(result).encode()),
+            routing_key=message.reply_to
+        )
 
 
 async def start_consuming():
@@ -79,11 +108,11 @@ async def start_consuming():
     channel = await connection.channel()
 
     # Очереди для обработки
-    auth_queue = await channel.declare_queue("auth_queue")
-    health_queue = await channel.declare_queue(
-        "health_check",
-        auto_delete=False
-    )
+    queues = {
+        "auth_queue": lambda msg: process_auth_message(msg, auth_service, user_service),
+        "health_check": lambda msg: msg.ack()
+    }
 
-    await auth_queue.consume(lambda message: process_auth_message(message, auth_service, user_service))
-    await health_queue.consume(lambda x: x.ack())
+    for queue_name, handler in queues.items():
+        queue = await channel.declare_queue(queue_name, auto_delete=True)
+        await queue.consume(handler)
