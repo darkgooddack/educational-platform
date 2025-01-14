@@ -38,10 +38,16 @@ async def register_user(
     async with rabbitmq.channel() as channel:
         queue = await channel.declare_queue("auth_queue")
 
+        # Преобразуем данные в словарь
+        user_data_dict = user_data.model_dump()
+        
         # Отправляем запрос регистрации в auth_service
         await channel.default_exchange.publish(
             Message(
-                body=json.dumps({"action": "register", "data": user_data}).encode()
+                body=json.dumps({
+                    "action": "register", 
+                    "data": user_data_dict
+                }).encode()
             ),
             routing_key="auth_queue",
         )
