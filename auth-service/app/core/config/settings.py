@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         docs_password (str): Пароль для доступа к docs/redoc
         token_key (SecretStr): Секретный ключ для JWT токенов
         redis_url (RedisDsn): URL подключения к Redis
-        database_dsn (PostgresDsn): URL подключения к базе данных
+        database_dsn (str): URL подключения к базе данных
         rabbitmq_dsn (AmqpDsn): URL подключения к RabbitMQ
         allow_origins (List[str]): Разрешенные источники для CORS
         allow_credentials (bool): Разрешение передачи учетных данных для CORS
@@ -71,7 +71,7 @@ class Settings(BaseSettings):
         default="redis://default:auth_pass@redis_auth:6379", description="Ссылка для подключения к Redis"
     )
 
-    database_dsn: PostgresDsn = Field(
+    database_dsn: str = Field(
         default="postgresql+asyncpg://postgres:postgres@postgres_auth:5432/auth_db",
         description="Ссылка для подключения к базе данных",
     )
