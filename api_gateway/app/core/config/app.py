@@ -89,6 +89,8 @@ class AppConfig:
 
     PATHS = PathConfig()
 
+    app_url: str = "https://api.ebtest.ru"
+
     redis_pool_size: int = Field(
         default=10, description="Размер пула подключений к Redis"
     )

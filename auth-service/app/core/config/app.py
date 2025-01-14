@@ -113,6 +113,8 @@ class AppConfig:
 
     PATHS = PathConfig()
 
+    app_url: str = "https://api.ebtest.ru"
+
     auth_url: str = Field(
         default="api/v1/authenticate", description="URL для аутентификации пользователя"
     )

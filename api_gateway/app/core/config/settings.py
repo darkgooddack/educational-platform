@@ -10,7 +10,7 @@
 
 from typing import Any, Dict, List
 
-from pydantic import PostgresDsn, AmqpDsn, Field, RedisDsn
+from pydantic import AmqpDsn, Field, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .app import AppConfig
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     )
 
     redis_url: RedisDsn = Field(
-        default="redis://default:gateway_pass@redis_gateway:6379", 
+        default="redis://default:gateway_pass@redis_gateway:6379",
         description="Ссылка для подключения к Redis"
     )
 
@@ -94,7 +94,7 @@ class Settings(BaseSettings):
                 "client_id": "",
                 "client_secret": "",
                 "auth_url": "https://oauth.vk.com/authorize",
-                "token_url": "https://oauth.vk.com/access_token", 
+                "token_url": "https://oauth.vk.com/access_token",
                 "user_info_url": "https://api.vk.com/method/users.get",
                 "scope": "email"
             },
@@ -103,7 +103,7 @@ class Settings(BaseSettings):
                 "client_secret": "",
                 "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
                 "token_url": "https://oauth2.googleapis.com/token",
-                "user_info_url": "https://www.googleapis.com/oauth2/v2/userinfo", 
+                "user_info_url": "https://www.googleapis.com/oauth2/v2/userinfo",
                 "scope": "email profile"
             },
             "yandex": {
@@ -117,7 +117,7 @@ class Settings(BaseSettings):
         },
         description="Настройки OAuth провайдеров"
     )
-    
+
     @property
     def rabbitmq_params(self) -> Dict[str, Any]:
         """

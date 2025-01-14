@@ -9,7 +9,7 @@ import json
 
 from aio_pika import Connection
 from fastapi import APIRouter, Depends
-
+from fastapi.exceptions import HTTPException
 from app.core.config import config
 from app.core.dependencies import get_redis, get_rabbitmq
 from app.core.rabbit.producer import send_auth_message
@@ -35,17 +35,31 @@ async def register_user(
     Returns:
         dict: Ответ от auth_service с результатом регистрации
     """
-    async with rabbitmq.channel() as channel:
-        response = await send_auth_message(
-            channel,
-            action="register",
-            data=user_data.model_dump()
-        )
-        # Кэшируем данные пользователя если регистрация успешна
-        if "user_id" in response:
-            await redis.setex(
-                f"user:{response['user_id']}",
-                3600,
-                json.dumps(user_data.model_dump())
+    try:
+        async with rabbitmq.channel() as channel:
+            response = await send_auth_message(
+                channel,
+                action="register",
+                data=user_data.model_dump()
             )
-        return response
+            # Кэшируем данные пользователя если регистрация успешна
+            if "user_id" in response:
+                await redis.setex(
+                    f"user:{response['user_id']}",
+                    3600,
+                    json.dumps(user_data.model_dump())
+                )
+
+            if "error" in response:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Auth service is not responding"
+                )
+
+            return response
+
+    except TimeoutError:
+        raise HTTPException(
+            status_code=503,
+            detail="Auth service timeout"
+        )
