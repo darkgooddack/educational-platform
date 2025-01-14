@@ -12,11 +12,14 @@ import json
 from aio_pika import IncomingMessage, connect_robust
 
 from app.core.config import config
-from app.services import AuthenticationService
-
+from app.services import AuthenticationService, UserService
+from app.schemas import TokenSchema
+from app.core.dependencies.database import SessionContextManager
 
 async def process_auth_message(
-    message: IncomingMessage, auth_service: AuthenticationService
+    message: IncomingMessage, 
+    auth_service: AuthenticationService,
+    user_service: UserService
 ) -> None:
     """
     Обрабатывает сообщения аутентификации.
@@ -45,6 +48,15 @@ async def process_auth_message(
                 body["provider"],
                 body["user_data"]
             )
+        elif action == "register":
+            # Используем UserService для регистрации
+            user = await user_service.create_user(body["data"])
+            # Генерируем токен через AuthService
+            payload = auth_service.create_payload(user)
+            token = auth_service.generate_token(payload)
+            await auth_service._data_manager.save_token(user, token)
+            result = TokenSchema(access_token=token, token_type=config.token_type)
+
         # Отправляем ответ
         await message.reply(json.dumps(result).encode())
 
@@ -57,6 +69,12 @@ async def start_consuming():
     - auth_queue: команды аутентификации
     - health_check: проверка работоспособности
     """
+
+    async with SessionContextManager() as session_manager:
+        # Создаем сервис аутентификации с сессией из контекстного менеджера
+        auth_service = AuthenticationService(session_manager.session)
+        user_service = UserService(session_manager.session)
+
     connection = await connect_robust(**config.rabbitmq_params)
     channel = await connection.channel()
 
@@ -67,6 +85,5 @@ async def start_consuming():
         auto_delete=False
     )
 
-    await auth_queue.consume(lambda message: process_auth_message(message, auth_service))
-    await health_queue.consume(lambda x: x.ack()) # Тут тоже косяк
-    # возможное исправление: await health_queue.consume(lambda message: process_health_check_message(message, health_service))
+    await auth_queue.consume(lambda message: process_auth_message(message, auth_service, user_service))
+    await health_queue.consume(lambda x: x.ack())
