@@ -67,5 +67,6 @@ async def start_consuming():
         auto_delete=False
     )
 
-    await auth_queue.consume(process_auth_message)
-    await health_queue.consume(lambda x: x.ack())
+    await auth_queue.consume(lambda message: process_auth_message(message, auth_service))
+    await health_queue.consume(lambda x: x.ack()) # Тут тоже косяк
+    # возможное исправление: await health_queue.consume(lambda message: process_health_check_message(message, health_service))
