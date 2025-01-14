@@ -27,17 +27,21 @@ https://{domain.ru}/api/v1/oauth/{provider}/callback
 4. Проверить работопособность
 
 """
+import json
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 import aiohttp
 from typing import Optional
-from app.schemas.v1.authentication import OAuthResponse, TokenSchema
+from app.core.dependencies import get_redis, get_rebbitmq
+from app.core.config import config
+from app.schemas import OAuthResponse, TokenSchema
+
 
 router = APIRouter(prefix="/oauth", tags=["oauth"])
 
 
-@router.get("/{provider}")
-async def oauth_login(provider: str):
+@router.get("/{provider}", response_class=RedirectResponse)
+async def oauth_login(provider: str) -> RedirectResponse:
     """
     Редирект на страницу авторизации провайдера.
     
