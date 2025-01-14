@@ -13,16 +13,17 @@ from fastapi import APIRouter, Depends
 from app.core.config import config
 from app.core.dependencies.rabbitmq import get_rabbitmq
 from app.core.dependencies.redis import get_redis
+from app.schemas import RegistrationSchema, RegistrationResponseSchema
 
 router = APIRouter(**config.SERVICES["registration"].to_dict())
 
 
-@router.post("/")
+@router.post("/", response_model=RegistrationResponseSchema)
 async def register_user(
-    user_data: dict,
+    user_data: RegistrationSchema,
     redis=Depends(get_redis),
     rabbitmq: Connection = Depends(get_rabbitmq),
-) -> dict:
+) -> RegistrationResponseSchema:
     """
     Регистрирует нового пользователя.
 

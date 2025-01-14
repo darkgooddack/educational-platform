@@ -16,7 +16,7 @@ from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
                                  TokenMissingError)
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
-from app.schemas import AuthenticationSchema, TokenSchema, UserSchema
+from app.schemas import AuthenticationSchema, TokenSchema, UserSchema, OAuthUserSchema
 from .base import BaseDataManager, BaseService
 from .users import UserDataManager
 
@@ -41,6 +41,47 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
         super().__init__(session)
         self._data_manager = AuthenticationDataManager(session)
 
+    async def oauth_authenticate(self, provider: str, user_data: dict) -> TokenSchema:
+        """
+        Аутентифицирует пользователя через OAuth провайдер.
+
+        Args:
+            provider: Имя провайдера (vk/google/yandex)
+            user_data: Данные пользователя от провайдера
+
+        Returns:
+            TokenSchema с access_token
+        """
+        # Ищем пользователя по provider_id
+        provider_field = f"{provider}_id"
+        provider_id = str(user_data["id"])
+        
+        user = await UserDataManager(self.session).get_by_field(provider_field, provider_id)
+        
+        if not user:
+            # Создаем нового пользователя
+            oauth_user = OAuthUserSchema(
+                email=user_data.get("email"),
+                first_name=user_data.get("first_name", ""),
+                last_name=user_data.get("last_name", ""),
+                avatar_url=user_data.get("avatar_url"),
+                **{provider_field: provider_id}
+            )
+
+            new_user = UserModel(
+                **oauth_user.model_dump(),
+                hashed_password=self.bcrypt(secrets.token_hex(16)),
+                role=UserRole.USER
+            )
+            user_schema = await UserDataManager(self.session).add_user(new_user) 
+
+        # Генерируем токен как в обычной аутентификации
+        payload = self.create_payload(user_schema)
+        token = self.generate_token(payload)
+        await self._data_manager.save_token(user_schema, token)
+
+        return TokenSchema(access_token=token, token_type=config.token_type)
+        
     async def authenticate(
         self, authentication_data: AuthenticationSchema
     ) -> TokenSchema:

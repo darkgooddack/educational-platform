@@ -40,7 +40,11 @@ async def process_auth_message(
             result = await auth_service.authenticate(body["data"])
         elif action == "logout":
             result = await auth_service.logout(body["token"])
-
+        elif action == "oauth_authenticate":
+            result = await auth_service.oauth_authenticate(
+                body["provider"],
+                body["user_data"]
+            )
         # Отправляем ответ
         await message.reply(json.dumps(result).encode())
 

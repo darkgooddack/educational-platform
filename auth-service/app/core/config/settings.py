@@ -11,7 +11,7 @@
 import secrets
 from typing import Any, Dict, List
 
-from pydantic import AmqpDsn, Field, RedisDsn, SecretStr
+from pydantic import PostgresDsn, AmqpDsn, Field, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .app import AppConfig
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         docs_password (str): Пароль для доступа к docs/redoc
         token_key (SecretStr): Секретный ключ для JWT токенов
         redis_url (RedisDsn): URL подключения к Redis
-        database_dsn (str): URL подключения к базе данных
+        database_dsn (PostgresDsn): URL подключения к базе данных
         rabbitmq_dsn (AmqpDsn): URL подключения к RabbitMQ
         allow_origins (List[str]): Разрешенные источники для CORS
         allow_credentials (bool): Разрешение передачи учетных данных для CORS
@@ -71,7 +71,7 @@ class Settings(BaseSettings):
         default="redis://default:auth_pass@redis_auth:6379", description="Ссылка для подключения к Redis"
     )
 
-    database_dsn: str = Field(
+    database_dsn: PostgresDsn = Field(
         default="postgresql+asyncpg://postgres:postgres@postgres_auth:5432/auth_db",
         description="Ссылка для подключения к базе данных",
     )

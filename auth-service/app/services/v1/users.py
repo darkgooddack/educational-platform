@@ -168,7 +168,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session, schema=UserSchema, model=UserModel)
 
-    async def add_user(self, user: UserModel) -> None:
+    async def add_user(self, user: UserModel) -> UserSchema:
         """
         Добавляет нового пользователя в базу данных.
 
@@ -176,7 +176,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
             user: Пользователь для добавления.
 
         Returns:
-            None
+            UserSchema: Данные пользователя.
         """
         try:
             return await self.add_one(user)
@@ -190,7 +190,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
     async def get_user_by_email(self, email: str) -> UserSchema:
         """
         Получает пользователя по email.
-
+        #! TODO: Перейти на get_by_field
         Args:
             email: Email пользователя.
 
@@ -206,7 +206,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
     async def get_user_by_phone(self, phone: str) -> UserSchema:
         """
         Получает пользователя по номеру телефона
-
+        #! TODO: Перейти на get_by_field
         Args:
             phone: Номер телефона пользователя.
 
@@ -217,6 +217,23 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         user = await self.get_one(statement)
         if not user:
             raise UserNotFoundError("phone", phone)
+        return user
+
+    async def get_by_field(self, field: str, value: str) -> UserSchema:
+        """
+        Получает пользователя по полю.
+
+        Args:
+            field: Поле пользователя.
+            value: Значение поля пользователя.
+
+        Returns:
+            Данные пользователя.
+        """
+        statement = select(self.model).where(getattr(self.model, field) == value)
+        user = await self.get_one(statement)
+        if not user:
+            raise UserNotFoundError(field, value)
         return user
 
     async def update_user(self, user_id: int, data: dict) -> UserSchema:

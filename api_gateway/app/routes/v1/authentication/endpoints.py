@@ -14,26 +14,30 @@ from fastapi import APIRouter, Depends
 from app.core.config import config
 from app.core.dependencies.rabbitmq import get_rabbitmq
 from app.core.dependencies.redis import get_redis
+from app.schemas import AuthenticationSchema, TokenSchema
 
 router = APIRouter(**config.SERVICES["authentication"].to_dict())
 
 
 @router.post("")
 async def authenticate(
-    credentials: dict,
+    credentials: AuthenticationSchema,
     redis=Depends(get_redis),
     rabbitmq: Connection = Depends(get_rabbitmq),
-) -> dict:
+) -> TokenSchema | None:
     """
-    Аутентифицирует пользователя.
+    Аутентифицирует пользователя по email и возвращает JWT токен.
 
     Args:
-        credentials (dict): Учетные данные пользователя
+        credentials: AuthenticationSchema Данные для аутентификации
         redis: Redis клиент для кэширования токенов
         rabbitmq: RabbitMQ соединение для общения с auth_service
 
     Returns:
-        dict: Ответ от auth_service с токеном доступа
+        TokenSchema с access_token и token_type
+    
+    Raises:
+        UserNotFoundError: Если пользователь не найден
     """
     async with rabbitmq.channel() as channel:
         queue = await channel.declare_queue("auth_queue")
@@ -65,7 +69,9 @@ async def authenticate(
 
 @router.post("/logout")
 async def logout(
-    token: str, redis=Depends(get_redis), rabbitmq: Connection = Depends(get_rabbitmq)
+    token: str, 
+    redis=Depends(get_redis), 
+    rabbitmq: Connection = Depends(get_rabbitmq)
 ) -> dict:
     """
     Выход пользователя из системы.
@@ -76,7 +82,7 @@ async def logout(
         rabbitmq: RabbitMQ соединение для общения с auth_service
 
     Returns:
-        dict: Ответ от auth_service о результате выхода
+        Словарь с сообщением об успешном выходе {"message": "Выход выполнен успешно!"}
     """
     # Удаляем токен из кэша
     await redis.delete(f"token:{token}")
