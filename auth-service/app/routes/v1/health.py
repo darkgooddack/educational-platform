@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import Response
 
 from app.core.config import config
-from app.core.dependencies.database import get_db_session
+from app.core.dependencies import get_db_session
 
 router = APIRouter(**config.SERVICES["health"].to_dict())
 

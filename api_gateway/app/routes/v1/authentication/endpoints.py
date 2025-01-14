@@ -12,8 +12,7 @@ from aio_pika import Connection, Message
 from fastapi import APIRouter, Depends
 
 from app.core.config import config
-from app.core.dependencies.rabbitmq import get_rabbitmq
-from app.core.dependencies.redis import get_redis
+from app.core.dependencies import get_redis, get_rabbitmq
 from app.schemas import AuthenticationSchema, TokenSchema
 
 router = APIRouter(**config.SERVICES["authentication"].to_dict())

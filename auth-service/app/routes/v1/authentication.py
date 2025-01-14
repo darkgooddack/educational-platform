@@ -8,8 +8,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import config
-from app.core.dependencies.authentication import oauth2_schema
-from app.core.dependencies.database import get_db_session
+from app.core.dependencies import get_db_session, oauth2_schema
 from app.core.exceptions import (InvalidCredentialsError, InvalidPasswordError,
                                  UserNotFoundError)
 from app.schemas import AuthenticationSchema, TokenSchema

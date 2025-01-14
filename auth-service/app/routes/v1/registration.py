@@ -9,7 +9,7 @@ from pydantic_core import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import config
-from app.core.dependencies.database import get_db_session
+from app.core.dependencies import get_db_session
 from app.core.exceptions import InvalidEmailFormatError, WeakPasswordError
 from app.schemas import CreateUserSchema
 from app.services import UserService
