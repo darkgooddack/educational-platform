@@ -18,7 +18,8 @@ from .handlers import (
     handle_authenticate,
     handle_logout,
     handle_oauth,
-    handle_register
+    handle_register,
+    handle_health_check
 )
 
 async def process_auth_message(
@@ -110,7 +111,7 @@ async def start_consuming():
     # Очереди для обработки
     queues = {
         "auth_queue": lambda msg: process_auth_message(msg, auth_service, user_service),
-        "health_check": lambda msg: msg.ack()
+        "health_check": handle_health_check
     }
 
     for queue_name, handler in queues.items():

@@ -6,6 +6,10 @@
 - logout: выход из системы
 - health_check: проверка работоспособности
 """
+import json
+from aio_pika import IncomingMessage, Message
+from sqlalchemy import text
+from app.core.dependencies import get_db_session
 from pydantic_core import ValidationError
 from app.schemas import AuthenticationSchema, CreateUserSchema, TokenSchema
 from app.services import AuthenticationService, UserService
@@ -110,3 +114,26 @@ async def handle_register(
             "error_type": getattr(e, "error_type", "validation_error"),
             "extra": getattr(e, "extra", {})
         }
+
+async def handle_health_check(message: IncomingMessage) -> None:
+    try:
+        async with get_db_session() as session:
+            await session.execute(text("SELECT 1"))
+
+            async with message.process():
+                await message.channel.default_exchange.publish(
+                    Message(
+                        body=json.dumps({"status": "healthy"}).encode(),
+                        content_type="application/json"
+                    ),
+                    routing_key=message.reply_to
+                )
+    except Exception:
+        async with message.process():
+            await message.channel.default_exchange.publish(
+                Message(
+                    body=json.dumps({"status": "unhealthy"}).encode(),
+                    content_type="application/json"
+                ),
+                routing_key=message.reply_to
+            )
