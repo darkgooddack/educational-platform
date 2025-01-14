@@ -41,12 +41,16 @@ async def authenticate(
     async with rabbitmq.channel() as channel:
         queue = await channel.declare_queue("auth_queue")
 
+        # Преобразуем данные в словарь
+        credentials_dict = credentials.model_dump()
+
         # Отправляем запрос в auth_service
         await channel.default_exchange.publish(
             Message(
-                body=json.dumps(
-                    {"action": "authenticate", "data": credentials}
-                ).encode()
+                body=json.dumps({
+                        "action": "authenticate", 
+                        "data": credentials_dict
+                    }).encode()
             ),
             routing_key="auth_queue",
         )
