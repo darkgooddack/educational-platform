@@ -61,7 +61,7 @@ async def oauth_login(provider: str) -> RedirectResponse:
     
     provider_data = config.oauth_providers[provider]
     logging.info(f"Информация от провайдера: {provider_data}")
-    logging.info(f"Редирект на {provider_data['auth_url']}")
+
     params = {
         "client_id": config.oauth_providers[provider]["client_id"],
         "redirect_uri": f"{config.app_url}/api/v1/oauth/{provider}/callback",
