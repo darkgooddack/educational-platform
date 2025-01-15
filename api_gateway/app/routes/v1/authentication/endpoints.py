@@ -75,7 +75,13 @@ async def logout(
     redis.delete(f"token:{token}")
 
     async with rabbitmq.channel() as channel:
-        queue = await channel.declare_queue("auth_queue")
+        # Или попробовать получше:
+        # try:
+        #     queue = await channel.declare_queue("auth_queue", durable=True, auto_delete=False)
+        # except aiormq.exceptions.ChannelPreconditionFailed:
+        #     # Очередь уже существует, можно продолжить
+        #     queue = await channel.get_queue("auth_queue")
+        _queue = await channel.declare_queue("auth_queue", auto_delete=True)
 
     # Отправляем запрос в auth_service
     async with rabbitmq.channel() as channel:

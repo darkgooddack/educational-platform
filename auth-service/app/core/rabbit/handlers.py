@@ -7,9 +7,10 @@
 - health_check: проверка работоспособности
 """
 import json
-from aio_pika import IncomingMessage, Message
+import logging
+from aio_pika import IncomingMessage, Message, connect_robust, RobustConnection
 from sqlalchemy import text
-from app.core.dependencies import get_db_session
+from app.core.dependencies.database import SessionContextManager
 from pydantic_core import ValidationError
 from app.schemas import AuthenticationSchema, RegistrationSchema, TokenSchema
 from app.services import AuthenticationService, UserService
@@ -19,6 +20,32 @@ from app.core.exceptions import (
     InvalidEmailFormatError,
     WeakPasswordError
 )
+from app.core.config import config
+
+async def send_response(message: IncomingMessage, status: dict) -> None:
+    """
+    Отправляет ответ обратно в очередь.
+    
+    Args:
+        message: Входящее сообщение с reply_to
+        status: Статус ответа в формате словаря
+
+    Returns: None
+    """
+    try:
+        connection: RobustConnection = await connect_robust(**config.rabbitmq_params)
+        async with connection:
+            channel = await connection.channel()
+            await channel.default_exchange.publish(
+                Message(
+                    body=json.dumps(status).encode(),
+                    content_type="application/json"
+                ),
+                routing_key=message.reply_to
+            )
+    except Exception as e:
+        logging.error("Error publishing message: %s", str(e))
+
 
 async def handle_authenticate(data: dict, auth_service: AuthenticationService) -> dict:
     """
@@ -115,25 +142,12 @@ async def handle_register(
             "extra": getattr(e, "extra", {})
         }
 
+
 async def handle_health_check(message: IncomingMessage) -> None:
     try:
-        async with get_db_session() as session:
-            await session.execute(text("SELECT 1"))
+        async with SessionContextManager() as session_manager:
+            await session_manager.execute(text("SELECT 1"))
 
-            async with message.process():
-                await message.channel.default_exchange.publish(
-                    Message(
-                        body=json.dumps({"status": "healthy"}).encode(),
-                        content_type="application/json"
-                    ),
-                    routing_key=message.reply_to
-                )
+            await send_response(message, {"status": "Здоров!"})
     except Exception:
-        async with message.process():
-            await message.channel.default_exchange.publish(
-                Message(
-                    body=json.dumps({"status": "unhealthy"}).encode(),
-                    content_type="application/json"
-                ),
-                routing_key=message.reply_to
-            )
+        await send_response(message, {"status": "Подох!"})
