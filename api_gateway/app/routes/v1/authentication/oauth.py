@@ -94,6 +94,10 @@ async def oauth_callback(
     Raises:
         HTTPException: При ошибке получения токена или данных пользователя
     """
+
+    logging.info("OAuth провайдер: %s", provider)
+    logging.info("Доступные провайдеры: %s", list(config.oauth_providers.keys()))
+
     if provider not in config.oauth_providers:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")
 
