@@ -102,7 +102,7 @@ async def handle_register(
 
         return {
             "status_code": 201,
-            "user_id": str(user.id),
+            "user_id": str(user.user_id),
             "email": user.email
         }
 
