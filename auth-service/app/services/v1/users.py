@@ -82,7 +82,7 @@ class UserService(HashingMixin, BaseService):
             middle_name=user.middle_name,
             email=user.email,
             phone=user.phone,
-            hashed_password=self.bcrypt(user.password),
+            hashed_password=self.hash_password(user.password),
         )
 
         user = await data_manager.add_user(user_model)

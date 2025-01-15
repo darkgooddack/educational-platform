@@ -70,7 +70,7 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
 
             new_user = UserModel(
                 **oauth_user.model_dump(),
-                hashed_password=self.bcrypt(secrets.token_hex(16)),
+                hashed_password=self.hash_password(secrets.token_hex(16)),
                 role=UserRole.USER
             )
             user_schema = await UserDataManager(self.session).add_user(new_user)

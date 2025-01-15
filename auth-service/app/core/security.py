@@ -10,9 +10,8 @@ Example:
     >>> from app.core.security import HashingMixin
     >>> class UserService(HashingMixin):
     >>>     def create_user(self, password: str):
-    >>>         hashed = self.bcrypt(password)
+    >>>         hashed = self.hash_password(password)
 
-    TODO: перейти с bcrypt на argon2
 """
 
 from datetime import datetime, timedelta, timezone
@@ -24,7 +23,13 @@ from app.core.config import config
 from app.core.exceptions import AuthenticationError
 from app.schemas import UserSchema
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["argon2"],
+    deprecated="auto",
+    argon2__time_cost=2,
+    argon2__memory_cost=102400,
+    argon2__parallelism=8
+)
 
 
 class HashingMixin:
@@ -35,7 +40,7 @@ class HashingMixin:
     """
 
     @staticmethod
-    def bcrypt(password: str) -> str:
+    def hash_password(password: str) -> str:
         """
         Генерирует хеш пароля с использованием bcrypt.
 
