@@ -84,7 +84,12 @@ class UserService(HashingMixin, BaseService):
             phone=user.phone,
             hashed_password=self.bcrypt(user.password),
         )
-        return await data_manager.add_user(user_model)
+
+        user = await data_manager.add_user(user_model)
+        return RegistrationResponseSchema(
+            user_id=user.id,
+            email=user.email
+        )
 
     async def get_by_email(self, email: str) -> UserSchema:
         """
