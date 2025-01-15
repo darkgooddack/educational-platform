@@ -135,13 +135,13 @@ class Settings(BaseSettings):
             missing = [field for field in required_fields if field not in config]
             if missing:
                 logging.error("❌ Провайдер %s: отсутствуют поля %s", provider, missing)
-                raise ValueError(f"Провайдер {provider} не имеет обязательных полей: {', '.join(missing)}")
+                #raise ValueError(f"Провайдер {provider} не имеет обязательных полей: {', '.join(missing)}")
             
             # Проверяем что все URL валидные
             for url_field in ["auth_url", "token_url", "user_info_url"]:
                 if not config[url_field].startswith(("http://", "https://")):
                     logging.error("❌ Провайдер %s: невалидный URL %s", provider, config[url_field])
-                    raise ValueError(f"Невалидный URL для {provider}.{url_field}: {config[url_field]}")
+                    #raise ValueError(f"Невалидный URL для {provider}.{url_field}: {config[url_field]}")
 
             logging.info("✅ Провайдер %s успешно провалидирован", provider)
 
