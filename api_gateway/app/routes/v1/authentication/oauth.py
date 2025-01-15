@@ -60,16 +60,16 @@ async def oauth_login(provider: str) -> RedirectResponse:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")
     
     provider_data = config.oauth_providers[provider]
-    logging.info(f"Информация от провайдера: {provider_data}")
+    logging.info(f"Информация от провайдера: {config.oauth_providers[provider]}")
 
     params = {
         "client_id": config.oauth_providers[provider]["client_id"],
         "redirect_uri": f"{config.app_url}/api/v1/oauth/{provider}/callback",
-        "scope": provider_data.get("scope"),
+        "scope": config.oauth_providers[provider]["scope"],
         "response_type": "code"
     }
     
-    auth_url = f"{provider_data['auth_url']}?{'&'.join(f'{k}={v}' for k,v in params.items())}"
+    auth_url = f"{config.oauth_providers[provider]['auth_url']}?{'&'.join(f'{k}={v}' for k,v in params.items())}"
     return RedirectResponse(auth_url)
 
 @router.get("/{provider}/callback", response_model=OAuthResponse)
@@ -113,14 +113,14 @@ async def oauth_callback(
 
     async with aiohttp.ClientSession() as session:
         # Получение токена от провайдера
-        async with session.post(provider_data["token_url"], data=token_params) as resp:
+        async with session.post(config.oauth_providers[provider]["token_url"], data=token_params) as resp:
             token_data = await resp.json()
             if "error" in token_data:
                 raise HTTPException(status_code=400, detail=token_data["error"])
             
         # Получение данных пользователя
         headers = {"Authorization": f"Bearer {token_data['access_token']}"}
-        async with session.get(provider_data["user_info_url"], headers=headers) as resp:
+        async with session.get(config.oauth_providers[provider]["user_info_url"], headers=headers) as resp:
             user_data = await resp.json()
 
     # Отправка данных в auth-service
