@@ -91,22 +91,22 @@ class Settings(BaseSettings):
 
     oauth_providers: Dict[str, Dict[str, str]] = Field(
         default={
-            "vk": {
-                "client_id": "",
-                "client_secret": "",
-                "auth_url": "https://oauth.vk.com/authorize",
-                "token_url": "https://oauth.vk.com/access_token",
-                "user_info_url": "https://api.vk.com/method/users.get",
-                "scope": "email"
-            },
-            "google": {
-                "client_id": "",
-                "client_secret": "",
-                "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
-                "token_url": "https://oauth2.googleapis.com/token",
-                "user_info_url": "https://www.googleapis.com/oauth2/v2/userinfo",
-                "scope": "email profile"
-            },
+            # "vk": {
+            #     "client_id": "",
+            #     "client_secret": "",
+            #     "auth_url": "https://oauth.vk.com/authorize",
+            #     "token_url": "https://oauth.vk.com/access_token",
+            #     "user_info_url": "https://api.vk.com/method/users.get",
+            #     "scope": "email"
+            # },
+            # "google": {
+            #     "client_id": "",
+            #     "client_secret": "",
+            #     "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
+            #     "token_url": "https://oauth2.googleapis.com/token",
+            #     "user_info_url": "https://www.googleapis.com/oauth2/v2/userinfo",
+            #     "scope": "email profile"
+            # },
             "yandex": {
                 "client_id": "",
                 "client_secret": "",
