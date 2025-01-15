@@ -8,6 +8,7 @@
 """
 
 import json
+import logging
 from aio_pika import IncomingMessage, connect_robust
 
 from app.core.config import config
@@ -69,7 +70,10 @@ async def process_auth_message(
     """
     body = json.loads(message.body.decode())
     action = body.get("action")
-
+    
+    logging.info("Сообщение от action: %s", action)
+    logging.info("Содержание: %s", body)
+    
     handlers = {
         "authenticate": lambda: handle_authenticate(body.get("data"), auth_service),
         "logout": lambda: handle_logout(body.get("data", {}).get("token"), auth_service),
