@@ -72,7 +72,7 @@ async def process_auth_message(
 
     handlers = {
         "authenticate": lambda: handle_authenticate(body.get("data"), auth_service),
-        "logout": lambda: handle_logout(body["token"], auth_service),
+        "logout": lambda: handle_logout(body.get("data", {}).get("token"), auth_service),
         "oauth_authenticate": lambda: handle_oauth(body["provider"], body["user_data"], auth_service),
         "register": lambda: handle_register(body["data"], user_service)
     }
