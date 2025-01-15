@@ -65,13 +65,22 @@ async def oauth_login(provider: str) -> RedirectResponse:
     if provider not in config.oauth_providers:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")
     
-    provider_data = config.oauth_providers[provider]
-    logging.info(f"Информация от провайдера: {config.oauth_providers[provider]}")
+    provider_config = config.oauth_providers[provider]
+    logging.info("Настройки провайдера: %s", json.dumps(provider_config, indent=2, ensure_ascii=False))
 
+    required_fields = ["client_id", "client_secret", "auth_url", "token_url", "user_info_url", "scope"]
+    missing = [field for field in required_fields if field not in provider_config]
+
+    if missing:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Отсутствуют обязательные поля конфигурации: {', '.join(missing)}"
+        )
+    
     params = {
-        "client_id": config.oauth_providers[provider]["client_id"],
+        "client_id": provider_config["client_id"],
         "redirect_uri": f"{config.app_url}/api/v1/oauth/{provider}/callback",
-        "scope": config.oauth_providers[provider]["scope"],
+        "scope": provider_config["scope"],
         "response_type": "code"
     }
     
