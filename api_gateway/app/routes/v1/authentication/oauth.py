@@ -28,6 +28,7 @@ https://{domain.ru}/api/v1/oauth/{provider}/callback
 
 """
 import json
+import logging
 from aio_pika import Connection, Message
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
@@ -59,10 +60,12 @@ async def oauth_login(provider: str) -> RedirectResponse:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")
     
     provider_data = config.oauth_providers[provider]
+    logging.info(f"Информация от провайдера: {provider_data}")
+    logging.info(f"Редирект на {provider_data['auth_url']}")
     params = {
         "client_id": config.oauth_providers[provider]["client_id"],
         "redirect_uri": f"{config.app_url}/api/v1/oauth/{provider}/callback",
-        "scope": provider_data["scope"],
+        "scope": provider_data.get("scope") or config.oauth_providers[provider]["scope"],
         "response_type": "code"
     }
     
