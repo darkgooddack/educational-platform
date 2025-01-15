@@ -9,7 +9,7 @@
 
 import json
 
-from aio_pika import IncomingMessage, Message, connect_robust
+from aio_pika import IncomingMessage, Message, connect_robust, ExchangeType
 
 from app.core.config import config
 from app.services import AuthenticationService, UserService
@@ -85,7 +85,20 @@ async def process_auth_message(
         else:
             result = await handler()
         try:
-            exchange = await message.channel.get_default_exchange()
+            # Посмотрим, что у нас получилось
+            try:
+                # Вариант 1: Через get_default_exchange
+                exchange = await message.channel.get_default_exchange()
+            except AttributeError:
+                try:
+                    # Вариант 2: Через default_exchange свойство
+                    exchange = message.channel.default_exchange
+                except AttributeError:
+                    # Вариант 3: Через пустой exchange
+                    exchange = await message.channel.declare_exchange(
+                        name="",
+                        type=ExchangeType.DIRECT
+                    )
             await exchange.publish(
                 Message(body=json.dumps(result).encode()),
                 routing_key=message.reply_to
