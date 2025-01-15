@@ -84,12 +84,8 @@ async def process_auth_message(
             result = {"error": f"Unknown action: {action}"}
         else:
             result = await handler()
-        
-        # Получаем default exchange 
-        exchange = await message.channel.get_exchange('')
 
-        # Публикуем результат в default exchange с routing_key, равным routing_key сообщения
-        await exchange.publish(
+        await message.channel.default_exchange.publish(
             Message(body=json.dumps(result).encode()),
             routing_key=message.reply_to
         )
