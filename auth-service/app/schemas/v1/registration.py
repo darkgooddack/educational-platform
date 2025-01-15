@@ -7,7 +7,7 @@ from pydantic import EmailStr, Field
 from .base import BaseInputSchema
 
 
-class CreateUserSchema(BaseInputSchema):
+class RegistrationSchema(BaseInputSchema):
     """
     Схема создания нового пользователя.
 
@@ -35,6 +35,19 @@ class CreateUserSchema(BaseInputSchema):
     )
     password: str = Field(min_length=8, description="Пароль минимум 8 символов")
 
+class RegistrationResponseSchema(BaseInputSchema):
+    """
+    Схема ответа при успешной регистрации
+
+    Attributes:
+        user_id (int): ID пользователя
+        email (str): Email пользователя
+        message (str): Сообщение об успешной регистрации
+    """
+    user_id: int
+    email: EmailStr
+    message: str = "Регистрация успешно завершена"
+    
 class OAuthUserSchema(BaseInputSchema):
     """
     Схема создания пользователя через OAuth

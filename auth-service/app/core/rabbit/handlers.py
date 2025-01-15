@@ -11,7 +11,7 @@ from aio_pika import IncomingMessage, Message
 from sqlalchemy import text
 from app.core.dependencies import get_db_session
 from pydantic_core import ValidationError
-from app.schemas import AuthenticationSchema, CreateUserSchema, TokenSchema
+from app.schemas import AuthenticationSchema, RegistrationSchema, TokenSchema
 from app.services import AuthenticationService, UserService
 from app.core.exceptions import (
     UserNotFoundError,
@@ -97,7 +97,7 @@ async def handle_register(
     """
     try:
         # Преобразуем dict в схему
-        user_data_schema = CreateUserSchema(**data)
+        user_data_schema = RegistrationSchema(**data)
         user = await user_service.create_user(user_data_schema)
 
         return {

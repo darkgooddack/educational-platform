@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import UserExistsError, UserNotFoundError
 from app.core.security import HashingMixin
 from app.models import UserModel
-from app.schemas import CreateUserSchema, UserSchema
+from app.schemas import RegistrationSchema, RegistrationResponseSchema, UserSchema
 from app.services import BaseEntityManager, BaseService
 
 
@@ -52,7 +52,7 @@ class UserService(HashingMixin, BaseService):
         super().__init__(session)
         self._data_manager = UserDataManager(self.session)
 
-    async def create_user(self, user: CreateUserSchema) -> UserSchema:
+    async def create_user(self, user: RegistrationSchema) -> RegistrationResponseSchema:
         """
         Создает нового пользователя в базе данных с использованием данных web формы.
 
@@ -60,7 +60,7 @@ class UserService(HashingMixin, BaseService):
             user: Данные нового пользователя.
 
         Returns:
-            Экземпляр созданного пользователя.
+            RegistrationResponseSchema: Данные нового пользователя.
         """
         data_manager = UserDataManager(self.session)
 

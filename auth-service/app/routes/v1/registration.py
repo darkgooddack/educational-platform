@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import config
 from app.core.dependencies import get_db_session
 from app.core.exceptions import InvalidEmailFormatError, WeakPasswordError
-from app.schemas import CreateUserSchema
+from app.schemas import RegistrationSchema
 from app.services import UserService
 
 router = APIRouter(**config.SERVICES["registration"].to_dict())
@@ -19,7 +19,7 @@ router = APIRouter(**config.SERVICES["registration"].to_dict())
 
 @router.post("/")
 async def registration_user(
-    user: CreateUserSchema,
+    user: RegistrationSchema,
     session: AsyncSession = Depends(get_db_session),
 ) -> None:
     """
