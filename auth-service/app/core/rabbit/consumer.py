@@ -85,7 +85,7 @@ async def process_auth_message(
         else:
             result = await handler()
 
-        await message.channel.default_exchange.publish(
+        await message.channel.default_exchange().publish(
             Message(body=json.dumps(result).encode()),
             routing_key=message.reply_to
         )
