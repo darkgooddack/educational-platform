@@ -56,7 +56,8 @@ async def oauth_login(provider: str) -> RedirectResponse:
     Raises:
         HTTPException: Если провайдер не поддерживается
     """
-
+    print("КОНФИГ КАК ЕСТЬ:", config.oauth_providers)
+    print("ВСЕ АТРИБУТЫ КОНФИГА:", dir(config))
     logging.info("🔍 Проверяем провайдера и конфиг:")
     logging.info("Провайдер: %s", provider)
     logging.info("Конфиг провайдеров: %s", json.dumps(config.oauth_providers, indent=2, ensure_ascii=False))
@@ -67,7 +68,7 @@ async def oauth_login(provider: str) -> RedirectResponse:
     
     provider_config = config.oauth_providers[provider]
     logging.info("Настройки провайдера: %s", json.dumps(provider_config, indent=2, ensure_ascii=False))
-
+    print("ПРОВАЙДЕР КОНФИГ:", config.oauth_providers.get(provider))
     required_fields = ["client_id", "client_secret", "auth_url", "token_url", "user_info_url", "scope"]
     missing = [field for field in required_fields if field not in provider_config]
 
