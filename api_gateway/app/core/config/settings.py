@@ -7,10 +7,11 @@
 - Конфигурацию CORS политик
 - Управление доступом к документации API
 """
-
+import json
+import logging
 from typing import Any, Dict, List
 
-from pydantic import AmqpDsn, Field, RedisDsn
+from pydantic import AmqpDsn, Field, RedisDsn, validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .app import AppConfig
@@ -118,6 +119,31 @@ class Settings(BaseSettings):
         description="Настройки OAuth провайдеров"
     )
 
+    @validator("oauth_providers")
+    def validate_oauth_providers(cls, providers):
+        logging.info("🔄 Начинаю валидацию OAuth провайдеров")
+        required_fields = ["client_id", "client_secret", "auth_url", "token_url", "user_info_url", "scope"]
+        
+        for provider, config in providers.items():
+            logging.info("🔍 Проверяю провайдера: %s", provider)
+            logging.debug("Конфигурация: %s", json.dumps(config, indent=2, ensure_ascii=False))
+            
+            missing = [field for field in required_fields if field not in config]
+            if missing:
+                logging.error("❌ Провайдер %s: отсутствуют поля %s", provider, missing)
+                raise ValueError(f"Провайдер {provider} не имеет обязательных полей: {', '.join(missing)}")
+            
+            # Проверяем что все URL валидные
+            for url_field in ["auth_url", "token_url", "user_info_url"]:
+                if not config[url_field].startswith(("http://", "https://")):
+                    logging.error("❌ Провайдер %s: невалидный URL %s", provider, config[url_field])
+                    raise ValueError(f"Невалидный URL для {provider}.{url_field}: {config[url_field]}")
+
+            logging.info("✅ Провайдер %s успешно провалидирован", provider)
+
+        logging.info("🎉 Все OAuth провайдеры успешно провалидированы")
+        return providers
+    
     @property
     def rabbitmq_params(self) -> Dict[str, Any]:
         """

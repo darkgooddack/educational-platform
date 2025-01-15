@@ -56,6 +56,12 @@ async def oauth_login(provider: str) -> RedirectResponse:
     Raises:
         HTTPException: Если провайдер не поддерживается
     """
+
+    logging.info("🔍 Проверяем провайдера и конфиг:")
+    logging.info("Провайдер: %s", provider)
+    logging.info("Конфиг провайдеров: %s", json.dumps(config.oauth_providers, indent=2, ensure_ascii=False))
+    logging.info("Настройки провайдера: %s", json.dumps(config.oauth_providers.get(provider, {}), indent=2, ensure_ascii=False))
+
     if provider not in config.oauth_providers:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")
     
