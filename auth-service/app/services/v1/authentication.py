@@ -185,13 +185,13 @@ class AuthenticationDataManager(BaseDataManager):
         try:
             redis = await RedisClient.get_instance()
             # Сохраняем токен
-            await redis.set(
+            redis.set(
                 f"token:{token}",
                 json.dumps(user_data),
                 ex=TokenMixin.get_token_expiration(),
             )
             # Добавляем в список сессий пользователя
-            await redis.sadd(f"sessions:{user.email}", token)
+            redis.sadd(f"sessions:{user.email}", token)
         except RedisError:
             # Redis недоступен - возвращаем только JWT
             pass
@@ -207,11 +207,11 @@ class AuthenticationDataManager(BaseDataManager):
             None
         """
         redis = await RedisClient.get_instance()
-        user_data = await redis.get(f"token:{token}")
+        user_data = redis.get(f"token:{token}")
         if user_data:
             user = UserSchema.model_validate_json(user_data)
-            await redis.srem(f"sessions:{user.email}", token)
-        await redis.delete(f"token:{token}")
+            redis.srem(f"sessions:{user.email}", token)
+        redis.delete(f"token:{token}")
 
     async def get_user_by_token(self, token: str) -> UserSchema | None:
         """
@@ -224,7 +224,7 @@ class AuthenticationDataManager(BaseDataManager):
             Данные пользователя или None, если пользователь не найден.
         """
         redis = await RedisClient.get_instance()
-        user_data = await redis.get(f"token:{token}")
+        user_data = redis.get(f"token:{token}")
         return UserSchema.model_validate_json(user_data) if user_data else None
 
     async def get_user_from_redis(self, token: str, email: str) -> UserSchema:
@@ -240,7 +240,7 @@ class AuthenticationDataManager(BaseDataManager):
         """
         try:
             redis = await RedisClient.get_instance()
-            stored_token = await redis.get(f"token:{token}")
+            stored_token = redis.get(f"token:{token}")
 
             if stored_token:
                 user_data = json.loads(stored_token)

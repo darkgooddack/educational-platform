@@ -44,7 +44,7 @@ async def register_user(
             )
             # Кэшируем данные пользователя если регистрация успешна
             if "user_id" in response:
-                await redis.setex(
+                redis.setex(
                     f"user:{response['user_id']}",
                     3600,
                     json.dumps(user_data.model_dump())

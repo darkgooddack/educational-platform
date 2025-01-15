@@ -144,7 +144,7 @@ async def oauth_callback(
                     )
 
                     if oauth_response.access_token:
-                        await redis.setex(
+                        redis.setex(
                             f"token:{oauth_response.access_token}",
                             3600,
                             oauth_response.email

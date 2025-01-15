@@ -34,7 +34,7 @@ async def health_check(
     """
     try:
         # Проверяем Redis
-        await redis.ping()
+        redis.ping()
 
         # Проверяем микросервисы через RabbitMQ
         async with rabbitmq.channel() as channel:

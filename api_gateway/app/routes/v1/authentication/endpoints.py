@@ -46,7 +46,7 @@ async def authenticate(
         )
 
         if "access_token" in response:
-            await redis.setex(
+            redis.setex(
                 f"token:{response['access_token']}",
                 3600,
                 credentials.email
@@ -72,7 +72,7 @@ async def logout(
         Словарь с сообщением об успешном выходе {"message": "Выход выполнен успешно!"}
     """
     # Удаляем токен из кэша
-    await redis.delete(f"token:{token}")
+    redis.delete(f"token:{token}")
 
     async with rabbitmq.channel() as channel:
         queue = await channel.declare_queue("auth_queue")
