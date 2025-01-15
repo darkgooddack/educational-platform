@@ -98,39 +98,26 @@ class Settings(BaseSettings):
                 "token_url": "https://oauth.yandex.ru/token",
                 "user_info_url": "https://login.yandex.ru/info",
                 "scope": "login:email"
-            }
-        }
-    )
-
-    @validator("oauth_providers")
-    def validate_oauth_providers(cls, providers):
-        default_config = {
-            "yandex": {
-                "auth_url": "https://oauth.yandex.ru/authorize", 
-                "token_url": "https://oauth.yandex.ru/token",
-                "user_info_url": "https://login.yandex.ru/info",
-                "scope": "login:email"
             },
             "vk": {
+                "client_id": "",
+                "client_secret": "",
                 "auth_url": "https://oauth.vk.com/authorize",
-                "token_url": "https://oauth.vk.com/access_token", 
+                "token_url": "https://oauth.vk.com/access_token",
                 "user_info_url": "https://api.vk.com/method/users.get",
                 "scope": "email"
             },
             "google": {
+                "client_id": "",
+                "client_secret": "",
                 "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
                 "token_url": "https://oauth2.googleapis.com/token",
                 "user_info_url": "https://www.googleapis.com/oauth2/v2/userinfo",
                 "scope": "email profile"
             }
         }
-        
-        for provider, config in providers.items():
-            if provider in default_config:
-                providers[provider] = {**default_config[provider], **config}
-                
-        return providers
-    
+    )
+
     @validator("oauth_providers")
     def validate_oauth_providers(cls, providers):
         if not providers:
@@ -143,8 +130,9 @@ class Settings(BaseSettings):
             missing = [field for field in required_fields if not config.get(field)]
             if missing:
                 logging.error(f"❌ Провайдер {provider}: отсутствуют обязательные поля {missing}")
-        return providers 
-    
+
+        return providers
+
     @property
     def rabbitmq_params(self) -> Dict[str, Any]:
         """
