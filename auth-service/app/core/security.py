@@ -11,6 +11,8 @@ Example:
     >>> class UserService(HashingMixin):
     >>>     def create_user(self, password: str):
     >>>         hashed = self.bcrypt(password)
+
+    TODO: перейти с bcrypt на argon2
 """
 
 from datetime import datetime, timedelta, timezone

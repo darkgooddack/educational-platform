@@ -8,8 +8,8 @@
 """
 
 import json
-
-from aio_pika import IncomingMessage, Message, connect_robust, ExchangeType
+import logging
+from aio_pika import IncomingMessage, Message, connect_robust, RobustConnection
 
 from app.core.config import config
 from app.services import AuthenticationService, UserService
@@ -84,17 +84,18 @@ async def process_auth_message(
             result = {"error": f"Unknown action: {action}"}
         else:
             result = await handler()
+
         try:
-            # Создаем новый канал
-            channel = await message.channel.connection.create_channel()
-            # Публикуем через него
-            await channel.basic_publish(
-                exchange='',  # Пустой exchange = default
-                routing_key=message.reply_to,
-                body=json.dumps(result).encode()
-            )
+            # Создаем новое подключение для публикации
+            connection: RobustConnection = await connect_robust(**config.rabbitmq_params)
+            async with connection:
+                channel = await connection.channel()
+                await channel.default_exchange.publish(
+                    Message(body=json.dumps(result).encode()),
+                    routing_key=message.reply_to
+                )
         except Exception as e:
-            print(f"Error publishing message: {e}")
+            logging.error("Error publishing message: %s", str(e))
 
 
 async def start_consuming():
