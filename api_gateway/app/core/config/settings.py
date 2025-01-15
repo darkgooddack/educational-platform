@@ -118,9 +118,13 @@ class Settings(BaseSettings):
         },
         description="Настройки OAuth провайдеров"
     )
-
+    logging.info(oauth_providers)
     @validator("oauth_providers")
     def validate_oauth_providers(cls, providers):
+        if not providers:
+            logging.info("🤷 OAuth провайдеры не настроены, пропускаю валидацию")
+            return providers
+
         logging.info("🔄 Начинаю валидацию OAuth провайдеров")
         required_fields = ["client_id", "client_secret", "auth_url", "token_url", "user_info_url", "scope"]
         
