@@ -69,7 +69,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             BaseAPIException: базовое исключение API
             HTTPException: HTTP исключение
         """
-        if config.logging_level == "DEBUG":
+        if getattr(config, "logging_level", "INFO") == "DEBUG":
             logger.debug("Request path: %s", request.url.path)
             logger.debug("Headers: %s", request.headers)
 
