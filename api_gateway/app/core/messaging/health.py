@@ -36,6 +36,6 @@ class HealthMessageProducer(MessageProducer):
             logging.info(f"Статус health check: {status}")
             return status, HealthStatus.HEALTHY if status else HealthStatus.UNKNOWN_ERROR
         
-        except Exception:
+        except Exception as e:
             logging.error(f"Ошибка при проверке health: {str(e)}")
             return False, HealthStatus.UNKNOWN_ERROR

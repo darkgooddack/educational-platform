@@ -151,6 +151,6 @@ async def handle_health_check(message: IncomingMessage) -> None:
             await session_manager.execute(text("SELECT 1"))
             logging.info("БД работает, отправляю healthy")
             await send_response(message, {"status": "healthy"})
-    except Exception:
+    except Exception as e:
         logging.error(f"Ошибка health check: {str(e)}")
         await send_response(message, {"status": "unhealthy"})
