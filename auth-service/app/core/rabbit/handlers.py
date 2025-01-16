@@ -148,7 +148,7 @@ async def handle_health_check(message: IncomingMessage) -> None:
     try:
         async with SessionContextManager() as session_manager:
             await session_manager.execute(text("SELECT 1"))
-
-            await send_response(message, {"status": "Здоров!"})
+            logging.info("Health check passed")
+            await send_response(message, {"status": "healthy"})
     except Exception:
-        await send_response(message, {"status": "Подох!"})
+        await send_response(message, {"status": "unhealthy"})
