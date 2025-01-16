@@ -23,7 +23,7 @@ async def lifespan(_app: FastAPI):
 
     """
     from app.core.clients import RabbitMQClient, RedisClient
-    from app.core.messaging.consumer import start_consuming
+    from app.core.handlers.consumer import start_consuming
 
     await RedisClient.get_instance()
     await RabbitMQClient.get_instance()

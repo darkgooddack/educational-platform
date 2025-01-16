@@ -10,28 +10,36 @@ from aio_pika import Connection
 from fastapi import APIRouter, Depends
 from starlette.responses import Response
 
-from app.core.config import config
 from app.core.dependencies import get_rabbitmq, get_redis
 from app.schemas.v1.health import HealthStatusCodes
 from app.services.v1.health import HealthService
 
 health_service = HealthService()
-router = APIRouter(**config.SERVICES["health"].to_dict())
 
 
-@router.get("/", status_code=HealthStatusCodes.OK.value)
-async def health_check(
-    redis=Depends(get_redis),
-    rabbitmq: Connection = Depends(get_rabbitmq),
-) -> Response:
+def setup_routes(router: APIRouter):
     """
-    Проверка доступности всех микросервисов.
+    Настройка маршрутов для проверки здоровья сервисов.
 
     Args:
-        redis (Redis): Объект Redis.
-        rabbitmq (Connection): Объект RabbitMQ.
+        router (APIRouter): Объект APIRouter.
 
-    Returns:
-        Response: Статус проверки здоровья.
+    Routes:
+        GET /health: Проверка доступности всех микросервисов
     """
-    return await health_service.check_health(redis, rabbitmq)
+    @router.get("/", status_code=HealthStatusCodes.OK.value)
+    async def health_check(
+        redis=Depends(get_redis),
+        rabbitmq: Connection = Depends(get_rabbitmq),
+    ) -> Response:
+        """
+        Проверка доступности всех микросервисов.
+
+        Args:
+            redis (Redis): Объект Redis.
+            rabbitmq (Connection): Объект RabbitMQ.
+
+        Returns:
+            Response: Статус проверки здоровья.
+        """
+        return await health_service.check_health(redis, rabbitmq)

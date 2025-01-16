@@ -11,9 +11,13 @@ API_MODULES - с префиксом api/v1:
 """
 
 from fastapi import APIRouter
-
-from . import health as health_router
+from app.core.config import config
 from .auth import auth_router, oauth_router, register_router
+
+from . import health
+router_health = APIRouter(**config.SERVICES["health"].to_dict())
+health.setup_routes(router_health)
+health_router = router_health
 
 BASE_MODULES = {
     "health": health_router,
@@ -38,7 +42,7 @@ def _include_modules(modules: dict) -> APIRouter:
     """
     router = APIRouter()
     for module in modules.values():
-        router.include_router(module.router)
+        router.include_router(module)
     return router
 
 
