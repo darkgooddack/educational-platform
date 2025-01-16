@@ -26,7 +26,7 @@ from app.core.security import HashingMixin
 from app.models import UserModel
 from app.schemas import (RegistrationResponseSchema, RegistrationSchema,
                          UserSchema)
-from app.services import BaseEntityManager, BaseService
+from app.services.v1.base import BaseEntityManager, BaseService
 
 
 class UserService(HashingMixin, BaseService):
