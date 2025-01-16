@@ -21,6 +21,7 @@ from app.core.config import config
 from app.core.dependencies import get_rabbitmq, get_redis
 from app.core.messaging.health import HealthMessageProducer, HealthStatus
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(**config.SERVICES["health"].to_dict())
 
@@ -57,6 +58,6 @@ async def health_check(
             return Response(status_code=500)
         
     except Exception as e:
-        logging.error(f"Critical health check error: {e}")
+        logger.error(f"Critical health check error: {e}")
         return Response(status_code=500)
             

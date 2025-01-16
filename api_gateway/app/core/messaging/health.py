@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Tuple
 from .base import MessageProducer
 
+logger = logging.getLogger(__name__)
+
 class HealthStatus(Enum):
     HEALTHY = "healthy"
     TIMEOUT = "timeout"
@@ -28,14 +30,14 @@ class HealthMessageProducer(MessageProducer):
                 routing_key="health_check", 
                 message={"status": "check"}
             )
-            logging.info(f"Получил ответ: {response}, ошибка: {error}")
+            logger.info(f"Получил ответ: {response}, ошибка: {error}")
             if error:
                 return False, HealthStatus(error)
             
             status = response.get("status") == "healthy"
-            logging.info(f"Статус health check: {status}")
+            logger.info(f"Статус health check: {status}")
             return status, HealthStatus.HEALTHY if status else HealthStatus.UNKNOWN_ERROR
         
         except Exception as e:
-            logging.error(f"Ошибка при проверке health: {str(e)}")
+            logger.error(f"Ошибка при проверке health: {str(e)}")
             return False, HealthStatus.UNKNOWN_ERROR

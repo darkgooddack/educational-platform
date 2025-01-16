@@ -21,6 +21,7 @@ from app.core.exceptions import (InvalidEmailFormatError, UserExistsError,
 from app.schemas import AuthenticationSchema, RegistrationSchema, TokenSchema
 from app.services import AuthenticationService, UserService
 
+logger = logging.getLogger(__name__)
 
 async def send_response(message: IncomingMessage, status: dict) -> None:
     """
@@ -43,7 +44,7 @@ async def send_response(message: IncomingMessage, status: dict) -> None:
                 routing_key=message.reply_to,
             )
     except Exception as e:
-        logging.error("Error publishing message: %s", str(e))
+        logger.error("Error publishing message: %s", str(e))
 
 
 async def handle_authenticate(data: dict, auth_service: AuthenticationService) -> dict:
@@ -147,10 +148,10 @@ async def handle_register(data: dict, user_service: UserService) -> dict:
 async def handle_health_check(message: IncomingMessage) -> None:
     try:
         async with SessionContextManager() as session_manager:
-            logging.info("Проверяю БД...")
+            logger.info("Проверяю БД...")
             await session_manager.session.execute(text("SELECT 1"))
-            logging.info("БД работает, отправляю healthy")
+            logger.info("БД работает, отправляю healthy")
             await send_response(message, {"status": "healthy"})
     except Exception as e:
-        logging.error(f"Ошибка health check: {str(e)}")
+        logger.error(f"Ошибка health check: {str(e)}")
         await send_response(message, {"status": "unhealthy"})

@@ -25,6 +25,7 @@ from app.schemas import BaseSchema
 M = TypeVar("M", bound=BaseModel)
 T = TypeVar("T", bound=BaseSchema)
 
+logger = logging.getLogger(__name__)
 
 class BaseService(Generic[T, M]):
     """
@@ -66,7 +67,7 @@ class BaseService(Generic[T, M]):
             return self.schema.model_validate(db_item)
         except SQLAlchemyError as e:
             await self.session.rollback()
-            logging.error("Ошибка при создании записи в базе данных: %s", e)
+            logger.error("Ошибка при создании записи в базе данных: %s", e)
             raise
 
     async def get(self, **filters) -> T | None:
@@ -87,7 +88,7 @@ class BaseService(Generic[T, M]):
             item = result.scalar_one_or_none()
             return self.schema.model_validate(item) if item else None
         except SQLAlchemyError as e:
-            logging.error("Ошибка при получении записи из базы данных: %s", e)
+            logger.error("Ошибка при получении записи из базы данных: %s", e)
             return None
 
     async def delete(self, **filters) -> bool:
@@ -109,5 +110,5 @@ class BaseService(Generic[T, M]):
             return result.rowcount > 0
         except SQLAlchemyError as e:
             await self.session.rollback()
-            logging.error("Ошибка при удалении записи из базы данных: %s", e)
+            logger.error("Ошибка при удалении записи из базы данных: %s", e)
             return False

@@ -19,6 +19,7 @@ from app.services import AuthenticationService, UserService
 from .handlers import (handle_authenticate, handle_health_check, handle_logout,
                        handle_oauth, handle_register, send_response)
 
+logger = logging.getLogger(__name__)
 
 async def process_auth_message(
     message: IncomingMessage,
@@ -68,8 +69,8 @@ async def process_auth_message(
     body = json.loads(message.body.decode())
     action = body.get("action")
 
-    logging.info("🎯 Получен запрос OAuth | Action: %s", action)
-    logging.info("📦 Тело запроса: %s", json.dumps(body, indent=2, ensure_ascii=False))
+    logger.info("🎯 Получен запрос OAuth | Action: %s", action)
+    logger.info("📦 Тело запроса: %s", json.dumps(body, indent=2, ensure_ascii=False))
 
     handlers = {
         "authenticate": lambda: handle_authenticate(body.get("data"), auth_service),
