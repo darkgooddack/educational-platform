@@ -3,6 +3,14 @@
 
 Этот модуль содержит эндпоинт для:
 - Регистрации новых пользователей через auth_service
+
+TODO:
+1. Cпецифичные коды ошибок:
+    - 503 для временных проблем (таймауты, connection)
+    - 500 для неизвестных ошибок
+    - 400 для ошибок валидации
+2. Кэширование в redis можно вынести в отдельную функцию для чистоты кода
+
 """
 
 import json
@@ -13,7 +21,7 @@ from fastapi.exceptions import HTTPException
 
 from app.core.config import config
 from app.core.dependencies import get_rabbitmq, get_redis
-from app.core.messaging.auth import AuthMessageProducer
+from app.core.messaging.auth import AuthMessageProducer, AuthAction
 from app.schemas import RegistrationResponseSchema, RegistrationSchema
 
 router = APIRouter(**config.SERVICES["registration"].to_dict())
@@ -36,31 +44,27 @@ async def register_user(
     Returns:
         dict: Ответ от auth_service с результатом регистрации
     """
-    try:
-        async with rabbitmq.channel() as channel:
-            producer = AuthMessageProducer(channel)
-            response = await producer.send_auth_message(
-                action="register", 
-                data=user_data.model_dump()
-            )
-            # Кэшируем данные пользователя если регистрация успешна
-            if "user_id" in response:
-                redis.setex(
-                    f"user:{response['user_id']}",
-                    3600,
-                    json.dumps(user_data.model_dump()),
-                )
-
-            if "error" in response:
-                raise HTTPException(
-                    status_code=503, 
-                    detail="Сервис авторизации не отвечает"
-                )
-
-            return response
-
-    except TimeoutError:
-        raise HTTPException(
-            status_code=503, 
-            detail="Превышено время ожидания ответа от сервиса авторизации"
+    
+    async with rabbitmq.channel() as channel:
+        producer = AuthMessageProducer(channel)
+        response, error = await producer.send_auth_message(
+            AuthAction.REGISTER, 
+            data=user_data.model_dump()
         )
+        
+        if error:
+            raise HTTPException(
+                status_code=503, 
+                detail=f"Auth service error: {error}"
+            )
+        
+        # Кэшируем данные пользователя если регистрация успешна
+        if "user_id" in response:
+            redis.setex(
+                f"user:{response['user_id']}",
+                3600,
+                json.dumps(user_data.model_dump()),
+            )
+        
+        return response
+

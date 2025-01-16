@@ -34,7 +34,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 import aiohttp
 from app.core.dependencies import get_redis, get_rabbitmq
-from app.core.messaging.auth import AuthMessageProducer
+from app.core.messaging.auth import AuthMessageProducer, AuthAction
 from app.core.config import config
 from app.schemas import OAuthResponse
 from redis import Redis
@@ -102,6 +102,14 @@ async def oauth_callback(
 
     Raises:
         HTTPException: При ошибке получения токена или данных пользователя
+    
+    TODO:
+        Enum для провайдеров вместо строк
+        Вынос конфигурации провайдера в отдельный модуль
+        Разделение получения токена и данных пользователя
+        Разные коды ошибок для разных проблем
+        Асинхронное кэширование токена
+        Типизация всех параметров
     """
 
     logging.info("OAuth провайдер: %s", provider)
@@ -134,13 +142,16 @@ async def oauth_callback(
     # Отправка данных в auth-service
     async with rabbitmq.channel() as channel:
         producer = AuthMessageProducer(channel)
-        response = await producer.send_auth_message(
-            action="oauth_authenticate",
+        response, error = await producer.send_auth_message(
+            AuthAction.OAUTH_AUTHENTICATE,
             data={
                 "provider": provider,
                 "user_data": user_data
             }
         )
+        
+        if error:
+            raise HTTPException(status_code=503, detail=f"Auth service error: {error}")
         
         # Получение ответа от auth-service
         oauth_response = OAuthResponse(
