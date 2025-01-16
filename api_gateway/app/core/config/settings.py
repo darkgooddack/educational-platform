@@ -18,6 +18,7 @@ from .app import AppConfig
 
 logger = logging.getLogger(__name__)
 
+
 class Settings(BaseSettings):
     """
     Конфигурация параметров приложения из переменных окружения.
@@ -121,8 +122,7 @@ class Settings(BaseSettings):
 
     @field_validator("oauth_providers")
     def validate_oauth_providers(
-        cls,
-        providers: Dict[str, Dict[str, str]]
+        cls, providers: Dict[str, Dict[str, str]]
     ) -> Dict[str, Dict[str, str]]:
         """
         Валидация провайдеров OAuth.
@@ -146,10 +146,11 @@ class Settings(BaseSettings):
                 logging.error(
                     "❌ Провайдер %s: отсутствуют обязательные поля %s, проверьте настройки",
                     provider,
-                    missing
+                    missing,
                 )
 
         return providers
+
     @property
     def rabbitmq_params(self) -> Dict[str, Any]:
         """

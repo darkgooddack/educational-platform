@@ -65,13 +65,69 @@ class PathConfig:
     APP_PATH = BASE_PATH / APP_DIR
 
 
+class LogConfig:
+    """
+    Конфигурация логирования.
+
+    Attributes:
+        LEVEL (str): Уровень логирования
+        FORMAT (str): Формат сообщений
+        FILE (str): Имя файла логов
+        MAX_BYTES (int): Максимальный размер файла
+        BACKUP_COUNT (int): Количество файлов ротации
+        ENCODING (str): Кодировка файла
+        FILE_MODE (str): Режим открытия файла
+        DATE_FORMAT (str): Формат даты
+    """
+
+    LEVEL = "DEBUG"
+    FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    FILE = "app.log"
+    MAX_BYTES = 10485760  # 10MB
+    BACKUP_COUNT = 5
+    ENCODING = "utf-8"
+    FILE_MODE = "a"
+    DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+    def to_dict(self) -> dict:
+        return {
+            "level": self.LEVEL,
+            "format": self.FORMAT,
+            "filename": self.FILE,
+            "maxBytes": self.MAX_BYTES,
+            "backupCount": self.BACKUP_COUNT,
+            "encoding": self.ENCODING,
+            "filemode": self.FILE_MODE,
+            "datefmt": self.DATE_FORMAT,
+            "force": True,
+        }
+
+
 class AppConfig:
     """
     Основная конфигурация приложения.
-    """
 
-    logging_level: str = "DEBUG"
-    logging_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    Attributes:
+        TITLE (str): Название сервиса
+        DESCRIPTION (str): Описание сервиса
+        VERSION (str): Версия API
+        HOST (str): Хост для запуска сервера
+        PORT (int): Порт для запуска сервера
+        API_VERSIONS (List[str]): Поддерживаемые версии API
+        SERVICES (Dict): Конфигурация эндпоинтов
+        PATHS (PathConfig): Конфигурация путей
+        LOGGING (LogConfig): Конфигурация логирования
+        app_url (str): URL приложения
+        redis_url (str): URL для Redis
+        app_params (Dict): Параметры запуска FastAPI
+        lifespan (Callable): Функция жизненного цикла приложения
+
+
+    Example:
+        >>> from app.core.config import config
+        >>> config.app_params
+        {'title': 'Auth microoservice', 'description': ... }
+    """
 
     TITLE: str = "Educational Platform API Gateway"
     DESCRIPTION: str = "API Gateway для образовательной платформы"
@@ -83,11 +139,14 @@ class AppConfig:
 
     SERVICES = {
         "health": ServiceConfig("health", ["Health"]),
-        "authentication": ServiceConfig("authenticate", ["Authentication"]),
-        "registration": ServiceConfig("registration", ["Registration"]),
+        "auth": ServiceConfig("authenticate", ["Authentication"]),
+        "oauth": ServiceConfig("oauth", ["OAuth"]),
+        "register": ServiceConfig("registration", ["Registration"]),
     }
 
     PATHS = PathConfig()
+
+    LOGGING = LogConfig()
 
     app_url: str = "https://api.ebtest.ru"
 
@@ -120,6 +179,3 @@ class AppConfig:
             "port": self.PORT,
             "proxy_headers": True,
         }
-
-
-app_config = AppConfig()

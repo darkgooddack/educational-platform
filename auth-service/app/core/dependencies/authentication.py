@@ -13,7 +13,7 @@ from app.core.config import config
 from app.schemas import UserSchema
 from app.services import AuthenticationDataManager
 
-# logger =logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl=config.auth_url, auto_error=False)
 
@@ -31,6 +31,6 @@ async def get_current_user(
     Returns:
         Данные текущего пользователя.
     """
-    # logger.debug("Получен токен: %s", token)
+    logger.debug("Получен токен: %s", token)
 
     return await data_manager.verify_and_get_user(token)

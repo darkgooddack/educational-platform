@@ -1,0 +1,37 @@
+"""
+Модуль для проверки здоровья сервисов.
+
+Этот модуль содержит эндпоинт для:
+- Проверки доступности всех микросервисов
+- Проверки соединений с Redis и RabbitMQ
+"""
+
+from aio_pika import Connection
+from fastapi import APIRouter, Depends
+from starlette.responses import Response
+
+from app.core.config import config
+from app.core.dependencies import get_rabbitmq, get_redis
+from app.schemas.v1.health import HealthStatusCodes
+from app.services.v1.health import HealthService
+
+health_service = HealthService()
+router = APIRouter(**config.SERVICES["health"].to_dict())
+
+
+@router.get("/", status_code=HealthStatusCodes.OK.value)
+async def health_check(
+    redis=Depends(get_redis),
+    rabbitmq: Connection = Depends(get_rabbitmq),
+) -> Response:
+    """
+    Проверка доступности всех микросервисов.
+
+    Args:
+        redis (Redis): Объект Redis.
+        rabbitmq (Connection): Объект RabbitMQ.
+
+    Returns:
+        Response: Статус проверки здоровья.
+    """
+    return await health_service.check_health(redis, rabbitmq)

@@ -65,13 +65,49 @@ class PathConfig:
     APP_PATH = BASE_PATH / APP_DIR
 
 
+class LogConfig:
+    """
+    Конфигурация логирования.
+
+    Attributes:
+        LEVEL (str): Уровень логирования
+        FORMAT (str): Формат сообщений
+        FILE (str): Имя файла логов
+        MAX_BYTES (int): Максимальный размер файла
+        BACKUP_COUNT (int): Количество файлов ротации
+        ENCODING (str): Кодировка файла
+        FILE_MODE (str): Режим открытия файла
+        DATE_FORMAT (str): Формат даты
+    """
+
+    LEVEL = "DEBUG"
+    FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    FILE = "app.log"
+    MAX_BYTES = 10485760  # 10MB
+    BACKUP_COUNT = 5
+    ENCODING = "utf-8"
+    FILE_MODE = "a"
+    DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+    def to_dict(self) -> dict:
+        return {
+            "level": self.LEVEL,
+            "format": self.FORMAT,
+            "filename": self.FILE,
+            "maxBytes": self.MAX_BYTES,
+            "backupCount": self.BACKUP_COUNT,
+            "encoding": self.ENCODING,
+            "filemode": self.FILE_MODE,
+            "datefmt": self.DATE_FORMAT,
+            "force": True,
+        }
+
+
 class AppConfig:
     """
     Основная конфигурация приложения.
 
     Attributes:
-        logging_level (str): Уровень логирования
-        logging_format (str): Формат сообщений лога
         TITLE (str): Название сервиса
         DESCRIPTION (str): Описание сервиса
         VERSION (str): Версия API
@@ -80,6 +116,7 @@ class AppConfig:
         API_VERSIONS (List[str]): Поддерживаемые версии API
         SERVICES (Dict): Конфигурация эндпоинтов
         PATHS (PathConfig): Конфигурация путей
+        LOGGING (LogConfig): Конфигурация логирования
         auth_url (str): URL для аутентификации
         redis_url (str): URL для Redis
         app_params (Dict): Параметры запуска FastAPI
@@ -91,9 +128,6 @@ class AppConfig:
         >>> config.app_params
         {'title': 'Auth microoservice', 'description': ... }
     """
-
-    logging_level: str = "DEBUG"
-    logging_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     TITLE: str = "Auth microoservice"
     DESCRIPTION: str = (
@@ -112,6 +146,8 @@ class AppConfig:
     }
 
     PATHS = PathConfig()
+
+    LOGGING = LogConfig()
 
     auth_url: str = Field(
         default="api/v1/authenticate", description="URL для аутентификации пользователя"
@@ -170,6 +206,3 @@ class AppConfig:
             "port": self.PORT,
             "proxy_headers": True,  # Для корректной работы с прокси-серверами
         }
-
-
-app_config = AppConfig()

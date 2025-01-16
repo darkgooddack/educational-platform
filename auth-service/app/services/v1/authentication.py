@@ -11,8 +11,8 @@ from datetime import datetime
 from redis.exceptions import RedisError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import config
 from app.core.clients import RedisClient
+from app.core.config import config
 from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
                                  TokenMissingError)
 from app.core.security import HashingMixin, TokenMixin

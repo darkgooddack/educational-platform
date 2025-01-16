@@ -12,15 +12,17 @@ API_MODULES - с префиксом api/v1:
 
 from fastapi import APIRouter
 
-from . import authentication, health, registration
+from . import health as health_router
+from .auth import auth_router, oauth_router, register_router
 
 BASE_MODULES = {
-    "health": health,
+    "health": health_router,
 }
 
 VERSIONS_MODULES = {
-    "authentication": authentication,
-    "registration": registration,
+    "auth": auth_router,
+    "oauth": oauth_router,
+    "register": register_router,
 }
 
 

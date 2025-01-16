@@ -32,7 +32,7 @@ from starlette.responses import JSONResponse
 from app.core.config import config
 from app.core.exceptions import BaseAPIException
 
-logger =logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):

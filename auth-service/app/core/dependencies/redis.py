@@ -6,7 +6,9 @@
 - close(): Закрывает подключение к Redis.
 
 """
+
 from app.core.clients import RedisClient
+
 
 async def get_redis():
     """

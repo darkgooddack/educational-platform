@@ -12,7 +12,8 @@ from app.schemas import BaseSchema
 M = TypeVar("M", bound=BaseModel)
 T = TypeVar("T", bound=BaseSchema)
 
-# logger =logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
+
 
 class SessionMixin:
     """
@@ -78,7 +79,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             return self.schema(**model.to_dict())
         except SQLAlchemyError as e:
             await self.session.rollback()
-            # logger.error("Ошибка при добавлении: %s", e)
+            logger.error("Ошибка при добавлении: %s", e)
             raise
 
     async def get_one(self, select_statement: Executable) -> Any | None:
@@ -98,7 +99,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             result = await self.session.execute(select_statement)
             return result.scalar()
         except SQLAlchemyError as e:
-            # logger.error("Ошибка при получении записи: %s", e)
+            logger.error("Ошибка при получении записи: %s", e)
             return None
 
     async def get_all(self, select_statement: Executable) -> List[Any]:
@@ -119,7 +120,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             items = result.unique().scalars().all()
             return [self.schema.model_validate(item) for item in items]
         except SQLAlchemyError as e:
-            # logger.error("Ошибка при получении записей: %s", e)
+            logger.error("Ошибка при получении записей: %s", e)
             return []
 
     async def delete(self, delete_statement: Executable) -> bool:
@@ -141,7 +142,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             return result.rowcount > 0
         except SQLAlchemyError as e:
             await self.session.rollback()
-            # logger.error("Ошибка при удалении: %s", e)
+            logger.error("Ошибка при удалении: %s", e)
             return False
 
     async def update_one(self, model_to_update, updated_model: Any) -> T | None:
@@ -171,7 +172,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             return self.schema(**model_to_update.to_dict())
         except SQLAlchemyError as e:
             await self.session.rollback()
-            # logger.error("Ошибка при обновлении: %s", e)
+            logger.error("Ошибка при обновлении: %s", e)
             raise
 
 

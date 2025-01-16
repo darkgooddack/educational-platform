@@ -15,7 +15,7 @@ from datetime import datetime
 import pytz
 from fastapi import HTTPException
 
-# logger =logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 moscow_tz = pytz.timezone("Europe/Moscow")
 
 
@@ -48,5 +48,5 @@ class BaseAPIException(HTTPException):
             **(extra or {}),
         }
 
-        # logger.error(detail, extra=context)
+        logger.error(detail, extra=context)
         super().__init__(status_code=status_code, detail=detail)

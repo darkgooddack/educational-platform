@@ -1,20 +1,28 @@
+"""
+Модуль для отправки сообщений о здоровье сервисов.
+
+Модуль содержит класс HealthMessageProducer,
+который наследуется от MessageProducer и отвечает за отправку сообщений
+о здоровье сервисов.
+"""
+
 import logging
-from enum import Enum
 from typing import Tuple
-from .base import MessageProducer
 
-# logger =logging.getLogger(__name__)
+from aio_pika.exceptions import AMQPChannelError, AMQPConnectionError
 
-class HealthStatus(Enum):
-    HEALTHY = "healthy"
-    TIMEOUT = "timeout"
-    CONNECTION_ERROR = "connection"
-    UNKNOWN_ERROR = "unknown"
+from app.schemas.v1.health import HealthStatus
+
+from .producer import MessageProducer
+
+logger = logging.getLogger(__name__)
+
 
 class HealthMessageProducer(MessageProducer):
     """
     Производитель сообщений для проверки здоровья сервисов.
     """
+
     async def check_health(self) -> Tuple[bool, HealthStatus]:
         """
         Проверяет здоровье сервисов через RabbitMQ.
@@ -22,22 +30,41 @@ class HealthMessageProducer(MessageProducer):
         Returns:
             bool: True если все сервисы здоровы, False при любой ошибке или таймауте
 
-        Note: 
+        Note:
             Отправляет сообщение с routing_key='health_check' и ждет ответ {'status': 'healthy'}
         """
         try:
             response, error = await self.send_and_wait(
-                routing_key="health_check", 
-                message={"status": "check"}
+                routing_key="health_check", message={"status": "check"}
             )
-            # logger.info(f"Получил ответ: {response}, ошибка: {error}")
+
+            logger.info("🔍 Получил ответ: %s, ошибка: %s", response, error)
+
             if error:
                 return False, HealthStatus(error)
-            
+
             status = response.get("status") == "healthy"
-            # logger.info(f"Статус health check: {status}")
-            return status, HealthStatus.HEALTHY if status else HealthStatus.UNKNOWN_ERROR
-        
+
+            logger.info(
+                "💉 Статус health check: %s", "✅ HEALTHY" if status else "❌ UNHEALTHY"
+            )
+
+            return status, (
+                HealthStatus.HEALTHY if status else HealthStatus.UNKNOWN_ERROR
+            )
+
+        except AMQPConnectionError as e:
+            logger.error("🔌 Ошибка подключения RabbitMQ: %s", str(e))
+            return False, HealthStatus.CONNECTION_ERROR
+
+        except AMQPChannelError as e:
+            logger.error("📡 Ошибка канала RabbitMQ: %s", str(e))
+            return False, HealthStatus.CONNECTION_ERROR
+
+        except TimeoutError:
+            logger.error("⏰ Таймаут при проверке health")
+            return False, HealthStatus.TIMEOUT
+
         except Exception as e:
-            # logger.error(f"Ошибка при проверке health: {str(e)}")
+            logger.error("💀 Неизвестная ошибка при проверке health: %s", str(e))
             return False, HealthStatus.UNKNOWN_ERROR

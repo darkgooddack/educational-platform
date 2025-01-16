@@ -12,9 +12,6 @@
 
 """
 
-from .database import get_db_session
-from .redis import get_redis
-from .rabbitmq import get_rabbitmq
 from .authentication import get_current_user, oauth2_schema
 from .database import get_db_session
 from .rabbitmq import RabbitMQClient, get_rabbitmq
