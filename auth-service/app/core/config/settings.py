@@ -11,7 +11,7 @@
 import secrets
 from typing import Any, Dict, List
 
-from pydantic import AmqpDsn, Field, PostgresDsn, RedisDsn, SecretStr
+from pydantic import AmqpDsn, Field, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .app import AppConfig

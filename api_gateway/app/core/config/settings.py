@@ -16,7 +16,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .app import AppConfig
 
-# # logger =logging.getLogger(__name__) 
+# logger =logging.getLogger(__name__) 
 
 class Settings(BaseSettings):
     """
@@ -122,7 +122,7 @@ class Settings(BaseSettings):
     @validator("oauth_providers")
     def validate_oauth_providers(cls, providers):
         if not providers:
-            # logger.info("🤷 OAuth провайдеры не настроены")
+            logging.info("🤷 OAuth провайдеры не настроены")
             return providers
 
         required_fields = ["client_id", "client_secret"]
@@ -130,7 +130,7 @@ class Settings(BaseSettings):
         for provider, config in providers.items():
             missing = [field for field in required_fields if not config.get(field)]
             if missing:
-                # logger.error(
+                logging.error(
                     f"❌ Провайдер {provider}: отсутствуют обязательные поля {missing}"
                 )
 

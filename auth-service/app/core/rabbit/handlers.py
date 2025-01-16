@@ -44,7 +44,7 @@ async def send_response(message: IncomingMessage, status: dict) -> None:
                 routing_key=message.reply_to,
             )
     except Exception as e:
-        # logger.error("Error publishing message: %s", str(e))
+        logging.error("Error publishing message: %s", str(e))
 
 
 async def handle_authenticate(data: dict, auth_service: AuthenticationService) -> dict:
