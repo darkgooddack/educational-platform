@@ -31,7 +31,8 @@ class HealthMessageProducer(MessageProducer):
             if error:
                 return False, HealthStatus(error)
             
-            return response.get("status") == "healthy", HealthStatus.HEALTHY
+            status = response.get("status") == "healthy"
+            return status, HealthStatus.HEALTHY if status else HealthStatus.UNKNOWN_ERROR
         
         except Exception:
             return False, HealthStatus.UNKNOWN_ERROR
