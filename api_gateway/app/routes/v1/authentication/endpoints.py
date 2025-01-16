@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.config import config
 from app.core.dependencies import get_rabbitmq, get_redis
-from app.core.rabbit.producer import send_auth_message
+from app.core.messaging.auth import AuthMessageProducer
 from app.schemas import AuthenticationSchema, TokenSchema
 
 router = APIRouter(**config.SERVICES["authentication"].to_dict())
@@ -39,10 +39,12 @@ async def authenticate(
     """
     async with rabbitmq.channel() as channel:
 
-        response = await send_auth_message(
-            channel, "authenticate", credentials.model_dump()
+        producer = AuthMessageProducer(channel)
+        response = await producer.send_auth_message(
+            action="authenticate",
+            data=credentials.model_dump()
         )
-
+        
         if "access_token" in response:
             redis.setex(f"token:{response['access_token']}", 3600, credentials.email)
         return response
@@ -66,15 +68,10 @@ async def logout(
     # Удаляем токен из кэша
     redis.delete(f"token:{token}")
 
-    async with rabbitmq.channel() as channel:
-        # Или попробовать получше:
-        # try:
-        #     queue = await channel.declare_queue("auth_queue", durable=True, auto_delete=False)
-        # except aiormq.exceptions.ChannelPreconditionFailed:
-        #     # Очередь уже существует, можно продолжить
-        #     queue = await channel.get_queue("auth_queue")
-        _queue = await channel.declare_queue("auth_queue", auto_delete=True)
-
     # Отправляем запрос в auth_service
     async with rabbitmq.channel() as channel:
-        return await send_auth_message(channel, "logout", {"token": token})
+        producer = AuthMessageProducer(channel)
+        return await producer.send_auth_message(
+            action="logout", 
+            data={"token": token}
+        )

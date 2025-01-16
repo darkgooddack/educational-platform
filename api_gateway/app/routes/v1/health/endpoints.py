@@ -5,14 +5,14 @@
 - Проверки доступности всех микросервисов
 - Проверки соединений с Redis и RabbitMQ
 """
-
+import logging
 from aio_pika import Connection
 from fastapi import APIRouter, Depends
 from starlette.responses import Response
 
 from app.core.config import config
 from app.core.dependencies import get_rabbitmq, get_redis
-from app.core.rabbit.producer import check_service_health
+from app.core.messaging.health import HealthMessageProducer
 
 router = APIRouter(**config.SERVICES["health"].to_dict())
 
@@ -32,15 +32,15 @@ async def health_check(
         Response: 204 если все сервисы живы, 503 если есть проблемы
     """
     try:
-        # Проверяем Redis
         redis.ping()
 
-        # Проверяем микросервисы через RabbitMQ
         async with rabbitmq.channel() as channel:
-            is_healthy = await check_service_health(channel)
-            if not is_healthy:
-                return Response(status_code=503)
+            producer = HealthMessageProducer(channel)
 
+            if not await producer.check_health():
+                return Response(status_code=503)
             return Response(status_code=204)
-    except:
+    except Exception as e:
+        logging.error(f"Ошибка проверки здоровья: {e}")
         return Response(status_code=503)
+            

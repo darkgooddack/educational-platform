@@ -13,7 +13,7 @@ from fastapi.exceptions import HTTPException
 
 from app.core.config import config
 from app.core.dependencies import get_rabbitmq, get_redis
-from app.core.rabbit.producer import send_auth_message
+from app.core.messaging.auth import AuthMessageProducer
 from app.schemas import RegistrationResponseSchema, RegistrationSchema
 
 router = APIRouter(**config.SERVICES["registration"].to_dict())
@@ -38,8 +38,10 @@ async def register_user(
     """
     try:
         async with rabbitmq.channel() as channel:
-            response = await send_auth_message(
-                channel, action="register", data=user_data.model_dump()
+            producer = AuthMessageProducer(channel)
+            response = await producer.send_auth_message(
+                action="register", 
+                data=user_data.model_dump()
             )
             # Кэшируем данные пользователя если регистрация успешна
             if "user_id" in response:
@@ -51,10 +53,14 @@ async def register_user(
 
             if "error" in response:
                 raise HTTPException(
-                    status_code=503, detail="Auth service is not responding"
+                    status_code=503, 
+                    detail="Сервис авторизации не отвечает"
                 )
 
             return response
 
     except TimeoutError:
-        raise HTTPException(status_code=503, detail="Auth service timeout")
+        raise HTTPException(
+            status_code=503, 
+            detail="Превышено время ожидания ответа от сервиса авторизации"
+        )

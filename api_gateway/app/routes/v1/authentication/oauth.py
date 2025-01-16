@@ -27,14 +27,14 @@ https://{domain.ru}/api/v1/oauth/{provider}/callback
 4. Проверить работопособность
 
 """
-import json
 import logging
 from typing import Annotated
-from aio_pika import Connection, Message
+from aio_pika import Connection
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 import aiohttp
 from app.core.dependencies import get_redis, get_rabbitmq
+from app.core.messaging.auth import AuthMessageProducer
 from app.core.config import config
 from app.schemas import OAuthResponse
 from redis import Redis
@@ -61,7 +61,8 @@ async def oauth_login(provider: str) -> RedirectResponse:
 
     provider_config = config.oauth_providers[provider]
 
-    required_fields = ["client_id", "client_secret"] # "auth_url", "token_url", "user_info_url", "scope" - по-умолчанию в конфиге
+    required_fields = ["client_id", "client_secret"] 
+    # "auth_url", "token_url", "user_info_url", "scope" - по-умолчанию в конфиге
     missing = [field for field in required_fields if field not in provider_config]
 
     if missing:
@@ -104,7 +105,6 @@ async def oauth_callback(
     """
 
     logging.info("OAuth провайдер: %s", provider)
-    logging.info("Доступные провайдеры: %s", list(config.oauth_providers.keys()))
 
     if provider not in config.oauth_providers:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")
@@ -112,8 +112,8 @@ async def oauth_callback(
     # Получение access token
     provider_data = config.oauth_providers[provider]
     token_params = {
-        "client_id": config.oauth_providers[provider]["client_id"],
-        "client_secret": config.oauth_providers[provider]["client_secret"],
+        "client_id": provider_data["client_id"],
+        "client_secret": provider_data["client_secret"],
         "code": code,
         "redirect_uri": f"{config.app_url}/api/v1/oauth/{provider}/callback",
         "grant_type": "authorization_code"
@@ -121,48 +121,41 @@ async def oauth_callback(
 
     async with aiohttp.ClientSession() as session:
         # Получение токена от провайдера
-        async with session.post(config.oauth_providers[provider]["token_url"], data=token_params) as resp:
+        async with session.post(provider_data["token_url"], data=token_params) as resp:
             token_data = await resp.json()
             if "error" in token_data:
                 raise HTTPException(status_code=400, detail=token_data["error"])
 
         # Получение данных пользователя
         headers = {"Authorization": f"Bearer {token_data['access_token']}"}
-        async with session.get(config.oauth_providers[provider]["user_info_url"], headers=headers) as resp:
+        async with session.get(provider_data["user_info_url"], headers=headers) as resp:
             user_data = await resp.json()
 
     # Отправка данных в auth-service
     async with rabbitmq.channel() as channel:
-        queue = await channel.declare_queue("auth_queue")
-        await channel.default_exchange.publish(
-            Message(
-                body=json.dumps({
-                    "action": "oauth_authenticate",
-                    "provider": provider,
-                    "user_data": user_data
-                }).encode()
-            ),
-            routing_key="auth_queue"
+        producer = AuthMessageProducer(channel)
+        response = await producer.send_auth_message(
+            action="oauth_authenticate",
+            data={
+                "provider": provider,
+                "user_data": user_data
+            }
+        )
+        
+        # Получение ответа от auth-service
+        oauth_response = OAuthResponse(
+            access_token=response["access_token"],
+            token_type="bearer",
+            provider=provider,
+            email=user_data["email"]
         )
 
-        # Получение ответа от auth-service
-        async with queue.iterator() as queue_iter:
-            async for message in queue_iter:
-                async with message.process():
-                    response_data = json.loads(message.body.decode())
-                    # Преобразуем ответ в схему
-                    oauth_response = OAuthResponse(
-                        access_token=response_data["access_token"],
-                        token_type="bearer",
-                        provider=provider,
-                        email=user_data["email"]
-                    )
+        # Кэширование токена в Redis
+        if oauth_response.access_token:
+            redis.setex(
+                f"token:{oauth_response.access_token}",
+                3600,
+                oauth_response.email
+            )
 
-                    if oauth_response.access_token:
-                        redis.setex(
-                            f"token:{oauth_response.access_token}",
-                            3600,
-                            oauth_response.email
-                        )
-
-                    return oauth_response
+        return oauth_response
