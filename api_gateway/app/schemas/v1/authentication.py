@@ -35,17 +35,19 @@ class TokenSchema(BaseInputSchema):
     access_token: str
     token_type: str
 
+
 class OAuthResponse(BaseInputSchema):
     """
     Схема ответа OAuth авторизации.
-    
+
     Attributes:
         access_token: Токен доступа
         token_type: Тип токена (bearer)
-        provider: Провайдер OAuth (vk/google/yandex) 
+        provider: Провайдер OAuth (vk/google/yandex)
         email: Email пользователя
     """
+
     access_token: str
     token_type: str = "bearer"
-    provider: str  
+    provider: str
     email: str

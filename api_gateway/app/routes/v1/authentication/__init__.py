@@ -2,6 +2,7 @@
 Общий роутер для аутентификации
 
 """
+
 from fastapi import APIRouter
 
 from .endpoints import router as auth_router

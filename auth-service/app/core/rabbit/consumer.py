@@ -9,24 +9,21 @@
 
 import json
 import logging
+
 from aio_pika import IncomingMessage, connect_robust
 
 from app.core.config import config
-from app.services import AuthenticationService, UserService
 from app.core.dependencies.database import SessionContextManager
-from .handlers import (
-    handle_authenticate,
-    handle_logout,
-    handle_oauth,
-    handle_register,
-    handle_health_check,
-    send_response
-)
+from app.services import AuthenticationService, UserService
+
+from .handlers import (handle_authenticate, handle_health_check, handle_logout,
+                       handle_oauth, handle_register, send_response)
+
 
 async def process_auth_message(
     message: IncomingMessage,
     auth_service: AuthenticationService,
-    user_service: UserService
+    user_service: UserService,
 ) -> None:
     """
     Процессинг сообщения из RabbitMQ.
@@ -70,26 +67,28 @@ async def process_auth_message(
     """
     body = json.loads(message.body.decode())
     action = body.get("action")
-    
+
     logging.info("🎯 Получен запрос OAuth | Action: %s", action)
     logging.info("📦 Тело запроса: %s", json.dumps(body, indent=2, ensure_ascii=False))
 
     handlers = {
         "authenticate": lambda: handle_authenticate(body.get("data"), auth_service),
-        "logout": lambda: handle_logout(body.get("data", {}).get("token"), auth_service),
-        "oauth_authenticate": lambda: handle_oauth(body["provider"], body["user_data"], auth_service),
-        "register": lambda: handle_register(body["data"], user_service)
+        "logout": lambda: handle_logout(
+            body.get("data", {}).get("token"), auth_service
+        ),
+        "oauth_authenticate": lambda: handle_oauth(
+            body["provider"], body["user_data"], auth_service
+        ),
+        "register": lambda: handle_register(body["data"], user_service),
     }
 
     handler = handlers.get(action)
-
 
     if not handler:
         await send_response(message, {"error": f"Неизвестный action: {action}"})
     else:
         result = await handler()
         await send_response(message, result)
-        
 
 
 async def start_consuming():
@@ -112,7 +111,7 @@ async def start_consuming():
     # Очереди для обработки
     queues = {
         "auth_queue": lambda msg: process_auth_message(msg, auth_service, user_service),
-        "health_check": handle_health_check
+        "health_check": handle_health_check,
     }
 
     for queue_name, handler in queues.items():

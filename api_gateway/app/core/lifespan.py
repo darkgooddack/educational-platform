@@ -22,7 +22,7 @@ async def lifespan(_app: FastAPI):
         _app: Экземпляр FastAPI приложения.
 
     """
-    from app.core.dependencies import RedisClient, RabbitMQClient
+    from app.core.dependencies import RabbitMQClient, RedisClient
 
     await RedisClient.get_instance()
     await RabbitMQClient.get_instance()

@@ -1,5 +1,6 @@
-import json
 import asyncio
+import json
+
 from aio_pika import Message
 
 
@@ -17,18 +18,13 @@ async def send_auth_message(channel, action: str, data: dict) -> dict:
     """
     queue = await channel.declare_queue("", exclusive=True)
 
-    message = {
-        "action": action,
-        "data": data
-    }
+    message = {"action": action, "data": data}
 
     await channel.default_exchange.publish(
         Message(
-            body=json.dumps(message).encode(),
-            reply_to=queue.name,
-            expiration=30000
+            body=json.dumps(message).encode(), reply_to=queue.name, expiration=30000
         ),
-        routing_key="auth_queue"
+        routing_key="auth_queue",
     )
 
     # Ждем ответ
@@ -38,6 +34,7 @@ async def send_auth_message(channel, action: str, data: dict) -> dict:
                 return json.loads(message.body.decode())
 
     return {"error": "Timeout"}
+
 
 async def check_service_health(channel) -> bool:
     """
@@ -56,11 +53,9 @@ async def check_service_health(channel) -> bool:
             # Отправляем пинг
             await channel.default_exchange.publish(
                 Message(
-                    body=b"health_check",
-                    reply_to=response_queue.name,
-                    expiration=5
+                    body=b"health_check", reply_to=response_queue.name, expiration=5
                 ),
-                routing_key="health_check"
+                routing_key="health_check",
             )
 
             # Ждем ответ с таймаутом

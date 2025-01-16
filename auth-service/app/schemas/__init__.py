@@ -6,7 +6,8 @@
 
 from .v1.authentication import AuthenticationSchema, TokenSchema
 from .v1.base import BaseInputSchema, BaseSchema
-from .v1.registration import RegistrationSchema, RegistrationResponseSchema, OAuthUserSchema
+from .v1.registration import (OAuthUserSchema, RegistrationResponseSchema,
+                              RegistrationSchema)
 from .v1.users import UserRole, UserSchema
 
 __all__ = [

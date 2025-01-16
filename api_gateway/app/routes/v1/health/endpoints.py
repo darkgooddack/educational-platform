@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends
 from starlette.responses import Response
 
 from app.core.config import config
-from app.core.dependencies import get_redis, get_rabbitmq
+from app.core.dependencies import get_rabbitmq, get_redis
 from app.core.rabbit.producer import check_service_health
 
 router = APIRouter(**config.SERVICES["health"].to_dict())
@@ -19,8 +19,7 @@ router = APIRouter(**config.SERVICES["health"].to_dict())
 
 @router.get("/", status_code=204)
 async def health_check(
-    redis=Depends(get_redis),
-    rabbitmq: Connection = Depends(get_rabbitmq)
+    redis=Depends(get_redis), rabbitmq: Connection = Depends(get_rabbitmq)
 ) -> Response:
     """
     Проверяет здоровье всех сервисов.

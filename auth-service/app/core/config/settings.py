@@ -11,7 +11,7 @@
 import secrets
 from typing import Any, Dict, List
 
-from pydantic import PostgresDsn, AmqpDsn, Field, RedisDsn, SecretStr
+from pydantic import AmqpDsn, Field, PostgresDsn, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .app import AppConfig
@@ -68,7 +68,8 @@ class Settings(BaseSettings):
     )
 
     redis_url: RedisDsn = Field(
-        default="redis://default:auth_pass@redis_auth:6379", description="Ссылка для подключения к Redis"
+        default="redis://default:auth_pass@redis_auth:6379",
+        description="Ссылка для подключения к Redis",
     )
 
     database_dsn: str = Field(

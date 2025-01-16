@@ -1,5 +1,7 @@
 from pydantic import EmailStr, Field
+
 from .base import BaseInputSchema
+
 
 class RegistrationSchema(BaseInputSchema):
     """
@@ -13,6 +15,7 @@ class RegistrationSchema(BaseInputSchema):
         phone (str): Телефон пользователя.
         password (str): Пароль пользователя.
     """
+
     first_name: str = Field(min_length=2, max_length=50, description="Имя пользователя")
     last_name: str = Field(
         min_length=2, max_length=50, description="Фамилия пользователя"
@@ -28,6 +31,7 @@ class RegistrationSchema(BaseInputSchema):
     )
     password: str = Field(min_length=8, description="Пароль минимум 8 символов")
 
+
 class RegistrationResponseSchema(BaseInputSchema):
     """
     Схема ответа при успешной регистрации
@@ -37,6 +41,7 @@ class RegistrationResponseSchema(BaseInputSchema):
         email (str): Email пользователя
         message (str): Сообщение об успешной регистрации
     """
+
     user_id: int
     email: EmailStr
     message: str = "Регистрация успешно завершена"

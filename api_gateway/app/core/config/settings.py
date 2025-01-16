@@ -7,6 +7,7 @@
 - Конфигурацию CORS политик
 - Управление доступом к документации API
 """
+
 import json
 import logging
 from typing import Any, Dict, List
@@ -63,7 +64,7 @@ class Settings(BaseSettings):
 
     redis_url: RedisDsn = Field(
         default="redis://default:gateway_pass@redis_gateway:6379",
-        description="Ссылка для подключения к Redis"
+        description="Ссылка для подключения к Redis",
     )
 
     database_dsn: str = Field(
@@ -97,7 +98,7 @@ class Settings(BaseSettings):
                 "auth_url": "https://oauth.yandex.ru/authorize",
                 "token_url": "https://oauth.yandex.ru/token",
                 "user_info_url": "https://login.yandex.ru/info",
-                "scope": "login:email"
+                "scope": "login:email",
             },
             "vk": {
                 "client_id": "",
@@ -105,7 +106,7 @@ class Settings(BaseSettings):
                 "auth_url": "https://oauth.vk.com/authorize",
                 "token_url": "https://oauth.vk.com/access_token",
                 "user_info_url": "https://api.vk.com/method/users.get",
-                "scope": "email"
+                "scope": "email",
             },
             "google": {
                 "client_id": "",
@@ -113,8 +114,8 @@ class Settings(BaseSettings):
                 "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
                 "token_url": "https://oauth2.googleapis.com/token",
                 "user_info_url": "https://www.googleapis.com/oauth2/v2/userinfo",
-                "scope": "email profile"
-            }
+                "scope": "email profile",
+            },
         }
     )
 
@@ -129,7 +130,9 @@ class Settings(BaseSettings):
         for provider, config in providers.items():
             missing = [field for field in required_fields if not config.get(field)]
             if missing:
-                logging.error(f"❌ Провайдер {provider}: отсутствуют обязательные поля {missing}")
+                logging.error(
+                    f"❌ Провайдер {provider}: отсутствуют обязательные поля {missing}"
+                )
 
         return providers
 

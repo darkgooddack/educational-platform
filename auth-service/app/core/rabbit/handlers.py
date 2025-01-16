@@ -6,26 +6,26 @@
 - logout: выход из системы
 - health_check: проверка работоспособности
 """
+
 import json
 import logging
-from aio_pika import IncomingMessage, Message, connect_robust, RobustConnection
-from sqlalchemy import text
-from app.core.dependencies.database import SessionContextManager
+
+from aio_pika import IncomingMessage, Message, RobustConnection, connect_robust
 from pydantic_core import ValidationError
+from sqlalchemy import text
+
+from app.core.config import config
+from app.core.dependencies.database import SessionContextManager
+from app.core.exceptions import (InvalidEmailFormatError, UserExistsError,
+                                 UserNotFoundError, WeakPasswordError)
 from app.schemas import AuthenticationSchema, RegistrationSchema, TokenSchema
 from app.services import AuthenticationService, UserService
-from app.core.exceptions import (
-    UserNotFoundError,
-    UserExistsError,
-    InvalidEmailFormatError,
-    WeakPasswordError
-)
-from app.core.config import config
+
 
 async def send_response(message: IncomingMessage, status: dict) -> None:
     """
     Отправляет ответ обратно в очередь.
-    
+
     Args:
         message: Входящее сообщение с reply_to
         status: Статус ответа в формате словаря
@@ -38,10 +38,9 @@ async def send_response(message: IncomingMessage, status: dict) -> None:
             channel = await connection.channel()
             await channel.default_exchange.publish(
                 Message(
-                    body=json.dumps(status).encode(),
-                    content_type="application/json"
+                    body=json.dumps(status).encode(), content_type="application/json"
                 ),
-                routing_key=message.reply_to
+                routing_key=message.reply_to,
             )
     except Exception as e:
         logging.error("Error publishing message: %s", str(e))
@@ -64,17 +63,22 @@ async def handle_authenticate(data: dict, auth_service: AuthenticationService) -
         return {
             "status_code": 200,
             "access_token": token.access_token,
-            "token_type": token.token_type
+            "token_type": token.token_type,
         }
 
-    except (UserNotFoundError, UserExistsError,
-            InvalidEmailFormatError, WeakPasswordError) as e:
+    except (
+        UserNotFoundError,
+        UserExistsError,
+        InvalidEmailFormatError,
+        WeakPasswordError,
+    ) as e:
         return {
             "status_code": getattr(e, "status_code", 400),
             "detail": str(e),
             "error_type": getattr(e, "error_type", "validation_error"),
-            "extra": getattr(e, "extra", {})
+            "extra": getattr(e, "extra", {}),
         }
+
 
 async def handle_logout(token: str, auth_service: AuthenticationService) -> dict:
     """
@@ -89,10 +93,9 @@ async def handle_logout(token: str, auth_service: AuthenticationService) -> dict
     """
     return await auth_service.logout(token)
 
+
 async def handle_oauth(
-    provider: str,
-    user_data: dict,
-    auth_service: AuthenticationService
+    provider: str, user_data: dict, auth_service: AuthenticationService
 ) -> dict:
     """
     Обрабатывает сообщение OAuth.
@@ -107,10 +110,8 @@ async def handle_oauth(
     """
     return await auth_service.oauth_authenticate(provider, user_data)
 
-async def handle_register(
-    data: dict,
-    user_service: UserService
-) -> dict:
+
+async def handle_register(data: dict, user_service: UserService) -> dict:
     """
     Обрабатывает сообщение регистрации.
 
@@ -127,19 +128,19 @@ async def handle_register(
         user_data_schema = RegistrationSchema(**data)
         user = await user_service.create_user(user_data_schema)
 
-        return {
-            "status_code": 201,
-            "user_id": str(user.user_id),
-            "email": user.email
-        }
+        return {"status_code": 201, "user_id": str(user.user_id), "email": user.email}
 
-    except (ValidationError, UserExistsError,
-            InvalidEmailFormatError, WeakPasswordError) as e:
+    except (
+        ValidationError,
+        UserExistsError,
+        InvalidEmailFormatError,
+        WeakPasswordError,
+    ) as e:
         return {
             "status_code": getattr(e, "status_code", 400),
             "detail": str(e),
             "error_type": getattr(e, "error_type", "validation_error"),
-            "extra": getattr(e, "extra", {})
+            "extra": getattr(e, "extra", {}),
         }
 
 

@@ -10,8 +10,8 @@ from aio_pika import Connection
 from fastapi import APIRouter, Depends
 
 from app.core.config import config
+from app.core.dependencies import get_rabbitmq, get_redis
 from app.core.rabbit.producer import send_auth_message
-from app.core.dependencies import get_redis, get_rabbitmq
 from app.schemas import AuthenticationSchema, TokenSchema
 
 router = APIRouter(**config.SERVICES["authentication"].to_dict())
@@ -40,25 +40,17 @@ async def authenticate(
     async with rabbitmq.channel() as channel:
 
         response = await send_auth_message(
-            channel,
-            "authenticate",
-            credentials.model_dump()
+            channel, "authenticate", credentials.model_dump()
         )
 
         if "access_token" in response:
-            redis.setex(
-                f"token:{response['access_token']}",
-                3600,
-                credentials.email
-            )
+            redis.setex(f"token:{response['access_token']}", 3600, credentials.email)
         return response
 
 
 @router.post("/logout")
 async def logout(
-    token: str,
-    redis=Depends(get_redis),
-    rabbitmq: Connection = Depends(get_rabbitmq)
+    token: str, redis=Depends(get_redis), rabbitmq: Connection = Depends(get_rabbitmq)
 ) -> dict:
     """
     Выход пользователя из системы.

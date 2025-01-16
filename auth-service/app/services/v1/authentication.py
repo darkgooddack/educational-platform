@@ -3,8 +3,9 @@
 В данном модуле реализованы функции для работы с пользователями,
 включая аутентификацию и авторизацию.
 """
-import secrets
+
 import json
+import secrets
 from datetime import datetime
 
 from redis.exceptions import RedisError
@@ -16,7 +17,9 @@ from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
                                  TokenMissingError)
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
-from app.schemas import AuthenticationSchema, TokenSchema, UserSchema, UserRole,OAuthUserSchema
+from app.schemas import (AuthenticationSchema, OAuthUserSchema, TokenSchema,
+                         UserRole, UserSchema)
+
 from .base import BaseDataManager, BaseService
 from .users import UserDataManager
 
@@ -56,7 +59,9 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
         provider_field = f"{provider}_id"
         provider_id = str(user_data["id"])
 
-        user_schema = await UserDataManager(self.session).get_by_field(provider_field, provider_id)
+        user_schema = await UserDataManager(self.session).get_by_field(
+            provider_field, provider_id
+        )
 
         if not user_schema:
             # Создаем нового пользователя
@@ -65,13 +70,13 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
                 first_name=user_data.get("first_name", ""),
                 last_name=user_data.get("last_name", ""),
                 avatar_url=user_data.get("avatar_url"),
-                **{provider_field: provider_id}
+                **{provider_field: provider_id},
             )
 
             new_user = UserModel(
                 **oauth_user.model_dump(),
                 hashed_password=self.hash_password(secrets.token_hex(16)),
-                role=UserRole.USER
+                role=UserRole.USER,
             )
             user_schema = await UserDataManager(self.session).add_user(new_user)
 

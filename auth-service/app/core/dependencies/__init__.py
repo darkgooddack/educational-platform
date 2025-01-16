@@ -16,10 +16,10 @@
 
 """
 
-from .database import get_db_session
-from .redis import get_redis, RedisClient
-from .rabbitmq import get_rabbitmq, RabbitMQClient
 from .authentication import get_current_user, oauth2_schema
+from .database import get_db_session
+from .rabbitmq import RabbitMQClient, get_rabbitmq
+from .redis import RedisClient, get_redis
 
 __all__ = [
     "get_db_session",

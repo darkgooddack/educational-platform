@@ -24,7 +24,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import UserExistsError, UserNotFoundError
 from app.core.security import HashingMixin
 from app.models import UserModel
-from app.schemas import RegistrationSchema, RegistrationResponseSchema, UserSchema
+from app.schemas import (RegistrationResponseSchema, RegistrationSchema,
+                         UserSchema)
 from app.services import BaseEntityManager, BaseService
 
 
@@ -86,10 +87,7 @@ class UserService(HashingMixin, BaseService):
         )
 
         user = await data_manager.add_user(user_model)
-        return RegistrationResponseSchema(
-            user_id=user.id,
-            email=user.email
-        )
+        return RegistrationResponseSchema(user_id=user.id, email=user.email)
 
     async def get_by_email(self, email: str) -> UserSchema:
         """

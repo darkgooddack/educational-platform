@@ -25,29 +25,29 @@
 #     При получении сообщения просто подтверждает его получение,
 #     сигнализируя что сервис жив.
 #     """
-    # async def health_callback(message: IncomingMessage) -> None:
-    #     try:
-    #         # Проверяем БД
-    #         async with get_db_session() as session:
-    #             await session.execute(text("SELECT 1"))
+# async def health_callback(message: IncomingMessage) -> None:
+#     try:
+#         # Проверяем БД
+#         async with get_db_session() as session:
+#             await session.execute(text("SELECT 1"))
 
-    #             async with message.process():
-    #                 await message.channel.default_exchange.publish(
-    #                     Message(
-    #                         body=json.dumps({"status": "healthy"}).encode(),
-    #                         content_type="application/json"
-    #                     ),
-    #                     routing_key=message.reply_to
-    #                 )
-    #     except Exception:
-    #         async with message.process():
-    #             await message.channel.default_exchange.publish(
-    #                 Message(
-    #                     body=json.dumps({"status": "unhealthy"}).encode(),
-    #                     content_type="application/json"
-    #                 ),
-    #                 routing_key=message.reply_to
-    #             )
+#             async with message.process():
+#                 await message.channel.default_exchange.publish(
+#                     Message(
+#                         body=json.dumps({"status": "healthy"}).encode(),
+#                         content_type="application/json"
+#                     ),
+#                     routing_key=message.reply_to
+#                 )
+#     except Exception:
+#         async with message.process():
+#             await message.channel.default_exchange.publish(
+#                 Message(
+#                     body=json.dumps({"status": "unhealthy"}).encode(),
+#                     content_type="application/json"
+#                 ),
+#                 routing_key=message.reply_to
+#             )
 
 #     queue = await channel.declare_queue(
 #         "health_check",

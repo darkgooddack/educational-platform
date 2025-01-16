@@ -27,17 +27,20 @@ https://{domain.ru}/api/v1/oauth/{provider}/callback
 4. Проверить работопособность
 
 """
+
 import json
 import logging
+from typing import Annotated
+
+import aiohttp
 from aio_pika import Connection, Message
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-import aiohttp
-from typing import Annotated
-from app.core.dependencies import get_redis, get_rabbitmq
-from app.core.config import config
-from app.schemas import OAuthResponse
 from redis import Redis
+
+from app.core.config import config
+from app.core.dependencies import get_rabbitmq, get_redis
+from app.schemas import OAuthResponse
 
 router = APIRouter(prefix="/oauth", tags=["oauth"])
 
@@ -46,59 +49,63 @@ router = APIRouter(prefix="/oauth", tags=["oauth"])
 async def oauth_login(provider: str) -> RedirectResponse:
     """
     Редирект на страницу авторизации провайдера.
-    
+
     Args:
         provider (str): Имя провайдера (vk/google/yandex)
-        
+
     Returns:
         RedirectResponse: Редирект на страницу авторизации
-        
+
     Raises:
         HTTPException: Если провайдер не поддерживается
     """
     if provider not in config.oauth_providers:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")
-    
+
     provider_config = config.oauth_providers[provider]
-    
-    required_fields = ["client_id", "client_secret"] # "auth_url", "token_url", "user_info_url", "scope" - по-умолчанию в конфиге
+
+    required_fields = [
+        "client_id",
+        "client_secret",
+    ]  # "auth_url", "token_url", "user_info_url", "scope" - по-умолчанию в конфиге
     missing = [field for field in required_fields if field not in provider_config]
 
     if missing:
         raise HTTPException(
             status_code=500,
-            detail=f"Отсутствуют обязательные поля конфигурации: {', '.join(missing)}"
+            detail=f"Отсутствуют обязательные поля конфигурации: {', '.join(missing)}",
         )
-    
+
     params = {
         "client_id": provider_config["client_id"],
         "redirect_uri": f"{config.app_url}/api/v1/oauth/{provider}/callback",
         "scope": provider_config["scope"],
-        "response_type": "code"
+        "response_type": "code",
     }
-    
+
     auth_url = f"{config.oauth_providers[provider]['auth_url']}?{'&'.join(f'{k}={v}' for k,v in params.items())}"
     return RedirectResponse(auth_url)
+
 
 @router.get("/{provider}/callback", response_model=OAuthResponse)
 async def oauth_callback(
     provider: str,
     code: str,
     redis: Annotated[Redis, Depends(get_redis)],
-    rabbitmq: Annotated[Connection, Depends(get_rabbitmq)]
+    rabbitmq: Annotated[Connection, Depends(get_rabbitmq)],
 ) -> OAuthResponse:
     """
     Обработка ответа от OAuth провайдера.
-    
+
     Args:
         provider (str): Имя провайдера
         code (str): Код авторизации от провайдера
         redis: Redis клиент для кэширования токена
         rabbitmq: RabbitMQ соединение для общения с auth-service
-        
+
     Returns:
         OAuthResponse: Токен доступа и провайдер
-        
+
     Raises:
         HTTPException: При ошибке получения токена или данных пользователя
     """
@@ -116,19 +123,23 @@ async def oauth_callback(
         "client_secret": config.oauth_providers[provider]["client_secret"],
         "code": code,
         "redirect_uri": f"{config.app_url}/api/v1/oauth/{provider}/callback",
-        "grant_type": "authorization_code"
+        "grant_type": "authorization_code",
     }
 
     async with aiohttp.ClientSession() as session:
         # Получение токена от провайдера
-        async with session.post(config.oauth_providers[provider]["token_url"], data=token_params) as resp:
+        async with session.post(
+            config.oauth_providers[provider]["token_url"], data=token_params
+        ) as resp:
             token_data = await resp.json()
             if "error" in token_data:
                 raise HTTPException(status_code=400, detail=token_data["error"])
-            
+
         # Получение данных пользователя
         headers = {"Authorization": f"Bearer {token_data['access_token']}"}
-        async with session.get(config.oauth_providers[provider]["user_info_url"], headers=headers) as resp:
+        async with session.get(
+            config.oauth_providers[provider]["user_info_url"], headers=headers
+        ) as resp:
             user_data = await resp.json()
 
     # Отправка данных в auth-service
@@ -136,15 +147,17 @@ async def oauth_callback(
         queue = await channel.declare_queue("auth_queue")
         await channel.default_exchange.publish(
             Message(
-                body=json.dumps({
-                    "action": "oauth_authenticate",
-                    "provider": provider,
-                    "user_data": user_data
-                }).encode()
+                body=json.dumps(
+                    {
+                        "action": "oauth_authenticate",
+                        "provider": provider,
+                        "user_data": user_data,
+                    }
+                ).encode()
             ),
-            routing_key="auth_queue"
+            routing_key="auth_queue",
         )
-        
+
         # Получение ответа от auth-service
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
@@ -155,14 +168,14 @@ async def oauth_callback(
                         access_token=response_data["access_token"],
                         token_type="bearer",
                         provider=provider,
-                        email=user_data["email"]
+                        email=user_data["email"],
                     )
 
                     if oauth_response.access_token:
                         redis.setex(
                             f"token:{oauth_response.access_token}",
                             3600,
-                            oauth_response.email
+                            oauth_response.email,
                         )
 
                     return oauth_response
