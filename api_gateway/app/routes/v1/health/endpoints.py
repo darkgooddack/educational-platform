@@ -47,14 +47,14 @@ async def health_check(
 
             is_healthy, status = await producer.check_health()
 
-            if not is_healthy:
-                logging.warning(f"Health check failed with status: {status.value}")
-                # Для временных проблем возвращаем 503, для серьезных - 500
-                if status in [HealthStatus.TIMEOUT, HealthStatus.CONNECTION_ERROR]:
-                    return Response(status_code=503)
-                return Response(status_code=500)
-            
-            return Response(status_code=204)
+            if is_healthy:
+                return Response(status_code=204)  # Все ок
+
+            # Иначе обрабатываем ошибки
+            logging.warning(f"Health check failed with status: {status.value}")
+            if status in [HealthStatus.TIMEOUT, HealthStatus.CONNECTION_ERROR]:
+                return Response(status_code=503)
+            return Response(status_code=500)
         
     except Exception as e:
         logging.error(f"Critical health check error: {e}")
