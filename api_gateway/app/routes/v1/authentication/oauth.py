@@ -39,7 +39,7 @@ from app.core.config import config
 from app.schemas import OAuthResponse
 from redis import Redis
 
-logger = logging.getLogger(__name__)
+# logger =logging.getLogger(__name__)
 
 router = APIRouter(prefix="/oauth", tags=["oAuth"])
 
@@ -114,7 +114,7 @@ async def oauth_callback(
         Типизация всех параметров
     """
 
-    logger.info("OAuth провайдер: %s", provider)
+    # logger.info("OAuth провайдер: %s", provider)
 
     if provider not in config.oauth_providers:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")

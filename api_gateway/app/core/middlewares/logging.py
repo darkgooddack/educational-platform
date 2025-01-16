@@ -32,7 +32,7 @@ from starlette.responses import JSONResponse
 from app.core.config import config
 from app.core.exceptions import BaseAPIException
 
-logger = logging.getLogger(__name__)
+# logger =logging.getLogger(__name__)
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -70,8 +70,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             HTTPException: HTTP исключение
         """
         if config.logging_level == "DEBUG":
-            logger.debug("Request path: %s", request.url.path)
-            logger.debug("Headers: %s", request.headers)
+            # logger.debug("Request path: %s", request.url.path)
+            # logger.debug("Headers: %s", request.headers)
 
         try:
             response = await call_next(request)
