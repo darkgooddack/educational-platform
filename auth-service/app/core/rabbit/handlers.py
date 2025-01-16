@@ -147,8 +147,10 @@ async def handle_register(data: dict, user_service: UserService) -> dict:
 async def handle_health_check(message: IncomingMessage) -> None:
     try:
         async with SessionContextManager() as session_manager:
+            logging.info("Проверяю БД...")
             await session_manager.execute(text("SELECT 1"))
-            logging.info("Health check passed")
+            logging.info("БД работает, отправляю healthy")
             await send_response(message, {"status": "healthy"})
     except Exception:
+        logging.error(f"Ошибка health check: {str(e)}")
         await send_response(message, {"status": "unhealthy"})
