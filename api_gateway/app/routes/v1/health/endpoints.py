@@ -38,6 +38,7 @@ async def health_check(
             producer = HealthMessageProducer(channel)
 
             if not await producer.check_health():
+                logging.error("Ошибка проверки здоровья")
                 return Response(status_code=503)
             return Response(status_code=204)
     except Exception as e:
