@@ -11,12 +11,12 @@
 import logging
 from typing import Any, Dict, List
 
-from pydantic import AmqpDsn, Field, RedisDsn, validator
+from pydantic import AmqpDsn, Field, RedisDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .app import AppConfig
 
-# logger =logging.getLogger(__name__) 
+logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     """
@@ -119,8 +119,21 @@ class Settings(BaseSettings):
         }
     )
 
-    @validator("oauth_providers")
-    def validate_oauth_providers(cls, providers):
+    @field_validator("oauth_providers")
+    def validate_oauth_providers(
+        cls,
+        providers: Dict[str, Dict[str, str]]
+    ) -> Dict[str, Dict[str, str]]:
+        """
+        Валидация провайдеров OAuth.
+
+        Args:
+            cls: Класс конфигурации приложения.
+            providers: Словарь провайдеров OAuth и их конфигураций.
+
+        Returns:
+            Dict[str, Dict[str, str]]: Валидированный словарь провайдеров OAuth.
+        """
         if not providers:
             logging.info("🤷 OAuth провайдеры не настроены")
             return providers
@@ -131,11 +144,12 @@ class Settings(BaseSettings):
             missing = [field for field in required_fields if not config.get(field)]
             if missing:
                 logging.error(
-                    f"❌ Провайдер {provider}: отсутствуют обязательные поля {missing}"
+                    "❌ Провайдер %s: отсутствуют обязательные поля %s, проверьте настройки",
+                    provider,
+                    missing
                 )
 
         return providers
-
     @property
     def rabbitmq_params(self) -> Dict[str, Any]:
         """
@@ -172,6 +186,3 @@ class Settings(BaseSettings):
         env_nested_delimiter="__",
         extra="allow",
     )
-
-
-config = Settings()

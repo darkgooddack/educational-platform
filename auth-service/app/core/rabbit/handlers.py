@@ -21,7 +21,7 @@ from app.core.exceptions import (InvalidEmailFormatError, UserExistsError,
 from app.schemas import AuthenticationSchema, RegistrationSchema, TokenSchema
 from app.services import AuthenticationService, UserService
 
-# logger =logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 async def send_response(message: IncomingMessage, status: dict) -> None:
     """

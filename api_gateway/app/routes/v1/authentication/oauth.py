@@ -39,7 +39,7 @@ from app.core.config import config
 from app.schemas import OAuthResponse
 from redis import Redis
 
-# logger =logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/oauth", tags=["oAuth"])
 
@@ -63,7 +63,7 @@ async def oauth_login(provider: str) -> RedirectResponse:
 
     provider_config = config.oauth_providers[provider]
 
-    required_fields = ["client_id", "client_secret"] 
+    required_fields = ["client_id", "client_secret"]
     # "auth_url", "token_url", "user_info_url", "scope" - по-умолчанию в конфиге
     missing = [field for field in required_fields if field not in provider_config]
 
@@ -104,7 +104,7 @@ async def oauth_callback(
 
     Raises:
         HTTPException: При ошибке получения токена или данных пользователя
-    
+
     TODO:
         Enum для провайдеров вместо строк
         Вынос конфигурации провайдера в отдельный модуль
@@ -114,7 +114,7 @@ async def oauth_callback(
         Типизация всех параметров
     """
 
-    # logger.info("OAuth провайдер: %s", provider)
+    logger.info("OAuth провайдер: %s", provider)
 
     if provider not in config.oauth_providers:
         raise HTTPException(status_code=400, detail="Неподдерживаемый провайдер")
@@ -151,10 +151,10 @@ async def oauth_callback(
                 "user_data": user_data
             }
         )
-        
+
         if error:
             raise HTTPException(status_code=503, detail=f"Auth service error: {error}")
-        
+
         # Получение ответа от auth-service
         oauth_response = OAuthResponse(
             access_token=response["access_token"],

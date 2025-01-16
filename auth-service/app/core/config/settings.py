@@ -131,6 +131,3 @@ class Settings(BaseSettings):
         env_nested_delimiter="__",  # Разделитель вложенных переменных окружения
         extra="allow",  # Разрешить дополнительные параметры
     )
-
-
-config = Settings()
