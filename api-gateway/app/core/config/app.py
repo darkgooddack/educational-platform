@@ -138,6 +138,7 @@ class AppConfig:
     API_VERSIONS = ["v1"]  # Поддерживаемые версии API
 
     SERVICES = {
+        "main": ServiceConfig("main", ["Main"]),
         "health": ServiceConfig("health", ["Health"]),
         "auth": ServiceConfig("auth", ["Authentication"]),
         "oauth": ServiceConfig("oauth", ["OAuth"]),

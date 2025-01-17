@@ -2,6 +2,7 @@
 Модуль для объединения всех роутеров API v1.
 
 BASE_MODULES - без префикса api/v1:
+- main (главная страница)
 - health (здоровье)
 
 API_MODULES - с префиксом api/v1:
@@ -15,12 +16,18 @@ from fastapi import APIRouter
 from app.core.config import config
 from .auth import auth_router, oauth_router, register_router
 
-from . import health
+from . import health, main
+
+router_main = APIRouter(**config.SERVICES["main"].to_dict())
+main.setup_routes(router_main)
+main_router = router_main
+
 router_health = APIRouter(**config.SERVICES["health"].to_dict())
 health.setup_routes(router_health)
 health_router = router_health
 
 BASE_MODULES = {
+    "main": router_main,
     "health": health_router,
 }
 
