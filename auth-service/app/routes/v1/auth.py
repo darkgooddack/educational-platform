@@ -14,7 +14,7 @@ from app.core.exceptions import (InvalidCredentialsError, InvalidPasswordError,
 from app.schemas import AuthSchema, TokenSchema
 from app.services import AuthService
 
-router = APIRouter(**config.SERVICES["authentication"].to_dict())
+router = APIRouter(**config.SERVICES["auth"].to_dict())
 
 
 @router.post("")
