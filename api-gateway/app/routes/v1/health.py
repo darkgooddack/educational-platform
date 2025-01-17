@@ -38,13 +38,13 @@ def setup_routes(router: APIRouter):
         Parameters
         ----------
         redis : Redis
-            Объект Redis
+            | Объект Redis
         rabbitmq : Connection
-            Объект RabbitMQ
+            | Объект RabbitMQ
 
         Returns
         -------
         Response
-            Статус проверки здоровья
+           | Статус проверки здоровья
         """
         return await health_service.check_health(redis, rabbitmq)
