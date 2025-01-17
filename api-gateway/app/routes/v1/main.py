@@ -15,8 +15,11 @@ def setup_routes(router: APIRouter):
         GET /: Перенаправление на документацию
     """
     @router.get("/")
-    async def root():
+    async def root() -> RedirectResponse:
         """
-        Перенаправление на документацию
+        🏠 Перенаправление на документацию.
+
+        **Returns**:
+        - **RedirectResponse**: Перенаправление по адресу /docs
         """
         return RedirectResponse(url="/docs")

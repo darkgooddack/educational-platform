@@ -33,18 +33,12 @@ def setup_routes(router: APIRouter):
         rabbitmq: Connection = Depends(get_rabbitmq),
     ) -> Response:
         """
-        Проверка доступности всех микросервисов.
+        🏥 Проверка доступности всех микросервисов.
 
-        Parameters
-        ----------
-        redis : Redis
-            | Объект Redis
-        rabbitmq : Connection
-            | Объект RabbitMQ
+        - **redis**: Объект Redis
+        - **rabbitmq**: Объект RabbitMQ
 
-        Returns
-        -------
-        Response
-           | Статус проверки здоровья
+        **Returns**:
+        - **Response**: Статус проверки здоровья
         """
         return await health_service.check_health(redis, rabbitmq)
