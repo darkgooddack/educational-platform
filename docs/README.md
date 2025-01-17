@@ -19,7 +19,7 @@ educational-platform/
 Windows:
 ```bash
 cd api-gateway  # или cd auth-service
-.\scripts\setup.bat
+.\scripts\setup.ps1
 ```
 Linux:
 ```bash
