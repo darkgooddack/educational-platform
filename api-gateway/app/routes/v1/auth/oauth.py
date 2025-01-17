@@ -69,8 +69,9 @@ def setup_routes(router: APIRouter):
     @router.get("/{provider}", response_class=RedirectResponse)
     async def oauth_login(provider: str) -> RedirectResponse:
         """
-        🌐 Редирект на страницу авторизации провайдера.
+        🌐 **Редирект на страницу авторизации провайдера.**
 
+        **Args**:
         - **provider**: Имя провайдера (vk/google/yandex)
 
         **Returns**:
@@ -112,8 +113,9 @@ def setup_routes(router: APIRouter):
         rabbitmq: Annotated[Connection, Depends(get_rabbitmq)],
     ) -> OAuthResponse:
         """
-        🔄 Обработка ответа от OAuth провайдера.
+        🔄 **Обработка ответа от OAuth провайдера.**
 
+        **Args**:
         - **provider**: Имя провайдера
         - **code**: Код авторизации от провайдера
         - **redis**: Redis клиент для кэширования токена

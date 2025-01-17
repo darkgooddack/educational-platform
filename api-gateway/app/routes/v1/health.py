@@ -33,8 +33,9 @@ def setup_routes(router: APIRouter):
         rabbitmq: Connection = Depends(get_rabbitmq),
     ) -> Response:
         """
-        🏥 Проверка доступности всех микросервисов.
-
+        🏥 **Проверка доступности всех микросервисов.**
+        
+        **Args**:
         - **redis**: Объект Redis
         - **rabbitmq**: Объект RabbitMQ
 
