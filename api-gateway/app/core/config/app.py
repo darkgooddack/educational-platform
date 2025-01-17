@@ -139,9 +139,9 @@ class AppConfig:
 
     SERVICES = {
         "health": ServiceConfig("health", ["Health"]),
-        "auth": ServiceConfig("authenticate", ["Authentication"]),
+        "auth": ServiceConfig("auth", ["Authentication"]),
         "oauth": ServiceConfig("oauth", ["OAuth"]),
-        "register": ServiceConfig("registration", ["Registration"]),
+        "register": ServiceConfig("register", ["Registration"]),
     }
 
     PATHS = PathConfig()

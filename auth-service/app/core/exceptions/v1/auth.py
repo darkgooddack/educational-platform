@@ -5,7 +5,7 @@ Provides:
     - TokenMissingError: Отсутствие токена
     - InvalidCredentialsError: Неверные учетные данные
     - TokenExpiredError: Истекший токен
-    - AuthenticationError: Ошибка аутентификации
+    - AuthError: Ошибка аутентификации
 
 Example:
     >>> raise TokenMissingError()
@@ -57,7 +57,7 @@ class TokenExpiredError(BaseAPIException):
         )
 
 
-class AuthenticationError(BaseAPIException):
+class AuthError(BaseAPIException):
     """
     Исключение, которое вызывается, когда пользователь не аутентифицирован.
     """
@@ -66,7 +66,7 @@ class AuthenticationError(BaseAPIException):
         super().__init__(
             status_code=401,
             detail="Неверные учетные данные, попробуйте снова",
-            error_type="authentication_error",
+            error_type="auth_error",
             extra={},
         )
 

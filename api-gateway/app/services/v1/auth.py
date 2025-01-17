@@ -8,7 +8,7 @@ from aio_pika import Connection
 from fastapi import HTTPException
 
 from app.core.messaging.auth import AuthAction, AuthMessageProducer
-from app.schemas import AuthenticationSchema, TokenSchema
+from app.schemas import AuthSchema, TokenSchema
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class AuthService:
             return response
 
     async def authenticate(
-        self, credentials: AuthenticationSchema, redis, rabbitmq: Connection
+        self, credentials: AuthSchema, redis, rabbitmq: Connection
     ) -> TokenSchema:
         """
         Аутентификация пользователя

@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  api_gateway:
+  api-gateway:
     build:
-      context: ./api_gateway
+      context: ./api-gateway
       dockerfile: Dockerfile
     env_file:
       - ./.env
@@ -16,7 +16,7 @@ services:
     networks:
       - dokploy-network
 
-  auth_service:
+  auth-service:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
@@ -28,7 +28,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      api_gateway:
+      api-gateway:
         condition: service_started
     networks:
       - dokploy-network

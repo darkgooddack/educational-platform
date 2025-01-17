@@ -5,8 +5,9 @@ BASE_MODULES - без префикса api/v1:
 - health (здоровье)
 
 API_MODULES - с префиксом api/v1:
-- authentication (аутентификация)
-- registration (регистрация)
+- auth (аутентификация)
+- register (регистрация)
+- oauth (OAuth)
 
 """
 

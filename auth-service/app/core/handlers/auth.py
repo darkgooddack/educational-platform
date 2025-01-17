@@ -6,13 +6,13 @@ import logging
 
 from app.core.exceptions import (InvalidEmailFormatError, UserExistsError,
                                  UserNotFoundError, WeakPasswordError)
-from app.schemas import AuthenticationSchema, TokenSchema
-from app.services import AuthenticationService
+from app.schemas import AuthSchema, TokenSchema
+from app.services import AuthService
 
 logger = logging.getLogger(__name__)
 
 
-async def handle_authenticate(data: dict, auth_service: AuthenticationService) -> dict:
+async def handle_authenticate(data: dict, auth_service: AuthService) -> dict:
     """
     Обрабатывает сообщение аутентификации.
 
@@ -25,7 +25,7 @@ async def handle_authenticate(data: dict, auth_service: AuthenticationService) -
     """
     logger.info("🔐 Попытка аутентификации пользователя: %s", data.get("email"))
     try:
-        auth_data_schema = AuthenticationSchema(**data)
+        auth_data_schema = AuthSchema(**data)
         token: TokenSchema = await auth_service.authenticate(auth_data_schema)
         logger.info("✅ Пользователь %s успешно аутентифицирован", data.get("email"))
         return {
@@ -49,7 +49,7 @@ async def handle_authenticate(data: dict, auth_service: AuthenticationService) -
         }
 
 
-async def handle_logout(token: str, auth_service: AuthenticationService) -> dict:
+async def handle_logout(token: str, auth_service: AuthService) -> dict:
     """
     Обрабатывает сообщение выхода.
 

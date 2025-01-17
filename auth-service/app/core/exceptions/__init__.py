@@ -8,7 +8,7 @@ Example:
     >>> raise UserNotFoundError(user_id=42)
 """
 
-from .v1.authentication import (AuthenticationError, InvalidCredentialsError,
+from .v1.auth import (AuthError, InvalidCredentialsError,
                                 InvalidPasswordError, TokenExpiredError,
                                 TokenMissingError)
 from .v1.base import BaseAPIException
@@ -21,7 +21,7 @@ __all__ = [
     "TokenExpiredError",
     "InvalidCredentialsError",
     "InvalidPasswordError",
-    "AuthenticationError",
+    "AuthError",
     "UserNotFoundError",
     "UserExistsError",
     "InvalidEmailFormatError",

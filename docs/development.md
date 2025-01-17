@@ -7,7 +7,7 @@
 Клонируем и ставим зависимости для КАЖДОГО сервиса:
 ```bash
 # Для Windows (powershell):
-cd api_gateway
+cd api-gateway
 .\scripts\setup.bat   # создаст venv, активирует его и установит зависимости
 
 cd ..\auth-service
@@ -16,7 +16,7 @@ cd ..\auth-service
 
 ```bash
 # Для Linux:
-cd api_gateway
+cd api-gateway
 ./scripts/setup.sh   # создаст venv, активирует его и установит зависимости
 
 cd ..\auth-service
@@ -24,7 +24,7 @@ cd ..\auth-service
 ```
 
 ```bash
-cd api_gateway # или находясь в api_gateway или в auth-service
+cd api-gateway # или находясь в api-gateway или в auth-service
                                                 # не нужно выполнять эту команду
 uv run infra-up   # команда сама сделает cd .. и поднимет все сервисы
 ```
@@ -49,7 +49,7 @@ uv run infra-up
 uv run infra-logs
 
 # Логи конкретного сервиса
-docker-compose -f docker-compose.dev.yml logs api_gateway
+docker-compose -f docker-compose.dev.yml logs api-gateway
 
 # Перезапустить сервис
 uv run infra-restart
@@ -71,13 +71,13 @@ docker-compose -f docker-compose.dev.yml up
 docker-compose -f docker-compose.dev.yml build
 
 # Посмотреть логи конкретного сервиса
-docker-compose -f docker-compose.dev.yml logs api_gateway
+docker-compose -f docker-compose.dev.yml logs api-gateway
 
 # Перезапустить один сервис
-docker-compose -f docker-compose.dev.yml restart auth_service
+docker-compose -f docker-compose.dev.yml restart auth-service
 
 # Перезапустить один сервис
-docker-compose -f docker-compose.dev.yml restart auth_service
+docker-compose -f docker-compose.dev.yml restart auth-service
 
 # Выполнить команду внутри контейнера
 docker-compose -f docker-compose.dev.yml exec postgres psql -U postgres

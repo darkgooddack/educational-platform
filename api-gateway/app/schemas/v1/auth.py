@@ -26,7 +26,7 @@ class AuthAction(Enum):
     REGISTER = "register"
 
 
-class AuthenticationSchema(BaseInputSchema):
+class AuthSchema(BaseInputSchema):
     """
     Схема аутентификации пользователя.
 

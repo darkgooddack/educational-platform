@@ -4,7 +4,7 @@
 
 from typing import Optional, Tuple
 
-from app.schemas.v1.authentication import AuthAction
+from app.schemas.v1.auth import AuthAction
 
 from .producer import MessageProducer
 

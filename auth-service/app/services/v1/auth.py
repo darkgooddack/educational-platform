@@ -17,14 +17,14 @@ from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
                                  TokenMissingError)
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
-from app.schemas import (AuthenticationSchema, OAuthUserSchema, TokenSchema,
+from app.schemas import (AuthSchema, OAuthUserSchema, TokenSchema,
                          UserRole, UserSchema)
 
 from .base import BaseDataManager, BaseService
 from .users import UserDataManager
 
 
-class AuthenticationService(HashingMixin, TokenMixin, BaseService):
+class AuthService(HashingMixin, TokenMixin, BaseService):
     """
     Сервис для аутентификации пользователей.
 
@@ -42,7 +42,7 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
 
     def __init__(self, session: AsyncSession):
         super().__init__(session)
-        self._data_manager = AuthenticationDataManager(session)
+        self._data_manager = AuthDataManager(session)
 
     async def oauth_authenticate(self, provider: str, user_data: dict) -> TokenSchema:
         """
@@ -88,7 +88,7 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
         return TokenSchema(access_token=token, token_type=config.token_type)
 
     async def authenticate(
-        self, authentication_data: AuthenticationSchema
+        self, auth_data: AuthSchema
     ) -> TokenSchema:
         """
         Аутентифицирует пользователя по логину и паролю.
@@ -100,11 +100,11 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
             Токен доступа.
         """
         user_model = await UserDataManager(self.session).get_user_by_email(
-            authentication_data.email
+            auth_data.email
         )
 
         if not user_model or not self.verify(
-            user_model.hashed_password, authentication_data.password
+            user_model.hashed_password, auth_data.password
         ):
             raise InvalidCredentialsError()
 
@@ -135,7 +135,7 @@ class AuthenticationService(HashingMixin, TokenMixin, BaseService):
         return {"message": "Выход выполнен успешно!"}
 
 
-class AuthenticationDataManager(BaseDataManager):
+class AuthDataManager(BaseDataManager):
     """
     Класс для работы с данными пользователей в базе данных.
 

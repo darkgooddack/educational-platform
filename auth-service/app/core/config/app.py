@@ -141,8 +141,8 @@ class AppConfig:
 
     SERVICES = {
         "health": ServiceConfig("health", ["Health"]),
-        "authentication": ServiceConfig("authenticate", ["Authentication"]),
-        "registration": ServiceConfig("registration", ["Registration"]),
+        "auth": ServiceConfig("auth", ["Authentication"]),
+        "register": ServiceConfig("register", ["Registration"]),
     }
 
     PATHS = PathConfig()
@@ -150,7 +150,7 @@ class AppConfig:
     LOGGING = LogConfig()
 
     auth_url: str = Field(
-        default="api/v1/authenticate", description="URL для аутентификации пользователя"
+        default="api/v1/auth", description="URL для аутентификации пользователя"
     )
 
     token_type: str = Field(default="bearer", description="Тип токена авторизации")

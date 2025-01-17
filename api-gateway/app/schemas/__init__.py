@@ -4,16 +4,16 @@
 Предоставляет единую точку доступа ко всем Pydantic схемам.
 """
 
-from .v1.authentication import AuthenticationSchema, OAuthResponse, TokenSchema
+from .v1.auth import AuthSchema, OAuthResponse, TokenSchema
 from .v1.base import BaseInputSchema, BaseSchema, CommonBaseSchema
 from .v1.cache import RouteCacheSchema, TokenCacheSchema
-from .v1.registration import RegistrationResponseSchema, RegistrationSchema
+from .v1.register import RegistrationResponseSchema, RegistrationSchema
 
 __all__ = [
     "BaseSchema",
     "BaseInputSchema",
     "CommonBaseSchema",
-    "AuthenticationSchema",
+    "AuthSchema",
     "TokenSchema",
     "OAuthResponse",
     "TokenCacheSchema",

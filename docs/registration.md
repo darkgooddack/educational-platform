@@ -4,7 +4,7 @@
 
 2. API Gateway формирует сообщение с action="register" и отправляет его в RabbitMQ очередь "auth_queue"
 
-3. Consumer в auth-service получает это сообщение и передает его в UserService
+3. Consumer в auth_service получает это сообщение и передает его в UserService
 
 4. UserService:
 

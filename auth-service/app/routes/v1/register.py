@@ -14,7 +14,7 @@ from app.core.exceptions import InvalidEmailFormatError, WeakPasswordError
 from app.schemas import RegistrationSchema
 from app.services import UserService
 
-router = APIRouter(**config.SERVICES["registration"].to_dict())
+router = APIRouter(**config.SERVICES["register"].to_dict())
 
 
 @router.post("/")

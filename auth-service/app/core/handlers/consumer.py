@@ -15,14 +15,14 @@ from aio_pika import IncomingMessage, connect_robust
 from app.core.config import config
 from app.core.dependencies.database import SessionContextManager
 from app.core.handlers import auth, health, oauth, register, utils
-from app.services import AuthenticationService, UserService
+from app.services import AuthService, UserService
 
 logger = logging.getLogger(__name__)
 
 
 async def process_auth_message(
     message: IncomingMessage,
-    auth_service: AuthenticationService,
+    auth_service: AuthService,
     user_service: UserService,
 ) -> None:
     """
@@ -94,7 +94,7 @@ async def start_consuming():
 
         # Создаем сервис аутентификации с сессией из контекстного менеджера
         async with SessionContextManager() as session_manager:
-            auth_service = AuthenticationService(session_manager.session)
+            auth_service = AuthService(session_manager.session)
             user_service = UserService(session_manager.session)
 
         connection = await connect_robust(**config.rabbitmq_params)

@@ -20,7 +20,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from app.core.config import config
-from app.core.exceptions import AuthenticationError
+from app.core.exceptions import AuthError
 from app.schemas import UserSchema
 
 pwd_context = CryptContext(
@@ -100,7 +100,7 @@ class TokenMixin:
             Декодированные данные
 
         Raises:
-            AuthenticationError: При невалидном токене
+            AuthError: При невалидном токене
         """
         try:
             return jwt.decode(
@@ -109,7 +109,7 @@ class TokenMixin:
                 algorithms=[config.token_algorithm],
             )
         except JWTError as exc:
-            raise AuthenticationError() from exc
+            raise AuthError() from exc
 
     @staticmethod
     def create_payload(user: UserSchema) -> dict:

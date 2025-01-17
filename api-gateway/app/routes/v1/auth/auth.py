@@ -17,7 +17,7 @@ from aio_pika import Connection
 from fastapi import APIRouter, Depends
 
 from app.core.dependencies import get_rabbitmq, get_redis
-from app.schemas import AuthenticationSchema, TokenSchema
+from app.schemas import AuthSchema, TokenSchema
 from app.services.v1.auth import AuthService
 
 auth_service = AuthService()
@@ -39,7 +39,7 @@ def setup_routes(router: APIRouter):
 
     @router.post("")
     async def authenticate(
-        credentials: AuthenticationSchema,
+        credentials: AuthSchema,
         redis=Depends(get_redis),
         rabbitmq: Connection = Depends(get_rabbitmq),
     ) -> TokenSchema:
@@ -47,7 +47,7 @@ def setup_routes(router: APIRouter):
         Аутентифицирует пользователя по email и возвращает JWT токен.
 
         Args:
-            credentials: AuthenticationSchema Данные для аутентификации
+            credentials: AuthSchema Данные для аутентификации
             redis: Redis клиент для кэширования токенов
             rabbitmq: RabbitMQ соединение для общения с auth_service
 

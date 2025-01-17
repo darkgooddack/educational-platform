@@ -4,13 +4,13 @@
 
 import logging
 
-from app.services import AuthenticationService
+from app.services import AuthService
 
 logger = logging.getLogger(__name__)
 
 
 async def handle_oauth(
-    provider: str, user_data: dict, auth_service: AuthenticationService
+    provider: str, user_data: dict, auth_service: AuthService
 ) -> dict:
     """
     Обрабатывает сообщение OAuth.

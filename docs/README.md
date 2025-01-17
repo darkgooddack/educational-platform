@@ -5,10 +5,10 @@
 ## Структура проекта
 ```
 educational-platform/
-├── api_gateway/ # API Gateway сервис
-├── auth_service/ # Сервис авторизации
-├── course_service/ # Сервис курсов - для примера
-└── user_service/ # Сервис пользователей - для примера
+├── api-gateway/ # API Gateway сервис
+├── auth-service/ # Сервис авторизации
+├── course-service/ # Сервис курсов - для примера
+└── user-service/ # Сервис пользователей - для примера
 ```
 
 
@@ -32,17 +32,17 @@ docker compose up rabbitmq -d
 ### 2. Запуск сервисов
 ```bash
 # Запуск API Gateway
-docker compose up api_gateway -d
+docker compose up api-gateway -d
 
 # Запуск сервисов авторизации, курсов и пользователей (для примера)
-docker compose up auth_service course_service user_service -d
+docker compose up auth-service course-service user-service -d
 ```
 
 Или по отдельности для разработки:
 
 ```bash
 # Сервис авторизации (порт 8000)
-cd api_gateway
+cd api-gateway
 uv pip install -e .
 alembic upgrade head
 uvicorn app.main:app --reload --port 8000
@@ -50,7 +50,7 @@ uvicorn app.main:app --reload --port 8000
 
 ```bash
 # Сервис авторизации (порт 8001)
-cd auth_service
+cd auth-service
 uv pip install -e .
 alembic upgrade head
 uvicorn app.main:app --reload --port 8001
@@ -94,13 +94,13 @@ API документация доступна по адресам:
 
 Windows:
 ```bash
-cd api_gateway  # или cd auth_service, cd course_service, cd user_service
+cd api-gateway  # или cd auth-service, cd course-service, cd user-service
 .\scripts\setup.bat
 uv run dev
 ```
 Linux:
 ```bash
-cd api_gateway # или cd auth_service, cd course_service, cd user_service
+cd api-gateway # или cd auth-service, cd course-service, cd user-service
 ./scripts/setup.sh
 uv run dev
 ```
@@ -113,7 +113,7 @@ uv run dev
 ```
 # Запуск инфраструктуры
 ```bash
-cd ./api_gateway
+cd ./api-gateway
 uv run infra-up
 ```
 

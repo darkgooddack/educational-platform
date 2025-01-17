@@ -5,22 +5,22 @@ BASE_MODULES - без префикса api/v1:
 - health (здоровье)
 
 API_MODULES - с префиксом api/v1:
-- authentication (аутентификация)
-- registration (регистрация)
+- auth (аутентификация)
+- register (регистрация)
 
 """
 
 from fastapi import APIRouter
 
-from . import authentication, health, registration
+from . import auth, health, register
 
 BASE_MODULES = {
     "health": health,
 }
 
 VERSIONS_MODULES = {
-    "authentication": authentication,
-    "registration": registration,
+    "auth": auth,
+    "register": register,
 }
 
 

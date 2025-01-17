@@ -11,15 +11,15 @@ from app.core.config import config
 from app.core.dependencies import get_db_session, oauth2_schema
 from app.core.exceptions import (InvalidCredentialsError, InvalidPasswordError,
                                  UserNotFoundError)
-from app.schemas import AuthenticationSchema, TokenSchema
-from app.services import AuthenticationService
+from app.schemas import AuthSchema, TokenSchema
+from app.services import AuthService
 
 router = APIRouter(**config.SERVICES["authentication"].to_dict())
 
 
 @router.post("")
 async def authenticate(
-    credentials: AuthenticationSchema,
+    credentials: AuthSchema,
     session: AsyncSession = Depends(get_db_session),
 ) -> TokenSchema | None:
     """
@@ -37,7 +37,7 @@ async def authenticate(
 
     """
     try:
-        return await AuthenticationService(session).authenticate(credentials)
+        return await AuthService(session).authenticate(credentials)
     except UserNotFoundError as e:
         raise UserNotFoundError("email", credentials.email) from e
     except InvalidCredentialsError as e:
@@ -59,4 +59,4 @@ async def logout(
     Returns:
         Словарь с сообщением об успешном выходе {"message": "Выход выполнен успешно!"}
     """
-    return await AuthenticationService(session).logout(token)
+    return await AuthService(session).logout(token)
