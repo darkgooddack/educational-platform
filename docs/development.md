@@ -10,26 +10,18 @@
 Клонируем и ставим зависимости для КАЖДОГО сервиса:
 ```bash
 # Для Windows (powershell):
-cd api-gateway
 .\scripts\setup.ps1   # создаст venv, активирует его и установит зависимости
-
-cd ..\auth-service
-.\scripts\setup.ps1
 ```
 
 ```bash
 # Для Linux:
-cd api-gateway
 ./scripts/setup.sh   # создаст venv, активирует его и установит зависимости
-
-cd ..\auth-service
-./scripts/setup.sh
 ```
 
+> [!CAUTION]
+> Работает нормально пока только этот вариант, uv run dev пока не поднимается
 ```bash
-cd api-gateway # или находясь в api-gateway или в auth-service
-                                                # не нужно выполнять эту команду
-uv run infra-up   # команда сама сделает cd .. и поднимет все сервисы
+uv run infra-up
 ```
 
 
@@ -44,17 +36,16 @@ uv run infra-up   # команда сама сделает cd .. и подним
 uv run infra-up
 
 # Посмотреть что поднялось:
-- RabbitMQ: http://localhost:15672 (admin/admin)
-- PostgreSQL: localhost:5432 (postgres/postgres) - понятно, что не в браузере
-- Redis: localhost:6379 (pass: default) - понятно, что не в браузере
-- API Gateway: http://localhost:8001
-- Auth Service: http://localhost:8002
+- 🐰 RabbitMQ UI: http://localhost:15672 (admin/admin) или (quest/quest)
+- 🗄️ PostgreSQL: localhost:5432 (postgres/postgres) - понятно, что не в браузере
+- 📦 Redis: localhost:6379 (pass: default) - понятно, что не в браузере
+- 📊 FastAPI Swagger:: http://localhost:8000
 
 # Логи всех сервисов
 uv run infra-logs
 
 # Логи конкретного сервиса
-docker-compose -f docker-compose.dev.yml logs api-gateway
+docker-compose -f docker-compose.dev.yml logs backend
 
 # Перезапустить сервис
 uv run infra-restart
@@ -76,13 +67,13 @@ docker-compose -f docker-compose.dev.yml up
 docker-compose -f docker-compose.dev.yml build
 
 # Посмотреть логи конкретного сервиса
-docker-compose -f docker-compose.dev.yml logs api-gateway
+docker-compose -f docker-compose.dev.yml logs backend
 
 # Перезапустить один сервис
-docker-compose -f docker-compose.dev.yml restart auth-service
+docker-compose -f docker-compose.dev.yml restart backend
 
 # Перезапустить один сервис
-docker-compose -f docker-compose.dev.yml restart auth-service
+docker-compose -f docker-compose.dev.yml restart backend
 
 # Выполнить команду внутри контейнера
 docker-compose -f docker-compose.dev.yml exec postgres psql -U postgres
@@ -98,8 +89,7 @@ docker-compose -f docker-compose.dev.yml exec postgres psql -U postgres testdb
 - 15672 - RabbitMQ админка
 - 5432 - PostgreSQL
 - 6379 - Redis
-- 8001 - API Gateway
-- 8002 - Auth Service
+- 8000 - Swagger UI
 
 ### Подключения для отладки
 
@@ -114,7 +104,7 @@ docker-compose -f docker-compose.dev.yml exec postgres psql -U postgres testdb
 - Port: 5432
 - User: postgres
 - Password: postgres
-- Database: testdb
+- Database: educational_db
 
 #### Redis
 ```bash
@@ -133,8 +123,7 @@ docker-compose -f docker-compose.dev.yml exec redis redis-cli -a default
 - password: admin
 
 #### Swagger UI
-- http://localhost:8001/docs  # API Gateway
-- http://localhost:8002/docs  # Auth Service
+- http://localhost:8000/docs  # API
 
 
 ### Рекомендации

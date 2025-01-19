@@ -4,9 +4,85 @@
 
 ## Структура проекта
 ```
-educational-platform/
-├── api-gateway/ # API Gateway сервис
-└── auth-service/ # Сервис авторизации
+app
+├── main.py
+├── __init__.py
+├── core
+│   ├── lifespan.py
+│   ├── logging.py
+│   ├── security.py
+│   ├── clients
+│   │   ├── rabbitmq.py
+│   │   ├── redis.py
+│   │   └── __init__.py
+│   ├── config
+│   │   ├── app.py
+│   │   ├── settings.py
+│   │   └── __init__.py
+│   ├── dependencies
+│   │   ├── auth.py
+│   │   ├── database.py
+│   │   ├── rabbitmq.py
+│   │   ├── redis.py
+│   │   └── __init__.py
+│   ├── exceptions
+│   │   ├── __init__.py
+│   │   └── v1
+│   │       ├── base.py
+│   │       ├── __init__.py
+│   │       └── auth
+│   │           ├── auth.py
+│   │           ├── oauth.py
+│   │           ├── security.py
+│   │           ├── users.py
+│   │           └── __init__.py
+│   ├── middlewares
+│   │   ├── docs_auth.py
+│   │   ├── logging.py
+│   │   └── __init__.py
+│   └── migrations
+│       ├── env.py
+│       ├── README
+│       ├── script.py.mako
+│       └── versions
+│           ├── c54703e51b42_add_fields_for_oauth.py
+│           └── f58b4d906a74_initial_commit.py
+├── models
+│   ├── __init__.py
+│   └── v1
+│       ├── base.py
+│       ├── users.py
+│       └── __init__.py
+├── routes
+│   ├── __init__.py
+│   └── v1
+│       ├── main.py
+│       ├── __init__.py
+│       └── auth
+│           ├── auth.py
+│           ├── oauth.py
+│           ├── register.py
+│           └── __init__.py
+├── schemas
+│   ├── __init__.py
+│   └── v1
+│       ├── base.py
+│       ├── __init__.py
+│       └── auth
+│           ├── auth.py
+│           ├── oauth.py
+│           ├── register.py
+│           └── users.py
+└── services
+    ├── __init__.py
+    └── v1
+        ├── base.py
+        ├── __init__.py
+        └── auth
+            ├── auth.py
+            ├── oauth.py
+            └── users.py
+Сразу видно где забыл __init__.py :)
 ...
 ```
 
@@ -18,24 +94,21 @@ educational-platform/
 
 Windows:
 ```bash
-cd api-gateway  # или cd auth-service
 .\scripts\setup.ps1
 ```
 Linux:
 ```bash
-cd api-gateway # или cd auth-service
 ./scripts/setup.sh
 ```
 #### Команды
 
 #### Запуск для разработки (индивидуально для каждого сервиса)
 ```bash
-# Запуск в режиме разработки (с hot-reload), но необходима локальная rabbitmq, иначе выпадет ошибка
+# Запуск в режиме разработки (с hot-reload), но необходима локальная rabbitmq, иначе выпадет ошибка, даже с контейнерами отдельно не заработала...
 uv run dev
 ```
 # Запуск инфраструктуры (контейнеров)
 ```bash
-cd ./api-gateway
 uv run infra-up
 ```
 
