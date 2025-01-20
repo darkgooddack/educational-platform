@@ -158,26 +158,6 @@ class Settings(BaseSettings):
         env_file=AppConfig.PATHS.ENV_PATH,
         env_file_encoding="utf-8",
         # env_prefix="EDU__",
-        # env_nested_delimiter="__",
+        env_nested_delimiter="__",
         extra="allow",
     )
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        logger.info("Loaded configuration:")
-        logger.info(f"Database DSN: {self.database_dsn}")
-        logger.info(f"Redis URL: {self.redis_url}")
-        logger.info(f"RabbitMQ DSN: {self.rabbitmq_dsn}")
-        logger.info(f"CORS params: {self.cors_params}")
-        logger.info(f"OAuth providers: {self.oauth_providers}")
-
-    def print_config(self):
-        print("\nCurrent configuration:")
-        print(f"Database DSN: {self.database_dsn}")
-        print(f"Redis URL: {self.redis_url}")
-        print(f"RabbitMQ DSN: {self.rabbitmq_dsn}")
-        print(f"CORS params: {self.cors_params}")
-        print(f"OAuth providers: {self.oauth_providers}\n")
-
-c = Settings()
-c.print_config()
