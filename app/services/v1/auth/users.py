@@ -241,38 +241,36 @@ class UserDataManager(BaseEntityManager[UserSchema]):
                 raise UserExistsError("phone", user.phone) from e
             raise e
 
-    async def get_user_by_email(self, email: str) -> UserSchema:
+    async def get_user_by_email(self, email: str) -> UserSchema | None:
         """
         Получает пользователя по email.
+        
         Args:
             email: Email пользователя.
 
         Returns:
-            UserSchema: Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
 
         """
         statement = select(self.model).where(self.model.email == email)
         user = await self.get_one(statement)
-        if not user:
-            raise UserNotFoundError("email", email)
         return user
 
-    async def get_user_by_phone(self, phone: str) -> UserSchema:
+    async def get_user_by_phone(self, phone: str) -> UserSchema | None:
         """
         Получает пользователя по номеру телефона
+        
         Args:
             phone: Номер телефона пользователя.
 
         Returns:
-            Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         statement = select(self.model).where(self.model.phone == phone)
         user = await self.get_one(statement)
-        if not user:
-            raise UserNotFoundError("phone", phone)
         return user
 
-    async def get_by_field(self, field: str, value: str) -> UserSchema:
+    async def get_by_field(self, field: str, value: str) -> UserSchema | None:
         """
         Получает пользователя по полю.
 
@@ -281,12 +279,10 @@ class UserDataManager(BaseEntityManager[UserSchema]):
             value: Значение поля пользователя.
 
         Returns:
-            Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         statement = select(self.model).where(getattr(self.model, field) == value)
         user = await self.get_one(statement)
-        if not user:
-            raise UserNotFoundError(field, value)
         return user
 
     async def update_user(self, user_id: int, data: dict) -> UserUpdateSchema:
