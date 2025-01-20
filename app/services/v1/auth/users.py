@@ -138,8 +138,8 @@ class UserService(HashingMixin, BaseService):
             hashed_password=self.hash_password(user.password),
             role=UserRole.USER,
             avatar_url=None,
-            vk_id=user_data.get("vk_id", None)
-            google_id=user_data.get("google_id", None)
+            vk_id=user_data.get("vk_id", None),
+            google_id=user_data.get("google_id", None),
             yandex_id=user_data.get("yandex_id", None)
         )
         try:

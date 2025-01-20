@@ -81,7 +81,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         Создание JWT токена
 
         Args:
-            user: Данные пользователя
+            user_schema: Данные пользователя
 
         Returns:
             TokenSchema: Схема с access_token и token_type
