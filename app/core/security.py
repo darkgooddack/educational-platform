@@ -15,24 +15,13 @@ Example:
 """
 
 from datetime import datetime, timedelta, timezone
-
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
-
 from app.core.config import config
 from app.core.exceptions import TokenExpiredError, TokenInvalidError
 from app.schemas import UserSchema
 
-
-def get_token_key() -> str:
-    """
-    Возвращает секретный ключ для генерации и проверки токенов.
-
-    Returns:
-        Секретный ключ
-    """
-    return config.token_key
 
 pwd_context = CryptContext(
     schemes=["argon2"],
