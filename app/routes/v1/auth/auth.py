@@ -36,8 +36,6 @@ def setup_routes(router: APIRouter):
 
         **Args**:
         - **credentials**: Данные для аутентификации (AuthSchema)
-        - **redis**: Redis клиент для кэширования токенов
-        - **rabbitmq**: RabbitMQ соединение для общения с auth_service
 
         **Returns**:
         - **TokenSchema**: Токен доступа с access_token и token_type

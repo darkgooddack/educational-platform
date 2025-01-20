@@ -15,7 +15,7 @@ config = context.config
 
 section = config.config_ini_section
 # Для быстрых миграций без запуска бд, но сначала alembic upgrade head
-# SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./auth-service.db"
+# SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 # config.set_section_option(section, "sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
 config.set_section_option(section, "sqlalchemy.url", str(c.database_dsn))
 

@@ -44,7 +44,6 @@ class UserService(HashingMixin, BaseService):
         create_user: Создание нового пользователя
         get_by_email: Получение пользователя по email
         get_by_phone: Получение пользователя по телефону
-        !# Обновление и удаления пользователя являются лишними в микросервисе auth-service
         update_user: Обновление данных пользователя
         delete_user: Удаление пользователя
     """
@@ -198,7 +197,6 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         add_user: Добавление пользователя в БД
         get_user_by_email: Получение пользователя по email
         get_user_by_phone: Получение пользователя по телефону
-        !# Обновление и удаления пользователя являются лишними в микросервисе auth-service
         update_user: Обновление данных пользователя
         delete_user: Удаление пользователя
 
