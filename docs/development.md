@@ -1,13 +1,8 @@
 ### Особенности разработки
-
-- venv - устанавливается там, где находится pyproject.toml файл (в корне каждого микросервиса), это банально, но хочется все делать из корня репозитория...
-- в каждом микросервисе есть скрипт setup.sh (setup.ps1), который создаёт venv, активирует его и устанавливает зависимости вместе с dev.
-- инфраструктура на контейнерах локально поднимается из любого микросервиса (команда uv run infra-up, которая запускает docker-compose.dev.yml), неважно из какого, всё равно поднимается одинаково всё.
 - можно установить rabbitmq локально, а базу данных через sqlite, тогда пользоваться командой uv run dev (но нужно все настроить)
 - весь deploy производится на сервер (с dokploy) через репозиторий (пока без тестов) и поднимается по средствам docker-compose.yml
 
 ### Первый запуск
-Клонируем и ставим зависимости для КАЖДОГО сервиса:
 ```bash
 # Для Windows (powershell):
 .\scripts\setup.ps1   # создаст venv, активирует его и установит зависимости
@@ -19,7 +14,7 @@
 ```
 
 > [!CAUTION]
-> Работает нормально пока только этот вариант, uv run dev пока не поднимается
+> Работает нормально пока только этот вариант, uv run dev пока не поднимается из-за ошибки подключения к rabbitmq
 ```bash
 uv run infra-up
 ```
@@ -44,10 +39,10 @@ uv run infra-up
 # Логи всех сервисов
 uv run infra-logs
 
-# Логи конкретного сервиса
+# Логи конкретного контейнера
 docker-compose -f docker-compose.dev.yml logs backend
 
-# Перезапустить сервис
+# Перезапустить
 uv run infra-restart
 
 # Остановить всё
@@ -60,25 +55,25 @@ uv run infra-build
 Или напрямую в консоли:
 
 ```bash
-# Поднять сервисы и показать логи
+# Поднять контейнеры и показать логи
 docker-compose -f docker-compose.dev.yml up
 
 # Перестроить образы (когда меняешь код)
 docker-compose -f docker-compose.dev.yml build
 
-# Посмотреть логи конкретного сервиса
+# Посмотреть логи конкретного контейнера
 docker-compose -f docker-compose.dev.yml logs backend
 
-# Перезапустить один сервис
+# Перезапустить один контейнер
 docker-compose -f docker-compose.dev.yml restart backend
 
-# Перезапустить один сервис
+# Перезапустить один контейнер
 docker-compose -f docker-compose.dev.yml restart backend
 
 # Выполнить команду внутри контейнера
 docker-compose -f docker-compose.dev.yml exec postgres psql -U postgres
 
-# Посмотреть статус сервисов
+# Посмотреть статус контейнеров
 docker-compose -f docker-compose.dev.yml ps
 
 # Через psql
