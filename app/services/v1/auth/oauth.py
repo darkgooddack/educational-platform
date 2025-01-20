@@ -49,6 +49,8 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         # Получаем данные пользователя
         user_data = await self._get_user_info(provider, token_data)
 
+        self.logger.debug("user_data: %s", user_data)
+
         # Ищем или создаем пользователя
         user = await self._get_or_create_user(provider, user_data)
 
