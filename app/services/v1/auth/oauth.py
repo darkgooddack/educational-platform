@@ -45,7 +45,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         token_data = await self._get_provider_token(provider, code)
 
         self.logger.debug("token_data: %s", token_data)
-
+        
         # Получаем данные пользователя
         user_data = await self._get_user_info(provider, token_data)
 
@@ -68,7 +68,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         """
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
-        provider_id = str(user_data["id"])
+        provider_id = user_data["id"]
 
         try:
             # Сначала ищем по provider_id
