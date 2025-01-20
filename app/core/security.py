@@ -21,7 +21,7 @@ from passlib.context import CryptContext
 from app.core.config import config
 from app.core.exceptions import TokenExpiredError, TokenInvalidError
 from app.schemas import UserSchema, TokenSchema
-from app.services import AuthDataManager
+from app.core.types import AuthDataManager
 
 pwd_context = CryptContext(
     schemes=["argon2"],
@@ -123,7 +123,7 @@ class TokenMixin:
             raise TokenInvalidError()
     
     @staticmethod
-    async def create_token(self, user: UserSchema, data_manager: AuthDataManager) -> TokenSchema:
+    async def create_token(self, user: UserSchema, data_manager: "AuthDataManager") -> TokenSchema:
         """
         Создание JWT токена
 
