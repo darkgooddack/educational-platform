@@ -112,7 +112,9 @@ class UserService(HashingMixin, BaseService):
 
         # Проверка email
         try:
+            self.logger.debug("Проверка пользователя по email 1:")
             await data_manager.get_user_by_email(user.email)
+            
             raise UserExistsError("email", user.email)
         except UserNotFoundError:
             pass
@@ -252,19 +254,18 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         Returns:
             UserSchema: Данные пользователя.
         """
-        existing_user = await self.get_user_by_email(user.email)
-        if existing_user:
-            raise UserExistsError("email", user.email)
-
-        existing_user = await self.get_user_by_phone(user.phone)
-        if existing_user:
-            raise UserExistsError("phone", user.phone)
-
         try:
             return await self.add_one(user)
         except IntegrityError as e:
-            # Обработка исключений, если они все же возникнут
-            raise e
+            if "users.email" in str(e):
+                self.logger.error("add_user: Пользователь с email '%s' уже существует", user.email)
+                raise UserExistsError("email", user.email)
+            elif "users.phone" in str(e):
+                self.logger.error("add_user: Пользователь с телефоном '%s' уже существует", user.phone)
+                raise UserExistsError("phone", user.phone)
+            else:
+                self.logger.error("Ошибка при добавлении пользователя: %s", e)
+                raise
         
 
     async def get_user_by_email(self, email: str) -> UserSchema | None:
