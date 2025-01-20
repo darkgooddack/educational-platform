@@ -99,7 +99,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             self.logger.info("Получение записи из базы данных")
             self.logger.debug("SQL-запрос: %s", select_statement)
             result = await self.session.execute(select_statement)
-            return result.scalar_one_or_none()
+            return result.scalar()
         except SQLAlchemyError as e:
             self.logger.error("❌ Ошибка при получении записи: %s", e)
             return None
