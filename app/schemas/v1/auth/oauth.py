@@ -1,5 +1,6 @@
 from pydantic import EmailStr, Field
 
+from typing import Optional
 from ..base import BaseInputSchema
 
 class OAuthUserSchema(BaseInputSchema):
@@ -23,9 +24,9 @@ class OAuthUserSchema(BaseInputSchema):
     middle_name: str | None = None
     phone: str | None = None
     password: str = Field(min_length=8)
-    vk_id: int | None = None
-    google_id: int | None = None
-    yandex_id: int | None = None
+    vk_id: Optional[int] = None
+    google_id: Optional[int] = None
+    yandex_id: Optional[int] = None
 
 class OAuthResponse(BaseInputSchema):
     """

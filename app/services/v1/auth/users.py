@@ -136,10 +136,10 @@ class UserService(HashingMixin, BaseService):
             hashed_password=self.hash_password(user.password),
             role=UserRole.USER,
             avatar_url=None,
-            vk_id=user_data.get("vk_id", None),
-            google_id=user_data.get("google_id", None),
-            yandex_id=user_data.get("yandex_id", None)
-        )
+            vk_id=int(user_data.get("vk_id")) if user_data.get("vk_id", "").isdigit() else None,
+            google_id=int(user_data.get("google_id")) if user_data.get("google_id", "").isdigit() else None,
+            yandex_id=int(user_data.get("yandex_id")) if user_data.get("yandex_id", "").isdigit() else None
+        ) #! Проверить
         try:
             return await data_manager.add_user(user_model)
         except Exception as e:
