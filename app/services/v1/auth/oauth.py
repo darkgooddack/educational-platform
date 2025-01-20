@@ -85,7 +85,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         """
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
-        provider_id = user_data["id"]
+        provider_id = int(user_data["id"])
 
         # Маппинг полей email для разных провайдеров
         email_field_mapping = {
