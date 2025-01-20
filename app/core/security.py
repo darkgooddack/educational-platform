@@ -21,7 +21,7 @@ from passlib.context import CryptContext
 from app.core.config import config
 from app.core.exceptions import TokenExpiredError, TokenInvalidError
 from app.schemas import UserSchema, TokenSchema
-from app.service import AuthDataManager
+from app.services import AuthDataManager
 
 pwd_context = CryptContext(
     schemes=["argon2"],
