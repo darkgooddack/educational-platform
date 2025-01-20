@@ -74,9 +74,26 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
 
         user_schema = UserSchema.model_validate(user_model)
         
-        return await TokenMixin.create_token(user_schema, self._data_manager)
+        return await self.create_token(user_schema)
 
-        
+    async def create_token(user: UserSchema) -> TokenSchema:
+        """
+        Создание JWT токена
+
+        Args:
+            user: Данные пользователя
+
+        Returns:
+            TokenSchema: Схема с access_token и token_type
+        """
+        payload = TokenMixin.create_payload(user)
+        token = TokenMixin.generate_token(payload)
+        await self._data_manager.save_token(user, token)
+
+        return TokenSchema(
+            access_token=token, 
+            token_type=config.token_type
+        )
 
     async def logout(self, token: str) -> dict:
         """

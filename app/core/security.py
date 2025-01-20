@@ -21,7 +21,6 @@ from passlib.context import CryptContext
 from app.core.config import config
 from app.core.exceptions import TokenExpiredError, TokenInvalidError
 from app.schemas import UserSchema, TokenSchema
-from app.core.types import AuthDataManager
 
 pwd_context = CryptContext(
     schemes=["argon2"],
@@ -122,31 +121,6 @@ class TokenMixin:
         except JWTError:
             raise TokenInvalidError()
     
-    @staticmethod
-    async def create_token(self, user: UserSchema, data_manager: "AuthDataManager") -> TokenSchema:
-        """
-        Создание JWT токена
-
-        Args:
-            user: Данные пользователя
-            data_manager: Менеджер данных для сохранения токена
-
-        Returns:
-            Токен доступа
-        """
-        # Отличная мысль, но пока нет
-        # if not isinstance(user, UserSchema): 
-        #     raise ValueError("Expected user to be of type UserSchema")
-
-        payload = TokenMixin.create_payload(user)
-        token = TokenMixin.generate_token(payload)
-        await data_manager.save_token(user, token)
-
-        return TokenSchema(
-            access_token=token, 
-            token_type=config.token_type
-        )
-
     @staticmethod
     def create_payload(user: UserSchema) -> dict:
         """

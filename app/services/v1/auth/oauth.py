@@ -131,7 +131,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 )
 
                 # Создаем и возвращаем токен
-                return await TokenMixin.create_token(user_schema, self._data_manager)
+                return await self.create_token(user_schema)
 
     
     async def get_oauth_url(self, provider: str) -> RedirectResponse:
