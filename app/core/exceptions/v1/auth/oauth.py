@@ -41,3 +41,15 @@ class OAuthUserDataError(OAuthError):
             detail=f"Ошибка получения данных пользователя от {provider}: {error}",
             extra={"provider": provider, "error": error}
         )
+
+class OAuthInvalidGrantError(OAuthError):
+    """Ошибка невалидного или истекшего кода авторизации"""
+    def __init__(self, provider: str):
+        super().__init__(
+            detail=f"Код авторизации от провайдера {provider} недействителен или истек. Пожалуйста, повторите вход.",
+            extra={
+                "provider": provider,
+                "error_code": "invalid_grant",
+                "requires_reauth": True
+            }
+        )

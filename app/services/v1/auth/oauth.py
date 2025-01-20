@@ -7,7 +7,13 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas import OAuthUserSchema, TokenSchema, UserSchema
-from app.core.exceptions import UserNotFoundError, InvalidProviderError, OAuthConfigError
+from app.core.exceptions import (
+    UserNotFoundError, 
+    InvalidProviderError, 
+    OAuthInvalidGrantError, 
+    OAuthTokenError, 
+    OAuthConfigError
+)
 from app.core.config import config
 from app.core.security import HashingMixin, TokenMixin
 from ..base import BaseService
@@ -181,12 +187,11 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 data=token_params
             ) as resp:
                 token_data = await resp.json()
-
-                if "error" in token_data:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=token_data["error"]
-                    )
+                if "error" in token_data and token_data["error"] == "invalid_grant":
+                    raise OAuthInvalidGrantError(provider)
+                elif "error" in token_data:
+                    raise OAuthTokenError(provider, token_data["error"])
+                return token_data
 
     async def _get_user_info(self, provider: str, token_data: dict) -> dict:
         """
