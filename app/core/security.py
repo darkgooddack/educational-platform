@@ -20,8 +20,8 @@ from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
 from app.core.config import config
 from app.core.exceptions import TokenExpiredError, TokenInvalidError
-from app.schemas import UserSchema
-
+from app.schemas import UserSchema, TokenSchema
+from app.service import AuthDataManager
 
 pwd_context = CryptContext(
     schemes=["argon2"],
@@ -134,9 +134,10 @@ class TokenMixin:
         Returns:
             Токен доступа
         """
-        if not isinstance(user, UserSchema):
-            raise ValueError("Expected user to be of type UserSchema")
-            
+        # Отличная мысль, но пока нет
+        # if not isinstance(user, UserSchema): 
+        #     raise ValueError("Expected user to be of type UserSchema")
+
         payload = TokenMixin.create_payload(user)
         token = TokenMixin.generate_token(payload)
         await data_manager.save_token(user, token)
