@@ -4,8 +4,8 @@
 Содержит функции для работы с секретными ключами и токенами.
 
 Example:
-    >>> from app.core.security import get_token_key
-    >>> secret = get_token_key()
+    >>> from app.core.security import TokenMixin
+    >>> secret = TokenMixin.get_token_key()
 
     >>> from app.core.security import HashingMixin
     >>> class UserService(HashingMixin):
