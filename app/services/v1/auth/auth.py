@@ -76,7 +76,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         
         return await self.create_token(user_schema)
 
-    async def create_token(user: UserSchema) -> TokenSchema:
+    async def create_token(self, user_schema: UserSchema) -> TokenSchema:
         """
         Создание JWT токена
 
@@ -86,9 +86,9 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         Returns:
             TokenSchema: Схема с access_token и token_type
         """
-        payload = TokenMixin.create_payload(user)
+        payload = TokenMixin.create_payload(user_schema)
         token = TokenMixin.generate_token(payload)
-        await self._data_manager.save_token(user, token)
+        await self._data_manager.save_token(user_schema, token)
 
         return TokenSchema(
             access_token=token, 
