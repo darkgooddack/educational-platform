@@ -33,6 +33,7 @@ def get_token_key() -> str:
         Секретный ключ
     """
     return config.token_key
+
 pwd_context = CryptContext(
     schemes=["argon2"],
     deprecated="auto",
@@ -72,8 +73,15 @@ class HashingMixin:
 
         Returns:
             True, если пароль соответствует хешу, иначе False.
+        
         """
-        return pwd_context.verify(plain_password, hashed_password)
+        try:
+            
+            return pwd_context.verify(plain_password, hashed_password)
+        
+        except passlib.exc.UnknownHashError:
+            
+            return False
 
 
 class TokenMixin:
@@ -95,7 +103,9 @@ class TokenMixin:
             JWT токен
         """
         return jwt.encode(
-            payload, key=TokenMixin.get_token_key(), algorithm=config.token_algorithm
+            payload, 
+            key=TokenMixin.get_token_key(), 
+            algorithm=config.token_algorithm
         )
 
     @staticmethod
