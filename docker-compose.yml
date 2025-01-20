@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  api:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,12 +9,30 @@ services:
       - ./.env
     ports:
       - "8000:8000"
-      - "8443:8443"
     restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - dokploy-network
-    depends_on:
-      - frontend
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-admin}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-admin}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dokploy-network
+
+
 networks:
   dokploy-network:
     external: true
