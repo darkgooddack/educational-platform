@@ -59,28 +59,58 @@ class UserService(HashingMixin, BaseService):
 
     async def create_user(self, user: RegistrationSchema) -> RegistrationResponseSchema:
         """
-        Создает нового пользователя в базе данных с использованием данных web формы или OAuth аутентификации.
+        Создает нового пользователя через веб-форму регистрации.
 
         Args:
-            user: Данные нового пользователя.
+            user: Данные пользователя из формы регистрации
 
         Returns:
-            RegistrationResponseSchema: Данные нового пользователя.
-            {
-                user_id (int): ID пользователя,
-                email (str): Email пользователя
-                message (str): Сообщение об успешном создании пользователя
-            }
+            RegistrationResponseSchema: Схема ответа с id, email и сообщением об успехе
+        """
+        
+        created_user = await self._create_user_internal(user)
+        
+        return RegistrationResponseSchema(
+            user_id=created_user.id,
+            email=created_user.email,
+            message="Регистрация успешно завершена"
+        )
+    
+    async def create_oauth_user(self, user: RegistrationSchema) -> UserModel:
+        """
+        Создает нового пользователя через OAuth аутентификацию.
+
+        Args:
+            user: Данные пользователя от OAuth провайдера
+
+        Returns:
+            UserModel: Полная модель созданного пользователя
+        """
+        return await self._create_user_internal(user)
+
+    async def _create_user_internal(self, user: RegistrationSchema) -> UserModel:
+        """
+        Внутренний метод создания пользователя в базе данных.
+
+        Args:
+            user: Данные нового пользователя
+
+        Returns:
+            UserModel: Созданная модель пользователя
+
+        Raises:
+            UserExistsError: Если пользователь с таким email или телефоном уже существует
+            UserCreationError: При ошибке создания пользователя
+
         Note:
-            - OAuthUserSchema дополнена полями провайдеров
-            - Поиск пользователя сначала по provider_id, потом по email
-            - create_user поддерживает оба типа схем
-            - Валидация телефона только для обычной регистрации
-            - Корректная обработка необязательных полей
+            - Поддерживает данные как из веб-формы, так и от OAuth провайдеров
+            - Проверяет уникальность email и телефона
+            - Сохраняет идентификаторы OAuth провайдеров
         """
         self.logger.info(f"Создание пользователя с параметрами: {user.model_dump()}")
         data_manager = UserDataManager(self.session)
 
+        # Проверка email
         try:
             await data_manager.get_user_by_email(user.email)
             raise UserExistsError("email", user.email)
@@ -97,14 +127,8 @@ class UserService(HashingMixin, BaseService):
 
         # Создаем модель пользователя
         user_data = user.model_dump(exclude_unset=True)
-        if isinstance(user, OAuthUserSchema):
-            user_data["phone"] = None # TODO: Проверить
 
         # Устанавливаем идентификаторы провайдеров, если они есть
-        vk_id = user_data.get("vk_id", None)
-        google_id = user_data.get("google_id", None)
-        yandex_id = user_data.get("yandex_id", None)
-
         user_model = UserModel(
             first_name=user.first_name,
             last_name=user.last_name,
@@ -114,22 +138,18 @@ class UserService(HashingMixin, BaseService):
             hashed_password=self.hash_password(user.password),
             role=UserRole.USER,
             avatar_url=None,
-            vk_id=vk_id,
-            google_id=google_id,
-            yandex_id=yandex_id
+            vk_id=user_data.get("vk_id", None)
+            google_id=user_data.get("google_id", None)
+            yandex_id=user_data.get("yandex_id", None)
         )
         try:
-            created_user = await data_manager.add_user(user_model)
-            return RegistrationResponseSchema(
-                user_id=created_user.id,
-                email=created_user.email,
-                message="Регистрация успешно завершена"
-            )
+            return await data_manager.add_user(user_model)
         except Exception as e:
             self.logger.error(f"Ошибка при создании пользователя: {e}")
             raise UserCreationError("Не удалось создать пользователя. Пожалуйста, попробуйте позже.")
 
-    async def get_by_field(self, field: str, value: str) -> UserSchema:
+
+    async def get_by_field(self, field: str, value: str) -> UserSchema | None:
         """
         Получает пользователя по заданному полю.
 
@@ -137,11 +157,11 @@ class UserService(HashingMixin, BaseService):
             field: Поле для поиска.
             value: Значение поля для поиска.
         Returns:
-            UserSchema: Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         return await self._data_manager.get_by_field(field, value)
 
-    async def get_by_email(self, email: str) -> UserSchema:
+    async def get_by_email(self, email: str) -> UserSchema | None:
         """
         Получает пользователя по email.
 
@@ -149,11 +169,11 @@ class UserService(HashingMixin, BaseService):
             email: Email пользователя.
 
         Returns:
-            UserSchema: Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         return await self._data_manager.get_user_by_email(email)
 
-    async def get_by_phone(self, phone: str) -> UserSchema:
+    async def get_by_phone(self, phone: str) -> UserSchema | None:
         """
         Получает пользователя по phone.
 
@@ -161,7 +181,7 @@ class UserService(HashingMixin, BaseService):
             phone: Phone пользователя.
 
         Returns:
-            UserSchema: Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         return await self._data_manager.get_user_by_phone(phone)
 

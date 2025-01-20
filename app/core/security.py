@@ -121,6 +121,30 @@ class TokenMixin:
             raise TokenExpiredError()
         except JWTError:
             raise TokenInvalidError()
+    
+    @staticmethod
+    async def create_token(self, user: UserSchema, data_manager: AuthDataManager) -> TokenSchema:
+        """
+        Создание JWT токена
+
+        Args:
+            user: Данные пользователя
+            data_manager: Менеджер данных для сохранения токена
+
+        Returns:
+            Токен доступа
+        """
+        if not isinstance(user, UserSchema):
+            raise ValueError("Expected user to be of type UserSchema")
+            
+        payload = TokenMixin.create_payload(user)
+        token = TokenMixin.generate_token(payload)
+        await data_manager.save_token(user, token)
+
+        return TokenSchema(
+            access_token=token, 
+            token_type=config.token_type
+        )
 
     @staticmethod
     def create_payload(user: UserSchema) -> dict:
@@ -133,7 +157,10 @@ class TokenMixin:
         Returns:
             Payload для JWT
         """
-        return {"sub": user.email, "expires_at": TokenMixin.get_token_expiration()}
+        return {
+            "sub": user.email, 
+            "expires_at": TokenMixin.get_token_expiration()
+        }
 
     @staticmethod
     def get_token_key() -> str:

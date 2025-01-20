@@ -73,14 +73,10 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             raise InvalidCredentialsError()
 
         user_schema = UserSchema.model_validate(user_model)
-        payload = self.create_payload(user_schema)
-        token = self.generate_token(payload)
+        
+        return await TokenMixin.create_token(user_schema, self._data_manager)
 
-        await self._data_manager.save_token(user_schema, token)
-        return TokenSchema(
-            access_token=token,
-            token_type=config.token_type
-        )
+        
 
     async def logout(self, token: str) -> dict:
         """

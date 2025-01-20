@@ -52,10 +52,12 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         self.logger.debug("user_data: %s", user_data)
 
         # Ищем или создаем пользователя
-        user = await self._get_or_create_user(provider, user_data)
+        created_user = await self._get_or_create_user(provider, user_data)
 
-        # Генерируем JWT токен
-        return await self._create_token(user)
+        # Передаем данные созданного пользователя
+        self.logger.debug("created_user: %s", created_user)
+
+        return created_user
 
     async def _get_or_create_user(self, provider: str, user_data: dict) -> TokenSchema:
         """
@@ -67,58 +69,71 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         Returns:
             TokenSchema с access_token
+
+        NOTE:
+            Пример user_data от yandex:
+            {
+                'id': '2<...>6', 
+                'login': 't<...>l', 
+                'client_id': '90d25ee61c06<...>2a70ecf5865', 
+                'default_email': '<...>l@yandex.ru', - пока ориентируемся на это название, в случае с другими провайдерами делаем по-другому
+                'emails': ['<...>l@yandex.ru'], # - нужно подумать, что делать, если emails несколько штук
+                'psuid': '1.AA0ZzA.BuDewI5<...>oB-Zgkebg5Wo77OLhsw'
+            }
+        TODO: 
+            Требуется проверить что приходит и от google и от vk и занести в email_field_mapping
         """
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
         provider_id = user_data["id"]
 
+        # Маппинг полей email для разных провайдеров
+        email_field_mapping = {
+            'yandex': 'default_email',
+            'google': 'email',
+            'vk': 'email'
+        }
+        user_email = user_data[email_field_mapping.get(provider, 'default_email')]
+
         try:
-            # Сначала ищем по provider_id
+            # Поиск по provider_id
             return await self._user_service.get_by_field(provider_field, provider_id)
         except UserNotFoundError:
             try:
-                # Затем пробуем найти по default_email
-                #! Пример user_data от yandex:
-                # {
-                #    'id': '2<...>6', 
-                #    'login': 't<...>l', 
-                #    'client_id': '90d25ee61c06<...>2a70ecf5865', 
-                #    'default_email': '<...>l@yandex.ru', - пока ориентируемся на это название, в случае с другими провайдерами делаем по-другому
-                #    'emails': ['<...>l@yandex.ru'], # - нужно подумать, что делать, если emails несколько штук
-                #    'psuid': '1.AA0ZzA.BuDewI5<...>oB-Zgkebg5Wo77OLhsw'
-                #}
-                # TODO: Требуется проверить что приходит и от google и от vk
-                return await self._user_service.get_by_email(user_data["default_email"]) # В случае с другими провайдерами пока не ясно что там
+                # Поиск по email
+                return await self._user_service.get_by_email(user_email)
             except UserNotFoundError:
-                # Базовые поля пользователя
-                user_data = {
-                    "email": user_data["default_email"], # В случае с другими провайдерами пока не ясно что там
-                    "first_name": user_data.get("first_name", ""),
-                    "last_name": user_data.get("last_name", ""),
-                    "password": secrets.token_hex(16),
-                    provider_field: provider_id
-                }
+                
+                # Создаем нового пользователя
+                oauth_user = OAuthUserSchema(
+                    email=user_email,
+                    first_name=user_data.get("first_name", ""),
+                    last_name=user_data.get("last_name", ""),
+                    middle_name=user_data.get("middle_name", None),
+                    phone=user_data.get("phone", None),
+                    password=secrets.token_hex(16),  # Генерируем случайный пароль
+                    **{provider_field: provider_id}  # Добавляем ID провайдера
+                )
 
-                # Создаем пользователя
-                oauth_user = OAuthUserSchema(**user_data)
-                user = await self._user_service.create_user(oauth_user)
-                return await self._user_service.get_by_email(user.email)
+                oauth_user_dict = oauth_user.model_dump()
+                registration_data = RegistrationSchema(**oauth_user_dict)
+                created_user = await self._user_service.create_oauth_user(registration_data)
 
-    async def _create_token(self, user: UserSchema) -> TokenSchema:
-        """
-        Создание JWT токена
+                # Генерация имени пользователя если оно пустое
+                display_name = created_user.first_name or f"User_{created_user.id}"
 
-        Args:
-            user: Данные пользователя
-        Returns:
-            Токен доступа
-        """
-        payload = self.create_payload(user)
-        token = self.generate_token(payload)
-        await self._data_manager.save_token(user, token)
+                # Создаем UserSchema для токена
+                user_schema = UserSchema(
+                    id=created_user.id,
+                    name=display_name,
+                    email=created_user.email,
+                    hashed_password=created_user.hashed_password
+                )
 
-        return TokenSchema(access_token=token, token_type=config.token_type)
+                # Создаем и возвращаем токен
+                return await TokenMixin.create_token(user_schema, self._data_manager)
 
+    
     async def get_oauth_url(self, provider: str) -> RedirectResponse:
         """
         Получение URL для OAuth2 авторизации
