@@ -77,12 +77,22 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             return await self._user_service.get_by_field(provider_field, provider_id)
         except UserNotFoundError:
             try:
-                # Затем пробуем найти по email
-                return await self._user_service.get_by_email(user_data["email"])
+                # Затем пробуем найти по default_email
+                #! Пример user_data от yandex:
+                # {
+                #    'id': '2<...>6', 
+                #    'login': 't<...>l', 
+                #    'client_id': '90d25ee61c06<...>2a70ecf5865', 
+                #    'default_email': '<...>l@yandex.ru', - пока ориентируемся на это название, в случае с другими провайдерами делаем по-другому
+                #    'emails': ['<...>l@yandex.ru'], # - нужно подумать, что делать, если emails несколько штук
+                #    'psuid': '1.AA0ZzA.BuDewI5<...>oB-Zgkebg5Wo77OLhsw'
+                #}
+                # TODO: Требуется проверить что приходит и от google и от vk
+                return await self._user_service.get_by_email(user_data["default_email"]) # В случае с другими провайдерами пока не ясно что там
             except UserNotFoundError:
                 # Базовые поля пользователя
                 user_data = {
-                    "email": user_data["email"],
+                    "email": user_data["default_email"], # В случае с другими провайдерами пока не ясно что там
                     "first_name": user_data.get("first_name", ""),
                     "last_name": user_data.get("last_name", ""),
                     "password": secrets.token_hex(16),
