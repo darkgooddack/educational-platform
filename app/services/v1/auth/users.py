@@ -252,14 +252,20 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         Returns:
             UserSchema: Данные пользователя.
         """
+        existing_user = await self.get_user_by_email(user.email)
+        if existing_user:
+            raise UserExistsError("email", user.email)
+
+        existing_user = await self.get_user_by_phone(user.phone)
+        if existing_user:
+            raise UserExistsError("phone", user.phone)
+
         try:
             return await self.add_one(user)
         except IntegrityError as e:
-            if "users.email" in f"{e}":
-                raise UserExistsError("email", user.email) from e
-            elif "users.phone" in f"{e}":
-                raise UserExistsError("phone", user.phone) from e
+            # Обработка исключений, если они все же возникнут
             raise e
+        
 
     async def get_user_by_email(self, email: str) -> UserSchema | None:
         """
