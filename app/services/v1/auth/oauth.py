@@ -44,8 +44,8 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         # Получаем токен от провайдера
         token_data = await self._get_provider_token(provider, code)
 
-        self.logger.debug("token_data: ", token_data)
-        
+        self.logger.debug("token_data: %s", token_data)
+
         # Получаем данные пользователя
         user_data = await self._get_user_info(provider, token_data)
 
