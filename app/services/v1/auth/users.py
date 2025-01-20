@@ -21,7 +21,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import UserExistsError, UserNotFoundError
+from app.core.exceptions import (
+    UserExistsError, 
+    UserNotFoundError,
+    UserCreationError
+)
 from app.core.security import HashingMixin
 from app.models import UserModel
 from app.schemas import (RegistrationResponseSchema, RegistrationSchema,
@@ -94,7 +98,12 @@ class UserService(HashingMixin, BaseService):
         # Создаем модель пользователя
         user_data = user.model_dump(exclude_unset=True)
         if isinstance(user, OAuthUserSchema):
-            user_data["phone"] = None
+            user_data["phone"] = None # TODO: Проверить
+
+        # Устанавливаем идентификаторы провайдеров, если они есть
+        vk_id = user_data.get("vk_id", None)
+        google_id = user_data.get("google_id", None)
+        yandex_id = user_data.get("yandex_id", None)
 
         user_model = UserModel(
             first_name=user.first_name,
@@ -105,16 +114,20 @@ class UserService(HashingMixin, BaseService):
             hashed_password=self.hash_password(user.password),
             role=UserRole.USER,
             avatar_url=None,
-            vk_id=None,
-            google_id=None,
-            yandex_id=None
+            vk_id=vk_id,
+            google_id=google_id,
+            yandex_id=yandex_id
         )
-
-        created_user = await data_manager.add_user(user_model)
-        return RegistrationResponseSchema(
-            user_id=created_user.id,
-            email=created_user.email
-        )
+        try:
+            created_user = await data_manager.add_user(user_model)
+            return RegistrationResponseSchema(
+                user_id=created_user.id,
+                email=created_user.email,
+                message="Регистрация успешно завершена"
+            )
+        except Exception as e:
+            self.logger.error(f"Ошибка при создании пользователя: {e}")
+            raise UserCreationError("Не удалось создать пользователя. Пожалуйста, попробуйте позже.")
 
     async def get_by_field(self, field: str, value: str) -> UserSchema:
         """

@@ -27,7 +27,8 @@ from .v1.auth.oauth import (
 
 from .v1.auth.users import (
     UserExistsError,
-    UserNotFoundError
+    UserNotFoundError,
+    UserCreationError
 )
 from .v1.auth.security import (
     TokenInvalidError,
@@ -53,4 +54,5 @@ __all__ = [
     "OAuthInvalidGrantError",
     "UserExistsError",
     "UserNotFoundError",
+    "UserCreationError"
 ]
