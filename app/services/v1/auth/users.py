@@ -111,21 +111,17 @@ class UserService(HashingMixin, BaseService):
         data_manager = UserDataManager(self.session)
 
         # Проверка email
-        try:
-            self.logger.debug("Проверка пользователя по email 1:")
-            await data_manager.get_user_by_email(user.email)
-            
+        existing_user = await data_manager.get_user_by_email(user.email)
+        if existing_user:
+            self.logger.error("Пользователь с email '%s' уже существует", user.email)
             raise UserExistsError("email", user.email)
-        except UserNotFoundError:
-            pass
 
         # Проверяем телефон только для обычной регистрации
         if isinstance(user, RegistrationSchema) and user.phone:
-            try:
-                await data_manager.get_user_by_phone(user.phone)
+            existing_user = await data_manager.get_user_by_phone(user.phone)
+            if existing_user:
+                self.logger.error("Пользователь с телефоном '%s' уже существует", user.phone)
                 raise UserExistsError("phone", user.phone)
-            except UserNotFoundError:
-                pass
 
         # Создаем модель пользователя
         user_data = user.model_dump(exclude_unset=True)
