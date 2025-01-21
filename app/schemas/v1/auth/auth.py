@@ -31,11 +31,7 @@ class TokenSchema(BaseInputSchema):
     Args:
         access_token (str): Токен доступа.
         token_type (str): Тип токена.
-        provider: (str) Провайдер.
-        email: (str): Email.
     """
 
     access_token: str
     token_type: str = "bearer"
-    provider: Optional[str] = None
-    email: Optional[str] = None
