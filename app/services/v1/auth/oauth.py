@@ -37,7 +37,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         self._user_service = UserService(session)
         self._data_manager = AuthDataManager(session)
 
-    async def authenticate(self, provider: str, code: str) -> TokenSchema:
+    async def oauthenticate(self, provider: str, code: str) -> TokenSchema:
         """
         Полный процесс OAuth аутентификации
 
