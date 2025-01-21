@@ -22,6 +22,7 @@ from app.core.exceptions import (
 )
 from app.core.config import config
 from app.core.security import HashingMixin, TokenMixin
+from app.models import UserModel
 from ..base import BaseService
 from .auth import AuthDataManager
 from .users import UserService
