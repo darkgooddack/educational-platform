@@ -125,7 +125,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                     first_name=user_data.get("first_name", "Анонимус"),
                     last_name=user_data.get("last_name", "Пользователь"),
                     middle_name=user_data.get("middle_name"),
-                    phone="+7 (000) 000-00-00" if user_data.get("phone") else None,
+                    phone=user_data.get("phone") or "+7 (000) 000-00-00",
                     password=secrets.token_hex(16),  # Генерируем случайный пароль
                     **{provider_field: provider_id}  # Добавляем ID провайдера
                 )
