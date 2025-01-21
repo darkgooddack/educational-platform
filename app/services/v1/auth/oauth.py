@@ -24,7 +24,7 @@ from app.core.config import config
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
 from ..base import BaseService
-from .auth import AuthDataManager
+from .auth import AuthService, AuthDataManager
 from .users import UserService
 
 class OAuthService(HashingMixin, TokenMixin, BaseService):
