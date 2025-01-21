@@ -47,5 +47,5 @@ class OAuthResponse(BaseInputSchema):
 
     access_token: str
     token_type: str = "bearer"
-    provider: str
-    email: str
+    provider: Optional[str] = None
+    email: Optional[str] = None
