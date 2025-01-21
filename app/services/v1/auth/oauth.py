@@ -106,41 +106,40 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             return await self._user_service.get_by_field(provider_field, provider_id)
         except UserNotFoundError:
             
-            try:
-                self.logger.warning("❌ Пользователь не найден по provider_id, пробуем по email...")
-                # Поиск по email
-                return await self._user_service.get_by_email(user_email)
-            except UserNotFoundError:
-                self.logger.warning("❌ Пользователь не найден по email, создаем нового пользователя...")
+        try:
+            self.logger.warning("❌ Пользователь не найден по provider_id, пробуем по email...")
+            # Поиск по email
+            return await self._user_service.get_by_email(user_email)
+        except UserNotFoundError:
+            self.logger.warning("❌ Пользователь не найден по email, создаем нового пользователя...")
                 
-                # Создаем нового пользователя
-                oauth_user = OAuthUserSchema(
-                    email=user_email,
-                    first_name=user_data.get("first_name", ""),
-                    last_name=user_data.get("last_name", ""),
-                    middle_name=user_data.get("middle_name", None),
-                    phone=user_data.get("phone", None),
-                    password=secrets.token_hex(16),  # Генерируем случайный пароль
-                    **{provider_field: provider_id}  # Добавляем ID провайдера
-                )
-                self.logger.debug(f"📝 Создание нового пользователя с email: {user_email}")
-                oauth_user_dict = oauth_user.model_dump()
-                registration_data = RegistrationSchema(**oauth_user_dict)
-                created_user = await self._user_service.create_oauth_user(registration_data)
-                self.logger.debug(f"✅ Пользователь удачно создан с id: {created_user.id}")
-                # Генерация имени пользователя если оно пустое
-                display_name = created_user.first_name or f"User_{created_user.id}"
-
-                # Создаем UserSchema для токена
-                user_schema = UserSchema(
-                    id=created_user.id,
-                    name=display_name,
-                    email=created_user.email,
-                    hashed_password=created_user.hashed_password
-                )
-                self.logger.debug("🔑 Создание токена для пользователя...")
-                # Создаем и возвращаем токен
-                return await self.create_token(user_schema)
+        # Создаем нового пользователя
+        oauth_user = OAuthUserSchema(
+            email=user_email,
+            first_name=user_data.get("first_name", ""),
+            last_name=user_data.get("last_name", ""),
+            middle_name=user_data.get("middle_name", None),
+            phone=user_data.get("phone", None),
+            password=secrets.token_hex(16),  # Генерируем случайный пароль
+            **{provider_field: provider_id}  # Добавляем ID провайдера
+        )
+        self.logger.debug(f"📝 Создание нового пользователя с email: {user_email}")
+        oauth_user_dict = oauth_user.model_dump()
+        registration_data = RegistrationSchema(**oauth_user_dict)
+        created_user = await self._user_service.create_oauth_user(registration_data)
+        self.logger.debug(f"✅ Пользователь удачно создан с id: {created_user.id}")
+        # Генерация имени пользователя если оно пустое
+        display_name = created_user.first_name or f"User_{created_user.id}
+        # Создаем UserSchema для токена
+        user_schema = UserSchema(
+            id=created_user.id,
+            name=display_name,
+            email=created_user.email,
+            hashed_password=created_user.hashed_password
+        )
+        self.logger.debug("🔑 Создание токена для пользователя...")
+        # Создаем и возвращаем токен
+        return await self.create_token(user_schema)
 
     
     async def get_oauth_url(self, provider: str) -> RedirectResponse:
