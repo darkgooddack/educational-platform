@@ -126,6 +126,10 @@ class UserService(HashingMixin, BaseService):
         # Создаем модель пользователя
         user_data = user.model_dump(exclude_unset=True)
 
+        vk_id = user_data.get("vk_id")
+        google_id = user_data.get("google_id")
+        yandex_id = user_data.get("yandex_id")
+
         # Устанавливаем идентификаторы провайдеров, если они есть
         user_model = UserModel(
             first_name=user.first_name,
@@ -136,10 +140,11 @@ class UserService(HashingMixin, BaseService):
             hashed_password=self.hash_password(user.password),
             role=UserRole.USER,
             avatar_url=None,
-            vk_id=int(user_data.get("vk_id")) if user_data.get("vk_id", "").isdigit() else None,
-            google_id=int(user_data.get("google_id")) if user_data.get("google_id", "").isdigit() else None,
-            yandex_id=int(user_data.get("yandex_id")) if user_data.get("yandex_id", "").isdigit() else None
-        ) #! Проверить
+            vk_id=int(vk_id) if vk_id is not None else None,
+            google_id=int(google_id) if google_id is not None else None,
+            yandex_id=int(yandex_id) if yandex_id is not None else None,
+        )
+        
         try:
             return await data_manager.add_user(user_model)
         except Exception as e:
