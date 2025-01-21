@@ -105,9 +105,8 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             # Поиск по provider_id
             return await self._user_service.get_by_field(provider_field, provider_id)
         except UserNotFoundError:
-            
-        try:
             self.logger.warning("❌ Пользователь не найден по provider_id, пробуем по email...")
+        try:
             # Поиск по email
             return await self._user_service.get_by_email(user_email)
         except UserNotFoundError:
