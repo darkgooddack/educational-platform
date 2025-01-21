@@ -12,9 +12,8 @@
 Класс `BaseInputSchema` - если в использоовании общих атрибутов
 из BaseSchema нет необходимости или они будут другие
 """
-from typing import TypeVar
+from typing import TypeVar, Optional
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 

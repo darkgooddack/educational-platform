@@ -25,9 +25,9 @@ async def lifespan(_app: FastAPI):
     from app.core.clients import RabbitMQClient, RedisClient
 
     await RedisClient.get_instance()
-    # await RabbitMQClient.get_instance()
+    await RabbitMQClient.get_instance()
 
     yield
 
     await RedisClient.close()
-    # await RabbitMQClient.close()
+    await RabbitMQClient.close()

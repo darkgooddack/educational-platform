@@ -69,17 +69,17 @@ class Settings(BaseSettings):
     )
 
     redis_url: RedisDsn = Field(
-        default="redis://default:default@redis:6379",
+        default="redis://default:default@localhost:6380",
         description="Ссылка для подключения к Redis",
     )
 
     database_dsn: str = Field(
-        default="postgresql+asyncpg://postgres:postgres@postgres:5432/educational_db",
+        default="postgresql+asyncpg://postgres:postgres@localhost:5434/educational_db",
         description="Ссылка для подключения к базе данных",
     )
 
     rabbitmq_dsn: AmqpDsn = Field(
-        default="amqp://guest:guest@rabbitmq:5672/",
+        default="amqp://guest:guest@localhost:15672/",
         description="URL подключения к RabbitMQ",
     )
 
@@ -109,9 +109,9 @@ class Settings(BaseSettings):
             "vk": {
                 "client_id": "",
                 "client_secret": "",
-                "auth_url": "https://oauth.vk.com/authorize",
-                "token_url": "https://oauth.vk.com/access_token",
-                "user_info_url": "https://api.vk.com/method/users.get",
+                "auth_url": "https://id.vk.com/authorize",
+                "token_url": "https://id.vk.com/oauth2/auth",
+                "user_info_url": "https://id.vk.com/oauth2/user_info",
                 "scope": "email",
             },
             "google": {
