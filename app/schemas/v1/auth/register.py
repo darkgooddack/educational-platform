@@ -37,9 +37,9 @@ class RegistrationSchema(BaseInputSchema):
         examples=["+7 (999) 123-45-67"],
     )
     password: str = Field(min_length=8, description="Пароль минимум 8 символов")
-    vk_id: Optional[str] = None
-    google_id: Optional[str] = None
-    yandex_id: Optional[str] = None
+    vk_id: Optional[int] = None
+    google_id: Optional[int] = None
+    yandex_id: Optional[int] = None
 
 class RegistrationResponseSchema(BaseInputSchema):
     """
