@@ -147,7 +147,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         # Создаем токен для существующего пользователя
         return await self.create_token(user_schema)
     
-    async def _create_token(self, user: UserModel) -> TokenSchema:
+    async def _create_token(self, new_user: UserModel) -> TokenSchema:
         """
         Создаем токен для нового пользователя
 
@@ -159,14 +159,12 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         TODO: Можно переделать получше.
         """
-        # Генерация имени пользователя если оно пустое
-        display_name = user.first_name or f"User_{user.id}"
         # Создаем UserSchema для токена
         user_schema = UserSchema(
-            id=user.id,
-            name=display_name,
-            email=user.email,
-            hashed_password=user.hashed_password
+            id=new_user.id,
+            name=new_user.first_name,
+            email=new_user.email,
+            hashed_password=new_user.hashed_password
         )
         self.logger.debug("🔑 Создание токена для пользователя...")
         # Создаем и возвращаем токен
