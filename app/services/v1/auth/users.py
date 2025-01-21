@@ -305,8 +305,9 @@ class UserDataManager(BaseEntityManager[UserSchema]):
             UserSchema | None: Данные пользователя или None.
         """
         statement = select(self.model).where(getattr(self.model, field) == value)
-        user = await self.get_one(statement)
-        return user
+        data = await self.get_one(statement)
+        self.logger.debug("data: %s", data)
+        return data
 
     async def update_user(self, user_id: int, data: dict) -> UserUpdateSchema:
         """
