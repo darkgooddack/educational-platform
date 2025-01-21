@@ -86,7 +86,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
-        provider_id = int(user_data["id"])
+        provider_id = int(user_data.id)
 
         # Получаем email в зависимости от провайдера
         user_email = (
@@ -98,7 +98,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             self.logger.error("❌ Email не найден в данных пользователя.")
             return None
 
-        self.logger.debug(f"🔍 Ищем пользователя {provider_field}: {provider_id}")
+        self.logger.debug("🔍 Ищем пользователя по провайдеру %s: %s", provider_field, provider_id)
 
         # Поиск по provider_id
         user_schema = await self._user_service.get_by_field(provider_field, provider_id)
@@ -115,23 +115,22 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 # Создаем нового пользователя
                 oauth_user = OAuthUserSchema(
                     email=user_email,
-                    first_name=user_data.get("first_name", "Анонимус"),
-                    last_name=user_data.get("last_name", "Пользователь"),
-                    middle_name=user_data.get("middle_name"),
-                    phone=user_data.get("phone") or "+7 (000) 000-00-00",
-                    password=secrets.token_hex(16),  # Генерируем случайный пароль
-                    **{provider_field: provider_id}  # Добавляем ID провайдера
+                    first_name=user_data.first_name or "Анонимус",
+                    last_name=user_data.last_name or "Пользователь",
+                    phone=user_data.phone if hasattr(user_data, 'phone') else "+7   (000) 000-00-00",
+                    password=secrets.token_hex(16),
+                    **{provider_field: provider_id}
                 )
 
-                self.logger.debug(f"📝 Создание нового пользователя с email: {user_email}")
+                self.logger.debug("📝 Создание нового пользователя с email: %s",user_email)
                 oauth_user_dict = oauth_user.to_dict()
                 registration_data = RegistrationSchema(**oauth_user_dict)
 
                 try:
                     created_user = await self._user_service.create_oauth_user(registration_data)
-                    self.logger.debug(f"✅ Пользователь удачно создан с id: {created_user.id}")
+                    self.logger.debug("✅ Пользователь удачно создан с id: %s",created_user.id)
                 except Exception as e:
-                    self.logger.error(f"Ошибка при создании пользователя: {e}")
+                    self.logger.error("Ошибка при создании пользователя: %s", e)
                     return None
 
                 # Создаем токен для нового пользователя
