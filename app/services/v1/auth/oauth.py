@@ -33,6 +33,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.providers = config.oauth_providers
+        self._auth_service = AuthService(session)
         self._user_service = UserService(session)
         self._data_manager = AuthDataManager(session)
 
@@ -145,7 +146,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 return await self._create_token(created_user)
         
         # Создаем токен для существующего пользователя
-        return await self.create_token(user_schema)
+        return await self._auth_service.create_token(user_schema)
     
     async def _create_token(self, new_user: UserModel) -> TokenSchema:
         """
