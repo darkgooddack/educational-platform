@@ -16,7 +16,7 @@
     user = await service.create_user(user_data)
     user_by_email = await service.get_by_email("test@test.com")
 """
-
+from typing import Any
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -147,7 +147,7 @@ class UserService(HashingMixin, BaseService):
             raise UserCreationError("Не удалось создать пользователя. Пожалуйста, попробуйте позже.")
 
 
-    async def get_by_field(self, field: str, value: str) -> UserSchema | None:
+    async def get_by_field(self, field: str, value: Any) -> UserSchema | None:
         """
         Получает пользователя по заданному полю.
 
@@ -293,7 +293,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         user = await self.get_one(statement)
         return user
 
-    async def get_by_field(self, field: str, value: str) -> UserSchema | None:
+    async def get_by_field(self, field: str, value: Any) -> UserSchema | None:
         """
         Получает пользователя по полю.
 
