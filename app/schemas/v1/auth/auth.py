@@ -2,6 +2,7 @@
 Схемы для аутентификации и управления пользователями.
 """
 
+from typing import Optional
 from pydantic import EmailStr, Field
 
 from ..base import BaseInputSchema
@@ -33,4 +34,4 @@ class TokenSchema(BaseInputSchema):
     """
 
     access_token: str
-    token_type: str
+    token_type: str = "bearer"

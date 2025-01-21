@@ -62,7 +62,7 @@ def setup_routes(router: APIRouter):
         **Raises**:
         - **HTTPException**: При ошибке получения токена или данных пользователя
         """
-        return await OAuthService(db_session).authenticate(provider, code)
+        return await OAuthService(db_session).oauthenticate(provider, code)
 
 
 __all__ = ["setup_routes"]

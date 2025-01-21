@@ -1,3 +1,4 @@
+import logging
 from urllib.parse import urlencode
 import secrets
 import aiohttp
@@ -6,12 +7,24 @@ from fastapi.responses import RedirectResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import OAuthUserSchema, TokenSchema, UserSchema
-from app.core.exceptions import UserNotFoundError, InvalidProviderError, OAuthConfigError
+from app.schemas import (
+    OAuthUserSchema, 
+    TokenSchema, 
+    UserSchema, 
+    RegistrationSchema
+)
+from app.core.exceptions import (
+    UserNotFoundError, 
+    InvalidProviderError, 
+    OAuthInvalidGrantError, 
+    OAuthTokenError, 
+    OAuthConfigError
+)
 from app.core.config import config
 from app.core.security import HashingMixin, TokenMixin
+from app.models import UserModel
 from ..base import BaseService
-from .auth import AuthDataManager
+from .auth import AuthService, AuthDataManager
 from .users import UserService
 
 class OAuthService(HashingMixin, TokenMixin, BaseService):
@@ -20,10 +33,11 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.providers = config.oauth_providers
+        self._auth_service = AuthService(session)
         self._user_service = UserService(session)
         self._data_manager = AuthDataManager(session)
 
-    async def authenticate(self, provider: str, code: str) -> TokenSchema:
+    async def oauthenticate(self, provider: str, code: str) -> TokenSchema:
         """
         Полный процесс OAuth аутентификации
 
@@ -37,14 +51,20 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         # Получаем токен от провайдера
         token_data = await self._get_provider_token(provider, code)
 
+        self.logger.debug("token_data: %s", token_data)
+        
         # Получаем данные пользователя
         user_data = await self._get_user_info(provider, token_data)
 
-        # Ищем или создаем пользователя
-        user = await self._get_or_create_user(provider, user_data)
+        self.logger.debug("user_data: %s", user_data)
 
-        # Генерируем JWT токен
-        return await self._create_token(user)
+        # Ищем или создаем пользователя
+        created_user = await self._get_or_create_user(provider, user_data)
+
+        # Передаем данные созданного пользователя
+        self.logger.debug("created_user: %s", created_user)
+           
+        return created_user
 
     async def _get_or_create_user(self, provider: str, user_data: dict) -> TokenSchema:
         """
@@ -56,47 +76,100 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         Returns:
             TokenSchema с access_token
+
+        NOTE:
+            Пример user_data от yandex:
+            {
+                'id': '2<...>6', 
+                'login': 't<...>l', 
+                'client_id': '90d25ee61c06<...>2a70ecf5865', 
+                'default_email': '<...>l@yandex.ru', - пока ориентируемся на это название, в случае с другими провайдерами делаем по-другому
+                'emails': ['<...>l@yandex.ru'], # - нужно подумать, что делать, если emails несколько штук
+                'psuid': '1.AA0ZzA.BuDewI5<...>oB-Zgkebg5Wo77OLhsw'
+            }
+        TODO: 
+            Требуется проверить что приходит и от google и от vk и занести в email_field_mapping
         """
+        
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
-        provider_id = str(user_data["id"])
+        provider_id = int(user_data["id"])
 
-        try:
-            # Сначала ищем по provider_id
-            return await self._user_service.get_by_field(provider_field, provider_id)
-        except UserNotFoundError:
-            try:
-                # Затем пробуем найти по email
-                return await self._user_service.get_by_email(user_data["email"])
-            except UserNotFoundError:
-                # Базовые поля пользователя
-                user_data = {
-                    "email": user_data["email"],
-                    "first_name": user_data.get("first_name", ""),
-                    "last_name": user_data.get("last_name", ""),
-                    "password": secrets.token_hex(16),
-                    provider_field: provider_id
-                }
+        # Маппинг полей email для разных провайдеров
+        email_field_mapping = {
+            'yandex': 'default_email',
+            'google': 'email',
+            'vk': 'email'
+        }
+        user_email = user_data[email_field_mapping.get(provider, 'default_email')]
+        if not user_email:
+            self.logger.error("❌ Email не найден в данных пользователя.")
+            return None
+        
+        self.logger.debug(f"🔍 Ищем пользователя {provider_field}: {provider_id}")
 
-                # Создаем пользователя
-                oauth_user = OAuthUserSchema(**user_data)
-                user = await self._user_service.create_user(oauth_user)
-                return await self._user_service.get_by_email(user.email)
+        # Поиск по provider_id
+        user_schema = await self._user_service.get_by_field(provider_field, provider_id)
+        
+        if user_schema is None:
+            self.logger.warning("❌ Пользователь не найден по provider_id, пробуем по email...")
+        
+            # Поиск по email
+            user_schema = await self._user_service.get_by_email(user_email)
+        
+            if user_schema is None:
+                self.logger.warning("❌ Пользователь не найден по email, создаем нового пользователя...")
+                
+                # Создаем нового пользователя
+                oauth_user = OAuthUserSchema(
+                    email=user_email,
+                    first_name=user_data.get("first_name", "Анонимус"),
+                    last_name=user_data.get("last_name", "Пользователь"),
+                    middle_name=user_data.get("middle_name"),
+                    phone=user_data.get("phone") or "+7 (000) 000-00-00",
+                    password=secrets.token_hex(16),  # Генерируем случайный пароль
+                    **{provider_field: provider_id}  # Добавляем ID провайдера
+                )
+                
+                self.logger.debug(f"📝 Создание нового пользователя с email: {user_email}")
+                oauth_user_dict = oauth_user.to_dict()
+                registration_data = RegistrationSchema(**oauth_user_dict)
 
-    async def _create_token(self, user: UserSchema) -> TokenSchema:
+                try:
+                    created_user = await self._user_service.create_oauth_user(registration_data)
+                    self.logger.debug(f"✅ Пользователь удачно создан с id: {created_user.id}")
+                except Exception as e:
+                    self.logger.error(f"Ошибка при создании пользователя: {e}")
+                    return None
+                
+                # Создаем токен для нового пользователя
+                return await self._create_token(created_user)
+        
+        # Создаем токен для существующего пользователя
+        return await self._auth_service.create_token(user_schema)
+    
+    async def _create_token(self, new_user: UserModel) -> TokenSchema:
         """
-        Создание JWT токена
+        Создаем токен для нового пользователя
 
-        Args:
-            user: Данные пользователя
-        Returns:
-            Токен доступа
+        Attributes:
+            user: Модель пользователя из базы данных после регистрации
+        
+        Returns: 
+            TokenSchema: Токен доступа.
+
+        TODO: Можно переделать получше.
         """
-        payload = self.create_payload(user)
-        token = self.generate_token(payload)
-        await self._data_manager.save_token(user, token)
-
-        return TokenSchema(access_token=token, token_type=config.token_type)
+        # Создаем UserSchema для токена
+        user_schema = UserSchema(
+            id=new_user.id,
+            name=new_user.first_name,
+            email=new_user.email,
+            hashed_password=new_user.hashed_password
+        )
+        self.logger.debug("🔑 Создание токена для пользователя...")
+        # Создаем и возвращаем токен
+        return await self.create_token(user_schema)
 
     async def get_oauth_url(self, provider: str) -> RedirectResponse:
         """
@@ -181,12 +254,11 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 data=token_params
             ) as resp:
                 token_data = await resp.json()
-
-                if "error" in token_data:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=token_data["error"]
-                    )
+                if "error" in token_data and token_data["error"] == "invalid_grant":
+                    raise OAuthInvalidGrantError(provider)
+                elif "error" in token_data:
+                    raise OAuthTokenError(provider, token_data["error"])
+                return token_data
 
     async def _get_user_info(self, provider: str, token_data: dict) -> dict:
         """

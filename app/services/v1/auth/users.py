@@ -16,12 +16,16 @@
     user = await service.create_user(user_data)
     user_by_email = await service.get_by_email("test@test.com")
 """
-
+from typing import Any
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import UserExistsError, UserNotFoundError
+from app.core.exceptions import (
+    UserExistsError, 
+    UserNotFoundError,
+    UserCreationError
+)
 from app.core.security import HashingMixin
 from app.models import UserModel
 from app.schemas import (RegistrationResponseSchema, RegistrationSchema,
@@ -55,47 +59,78 @@ class UserService(HashingMixin, BaseService):
 
     async def create_user(self, user: RegistrationSchema) -> RegistrationResponseSchema:
         """
-        Создает нового пользователя в базе данных с использованием данных web формы или OAuth аутентификации.
+        Создает нового пользователя через веб-форму регистрации.
 
         Args:
-            user: Данные нового пользователя.
+            user: Данные пользователя из формы регистрации
 
         Returns:
-            RegistrationResponseSchema: Данные нового пользователя.
-            {
-                user_id (int): ID пользователя,
-                email (str): Email пользователя
-                message (str): Сообщение об успешном создании пользователя
-            }
+            RegistrationResponseSchema: Схема ответа с id, email и сообщением об успехе
+        """
+        
+        created_user = await self._create_user_internal(user)
+        
+        return RegistrationResponseSchema(
+            user_id=created_user.id,
+            email=created_user.email,
+            message="Регистрация успешно завершена"
+        )
+    
+    async def create_oauth_user(self, user: RegistrationSchema) -> UserModel:
+        """
+        Создает нового пользователя через OAuth аутентификацию.
+
+        Args:
+            user: Данные пользователя от OAuth провайдера
+
+        Returns:
+            UserModel: Полная модель созданного пользователя
+        """
+        return await self._create_user_internal(user)
+
+    async def _create_user_internal(self, user: RegistrationSchema) -> UserModel:
+        """
+        Внутренний метод создания пользователя в базе данных.
+
+        Args:
+            user: Данные нового пользователя
+
+        Returns:
+            UserModel: Созданная модель пользователя
+
+        Raises:
+            UserExistsError: Если пользователь с таким email или телефоном уже существует
+            UserCreationError: При ошибке создания пользователя
+
         Note:
-            - OAuthUserSchema дополнена полями провайдеров
-            - Поиск пользователя сначала по provider_id, потом по email
-            - create_user поддерживает оба типа схем
-            - Валидация телефона только для обычной регистрации
-            - Корректная обработка необязательных полей
+            - Поддерживает данные как из веб-формы, так и от OAuth провайдеров
+            - Проверяет уникальность email и телефона
+            - Сохраняет идентификаторы OAuth провайдеров
         """
         self.logger.info(f"Создание пользователя с параметрами: {user.model_dump()}")
         data_manager = UserDataManager(self.session)
 
-        try:
-            await data_manager.get_user_by_email(user.email)
+        # Проверка email
+        existing_user = await data_manager.get_user_by_email(user.email)
+        if existing_user:
+            self.logger.error("Пользователь с email '%s' уже существует", user.email)
             raise UserExistsError("email", user.email)
-        except UserNotFoundError:
-            pass
 
         # Проверяем телефон только для обычной регистрации
         if isinstance(user, RegistrationSchema) and user.phone:
-            try:
-                await data_manager.get_user_by_phone(user.phone)
+            existing_user = await data_manager.get_user_by_phone(user.phone)
+            if existing_user:
+                self.logger.error("Пользователь с телефоном '%s' уже существует", user.phone)
                 raise UserExistsError("phone", user.phone)
-            except UserNotFoundError:
-                pass
 
         # Создаем модель пользователя
-        user_data = user.model_dump(exclude_unset=True)
-        if isinstance(user, OAuthUserSchema):
-            user_data["phone"] = None
+        user_data = user.to_dict()
 
+        vk_id = user_data.get("vk_id")
+        google_id = user_data.get("google_id")
+        yandex_id = user_data.get("yandex_id")
+
+        # Устанавливаем идентификаторы провайдеров, если они есть
         user_model = UserModel(
             first_name=user.first_name,
             last_name=user.last_name,
@@ -105,18 +140,19 @@ class UserService(HashingMixin, BaseService):
             hashed_password=self.hash_password(user.password),
             role=UserRole.USER,
             avatar_url=None,
-            vk_id=None,
-            google_id=None,
-            yandex_id=None
+            vk_id=int(vk_id) if vk_id is not None else None,
+            google_id=int(google_id) if google_id is not None else None,
+            yandex_id=int(yandex_id) if yandex_id is not None else None,
         )
 
-        created_user = await data_manager.add_user(user_model)
-        return RegistrationResponseSchema(
-            user_id=created_user.id,
-            email=created_user.email
-        )
+        try:
+            return await data_manager.add_user(user_model)
+        except Exception as e:
+            self.logger.error(f"Ошибка при создании пользователя: {e}")
+            raise UserCreationError("Не удалось создать пользователя. Пожалуйста, попробуйте позже.")
 
-    async def get_by_field(self, field: str, value: str) -> UserSchema:
+
+    async def get_by_field(self, field: str, value: Any) -> UserSchema | None:
         """
         Получает пользователя по заданному полю.
 
@@ -124,11 +160,11 @@ class UserService(HashingMixin, BaseService):
             field: Поле для поиска.
             value: Значение поля для поиска.
         Returns:
-            UserSchema: Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         return await self._data_manager.get_by_field(field, value)
 
-    async def get_by_email(self, email: str) -> UserSchema:
+    async def get_by_email(self, email: str) -> UserSchema | None:
         """
         Получает пользователя по email.
 
@@ -136,11 +172,11 @@ class UserService(HashingMixin, BaseService):
             email: Email пользователя.
 
         Returns:
-            UserSchema: Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         return await self._data_manager.get_user_by_email(email)
 
-    async def get_by_phone(self, phone: str) -> UserSchema:
+    async def get_by_phone(self, phone: str) -> UserSchema | None:
         """
         Получает пользователя по phone.
 
@@ -148,7 +184,7 @@ class UserService(HashingMixin, BaseService):
             phone: Phone пользователя.
 
         Returns:
-            UserSchema: Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         return await self._data_manager.get_user_by_phone(phone)
 
@@ -222,44 +258,47 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         try:
             return await self.add_one(user)
         except IntegrityError as e:
-            if "users.email" in f"{e}":
-                raise UserExistsError("email", user.email) from e
-            elif "users.phone" in f"{e}":
-                raise UserExistsError("phone", user.phone) from e
-            raise e
+            if "users.email" in str(e):
+                self.logger.error("add_user: Пользователь с email '%s' уже существует", user.email)
+                raise UserExistsError("email", user.email)
+            elif "users.phone" in str(e):
+                self.logger.error("add_user: Пользователь с телефоном '%s' уже существует", user.phone)
+                raise UserExistsError("phone", user.phone)
+            else:
+                self.logger.error("Ошибка при добавлении пользователя: %s", e)
+                raise
+        
 
-    async def get_user_by_email(self, email: str) -> UserSchema:
+    async def get_user_by_email(self, email: str) -> UserSchema | None:
         """
         Получает пользователя по email.
+        
         Args:
             email: Email пользователя.
 
         Returns:
-            UserSchema: Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
 
         """
         statement = select(self.model).where(self.model.email == email)
         user = await self.get_one(statement)
-        if not user:
-            raise UserNotFoundError("email", email)
         return user
 
-    async def get_user_by_phone(self, phone: str) -> UserSchema:
+    async def get_user_by_phone(self, phone: str) -> UserSchema | None:
         """
         Получает пользователя по номеру телефона
+        
         Args:
             phone: Номер телефона пользователя.
 
         Returns:
-            Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         statement = select(self.model).where(self.model.phone == phone)
         user = await self.get_one(statement)
-        if not user:
-            raise UserNotFoundError("phone", phone)
         return user
 
-    async def get_by_field(self, field: str, value: str) -> UserSchema:
+    async def get_by_field(self, field: str, value: Any) -> UserSchema | None:
         """
         Получает пользователя по полю.
 
@@ -268,13 +307,12 @@ class UserDataManager(BaseEntityManager[UserSchema]):
             value: Значение поля пользователя.
 
         Returns:
-            Данные пользователя.
+            UserSchema | None: Данные пользователя или None.
         """
         statement = select(self.model).where(getattr(self.model, field) == value)
-        user = await self.get_one(statement)
-        if not user:
-            raise UserNotFoundError(field, value)
-        return user
+        data = await self.get_one(statement)
+        self.logger.debug("data: %s", data)
+        return data
 
     async def update_user(self, user_id: int, data: dict) -> UserUpdateSchema:
         """

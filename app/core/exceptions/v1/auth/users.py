@@ -68,3 +68,19 @@ class UserExistsError(BaseAPIException):
             error_type="user_exists",
             extra={"user_" + field: value},
         )
+
+class UserCreationError(BaseAPIException):
+    """
+    Ошибка при создании пользователя.
+
+    Attributes:
+        detail (str): Подробности об ошибке.
+    """
+
+    def __init__(self, detail: str):
+        super().__init__(
+            status_code=500,
+            detail=detail,
+            error_type="user_creation_error",
+            extra={}
+        )

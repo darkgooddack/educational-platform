@@ -20,8 +20,7 @@ from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
 from app.core.config import config
 from app.core.exceptions import TokenExpiredError, TokenInvalidError
-from app.schemas import UserSchema
-
+from app.schemas import UserSchema, TokenSchema
 
 pwd_context = CryptContext(
     schemes=["argon2"],
@@ -121,7 +120,7 @@ class TokenMixin:
             raise TokenExpiredError()
         except JWTError:
             raise TokenInvalidError()
-
+    
     @staticmethod
     def create_payload(user: UserSchema) -> dict:
         """
@@ -133,7 +132,10 @@ class TokenMixin:
         Returns:
             Payload для JWT
         """
-        return {"sub": user.email, "expires_at": TokenMixin.get_token_expiration()}
+        return {
+            "sub": user.email, 
+            "expires_at": TokenMixin.get_token_expiration()
+        }
 
     @staticmethod
     def get_token_key() -> str:

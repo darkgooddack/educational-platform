@@ -50,3 +50,21 @@ class BaseAPIException(HTTPException):
 
         logger.error(detail, extra=context)
         super().__init__(status_code=status_code, detail=detail)
+
+class ValueNotFoundError(BaseAPIException):
+    """
+    Значение поля не найдно.
+
+    Attributes:
+        field (str): наименование поля.
+        value (str): значение поля.
+    """
+
+    def __init__(self, field: str, value: str):
+
+        super().__init__(
+            status_code=404,
+            detail=f"Поле {field} со значением '{value}' не существует!",
+            error_type="user_not_found",
+            extra={"user_" + field: value},
+        )

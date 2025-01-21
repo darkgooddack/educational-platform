@@ -102,7 +102,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             return result.scalar()
         except SQLAlchemyError as e:
             self.logger.error("❌ Ошибка при получении записи: %s", e)
-            return None
+            raise
 
     async def get_all(self, select_statement: Executable) -> List[Any]:
         """

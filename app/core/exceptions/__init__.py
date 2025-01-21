@@ -7,7 +7,7 @@ Example:
     >>> from app.core.exceptions import UserNotFoundError, UserExistsError
     >>> raise UserNotFoundError(user_id=42)
 """
-from .v1.base import BaseAPIException
+from .v1.base import BaseAPIException, ValueNotFoundError
 from .v1.auth.auth import (
     AuthenticationError,
     InvalidCredentialsError,
@@ -22,11 +22,13 @@ from .v1.auth.oauth import (
     OAuthConfigError,
     OAuthTokenError,
     OAuthUserDataError,
+    OAuthInvalidGrantError
 )
 
 from .v1.auth.users import (
     UserExistsError,
-    UserNotFoundError
+    UserNotFoundError,
+    UserCreationError
 )
 from .v1.auth.security import (
     TokenInvalidError,
@@ -36,6 +38,7 @@ from .v1.auth.security import (
 
 __all__ = [
     "BaseAPIException",
+    "ValueNotFoundError",
     "AuthenticationError",
     "InvalidCredentialsError",
     "InvalidEmailFormatError",
@@ -49,6 +52,8 @@ __all__ = [
     "OAuthConfigError",
     "OAuthTokenError",
     "OAuthUserDataError",
+    "OAuthInvalidGrantError",
     "UserExistsError",
     "UserNotFoundError",
+    "UserCreationError"
 ]

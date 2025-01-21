@@ -73,12 +73,25 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             raise InvalidCredentialsError()
 
         user_schema = UserSchema.model_validate(user_model)
-        payload = self.create_payload(user_schema)
-        token = self.generate_token(payload)
+        
+        return await self.create_token(user_schema)
 
+    async def create_token(self, user_schema: UserSchema) -> TokenSchema:
+        """
+        Создание JWT токена
+
+        Args:
+            user_schema: Данные пользователя
+
+        Returns:
+            TokenSchema: Схема с access_token и token_type
+        """
+        payload = TokenMixin.create_payload(user_schema)
+        token = TokenMixin.generate_token(payload)
         await self._data_manager.save_token(user_schema, token)
+
         return TokenSchema(
-            access_token=token,
+            access_token=token, 
             token_type=config.token_type
         )
 
@@ -134,7 +147,7 @@ class AuthDataManager(BaseDataManager):
         Returns:
             Данные пользователя для сохранения.
         """
-        user_data = user.model_dump()
+        user_data = user.to_dict()
 
         # Конвертируем datetime в строки для отправки в Redis,
         # иначе TypeError: Object of type datetime is not JSON serializable
