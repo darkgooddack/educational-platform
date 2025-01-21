@@ -17,9 +17,8 @@ from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
 from app.schemas import AuthSchema, TokenSchema, UserSchema
-
-from ..base import BaseDataManager, BaseService
-from .users import UserDataManager
+from app.services import BaseService, BaseDataManager
+from ..users import UserDataManager
 
 
 class AuthService(HashingMixin, TokenMixin, BaseService):
@@ -73,7 +72,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             raise InvalidCredentialsError()
 
         user_schema = UserSchema.model_validate(user_model)
-        
+
         return await self.create_token(user_schema)
 
     async def create_token(self, user_schema: UserSchema) -> TokenSchema:
@@ -91,7 +90,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         await self._data_manager.save_token(user_schema, token)
 
         return TokenSchema(
-            access_token=token, 
+            access_token=token,
             token_type=config.token_type
         )
 

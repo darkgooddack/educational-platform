@@ -27,3 +27,7 @@ def setup_logging():
             backupCount=handler_params['backupCount']
         )
         logging.getLogger().addHandler(handler)
+
+    # Филильтрация логов
+    logging.getLogger("aio_pika.robust_connection").setLevel(logging.INFO)
+    logging.getLogger("aiormq.connection").setLevel(logging.INFO)

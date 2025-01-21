@@ -1,31 +1,37 @@
-import logging
+import hashlib
 from urllib.parse import urlencode
 import secrets
 import aiohttp
-from fastapi import HTTPException
 from fastapi.responses import RedirectResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas import (
-    OAuthUserSchema, 
-    TokenSchema, 
-    UserSchema, 
-    RegistrationSchema
+    OAuthUserSchema,
+    TokenSchema,
+    UserSchema,
+    RegistrationSchema,
+    BaseOAuthUserData,
+    YandexUserData
 )
 from app.core.exceptions import (
-    UserNotFoundError, 
-    InvalidProviderError, 
-    OAuthInvalidGrantError, 
-    OAuthTokenError, 
+    InvalidProviderError,
+    OAuthInvalidGrantError,
+    OAuthTokenError,
     OAuthConfigError
 )
 from app.core.config import config
+from app.core.clients import RedisClient
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
-from ..base import BaseService
-from .auth import AuthService, AuthDataManager
-from .users import UserService
+from app.services import (
+    BaseService,
+    AuthService,
+    UserService
+)
+from app.services.v1.oauth.providers import PROVIDER_HANDLERS
+from ..auth import AuthDataManager
+
 
 class OAuthService(HashingMixin, TokenMixin, BaseService):
     """Сервис для работы с OAuth провайдерами"""
@@ -52,7 +58,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         token_data = await self._get_provider_token(provider, code)
 
         self.logger.debug("token_data: %s", token_data)
-        
+
         # Получаем данные пользователя
         user_data = await self._get_user_info(provider, token_data)
 
@@ -63,10 +69,10 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         # Передаем данные созданного пользователя
         self.logger.debug("created_user: %s", created_user)
-           
+
         return created_user
 
-    async def _get_or_create_user(self, provider: str, user_data: dict) -> TokenSchema:
+    async def _get_or_create_user(self, provider: str, user_data: BaseOAuthUserData) -> TokenSchema:
         """
         Аутентифицирует пользователя через OAuth провайдер.
 
@@ -76,50 +82,36 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         Returns:
             TokenSchema с access_token
-
-        NOTE:
-            Пример user_data от yandex:
-            {
-                'id': '2<...>6', 
-                'login': 't<...>l', 
-                'client_id': '90d25ee61c06<...>2a70ecf5865', 
-                'default_email': '<...>l@yandex.ru', - пока ориентируемся на это название, в случае с другими провайдерами делаем по-другому
-                'emails': ['<...>l@yandex.ru'], # - нужно подумать, что делать, если emails несколько штук
-                'psuid': '1.AA0ZzA.BuDewI5<...>oB-Zgkebg5Wo77OLhsw'
-            }
-        TODO: 
-            Требуется проверить что приходит и от google и от vk и занести в email_field_mapping
         """
-        
+
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
         provider_id = int(user_data["id"])
 
-        # Маппинг полей email для разных провайдеров
-        email_field_mapping = {
-            'yandex': 'default_email',
-            'google': 'email',
-            'vk': 'email'
-        }
-        user_email = user_data[email_field_mapping.get(provider, 'default_email')]
+        # Получаем email в зависимости от провайдера
+        user_email = (
+            user_data.default_email if isinstance(user_data, YandexUserData)
+            else user_data.email
+        )
+
         if not user_email:
             self.logger.error("❌ Email не найден в данных пользователя.")
             return None
-        
+
         self.logger.debug(f"🔍 Ищем пользователя {provider_field}: {provider_id}")
 
         # Поиск по provider_id
         user_schema = await self._user_service.get_by_field(provider_field, provider_id)
-        
+
         if user_schema is None:
             self.logger.warning("❌ Пользователь не найден по provider_id, пробуем по email...")
-        
+
             # Поиск по email
             user_schema = await self._user_service.get_by_email(user_email)
-        
+
             if user_schema is None:
                 self.logger.warning("❌ Пользователь не найден по email, создаем нового пользователя...")
-                
+
                 # Создаем нового пользователя
                 oauth_user = OAuthUserSchema(
                     email=user_email,
@@ -130,7 +122,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                     password=secrets.token_hex(16),  # Генерируем случайный пароль
                     **{provider_field: provider_id}  # Добавляем ID провайдера
                 )
-                
+
                 self.logger.debug(f"📝 Создание нового пользователя с email: {user_email}")
                 oauth_user_dict = oauth_user.to_dict()
                 registration_data = RegistrationSchema(**oauth_user_dict)
@@ -141,21 +133,21 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 except Exception as e:
                     self.logger.error(f"Ошибка при создании пользователя: {e}")
                     return None
-                
+
                 # Создаем токен для нового пользователя
                 return await self._create_token(created_user)
-        
+
         # Создаем токен для существующего пользователя
         return await self._auth_service.create_token(user_schema)
-    
+
     async def _create_token(self, new_user: UserModel) -> TokenSchema:
         """
         Создаем токен для нового пользователя
 
         Attributes:
             user: Модель пользователя из базы данных после регистрации
-        
-        Returns: 
+
+        Returns:
             TokenSchema: Токен доступа.
 
         TODO: Можно переделать получше.
@@ -169,7 +161,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         )
         self.logger.debug("🔑 Создание токена для пользователя...")
         # Создаем и возвращаем токен
-        return await self.create_token(user_schema)
+        return await self._auth_service.create_token(user_schema)
 
     async def get_oauth_url(self, provider: str) -> RedirectResponse:
         """
@@ -186,7 +178,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         provider_config = self.providers[provider]
         self._validate_provider_config(provider, provider_config)
-        auth_url = self._build_auth_url(provider, provider_config)
+        auth_url = await self._build_auth_url(provider, provider_config)
 
         return RedirectResponse(auth_url)
 
@@ -206,7 +198,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         if missing:
             raise OAuthConfigError(provider, missing)
 
-    def _build_auth_url(self, provider: str, _config: dict) -> str:
+    async def _build_auth_url(self, provider: str, _config: dict) -> str:
         """
         Построение URL для авторизации.
 
@@ -223,6 +215,20 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             "scope": _config.get("scope", ""),
             "response_type": "code",
         }
+        if provider == "vk":
+            code_verifier = secrets.token_urlsafe(64)
+            code_challenge = hashlib.sha256(code_verifier.encode()).hexdigest()
+            params.update({
+                "state": secrets.token_urlsafe(32),
+                "code_challenge": code_challenge,
+                "code_challenge_method": "S256",
+                "v": "5.131",
+                "display": "page"
+            })
+            # Сохраняем verifier только для VK
+            redis = await RedisClient.get_instance()
+            redis.set(f"oauth:verifier:{params['state']}", code_verifier, ex=300)
+
         return f"{_config['auth_url']}?{urlencode(params)}"
 
 
@@ -260,7 +266,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                     raise OAuthTokenError(provider, token_data["error"])
                 return token_data
 
-    async def _get_user_info(self, provider: str, token_data: dict) -> dict:
+    async def _get_user_info(self, provider: str, token_data: dict) -> BaseOAuthUserData:
         """
         Получение информации о пользователе от провайдера.
 
@@ -281,5 +287,9 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 headers=headers
             ) as resp:
                 user_data = await resp.json()
+
+        handler = PROVIDER_HANDLERS.get(provider)
+        if handler:
+            return await handler(user_data)
 
         return user_data

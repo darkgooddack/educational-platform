@@ -22,15 +22,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (
-    UserExistsError, 
-    UserNotFoundError,
+    UserExistsError,
     UserCreationError
 )
 from app.core.security import HashingMixin
 from app.models import UserModel
 from app.schemas import (RegistrationResponseSchema, RegistrationSchema,
-                         UserSchema, UserUpdateSchema, OAuthUserSchema, UserRole)
-from app.services.v1.base import BaseEntityManager, BaseService
+                         UserSchema, UserUpdateSchema, UserRole)
+from app.services import BaseEntityManager, BaseService
 
 
 class UserService(HashingMixin, BaseService):
@@ -67,15 +66,15 @@ class UserService(HashingMixin, BaseService):
         Returns:
             RegistrationResponseSchema: Схема ответа с id, email и сообщением об успехе
         """
-        
+
         created_user = await self._create_user_internal(user)
-        
+
         return RegistrationResponseSchema(
             user_id=created_user.id,
             email=created_user.email,
             message="Регистрация успешно завершена"
         )
-    
+
     async def create_oauth_user(self, user: RegistrationSchema) -> UserModel:
         """
         Создает нового пользователя через OAuth аутентификацию.
@@ -267,12 +266,12 @@ class UserDataManager(BaseEntityManager[UserSchema]):
             else:
                 self.logger.error("Ошибка при добавлении пользователя: %s", e)
                 raise
-        
+
 
     async def get_user_by_email(self, email: str) -> UserSchema | None:
         """
         Получает пользователя по email.
-        
+
         Args:
             email: Email пользователя.
 
@@ -287,7 +286,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
     async def get_user_by_phone(self, phone: str) -> UserSchema | None:
         """
         Получает пользователя по номеру телефона
-        
+
         Args:
             phone: Номер телефона пользователя.
 

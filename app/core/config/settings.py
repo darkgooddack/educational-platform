@@ -109,9 +109,9 @@ class Settings(BaseSettings):
             "vk": {
                 "client_id": "",
                 "client_secret": "",
-                "auth_url": "https://oauth.vk.com/authorize",
-                "token_url": "https://oauth.vk.com/access_token",
-                "user_info_url": "https://api.vk.com/method/users.get",
+                "auth_url": "https://id.vk.com/authorize",
+                "token_url": "https://id.vk.com/oauth2/auth",
+                "user_info_url": "https://id.vk.com/oauth2/user_info",
                 "scope": "email",
             },
             "google": {

@@ -1,7 +1,7 @@
-from pydantic import EmailStr, Field
-
 from typing import Optional
-from ..base import BaseInputSchema
+from pydantic import EmailStr, Field, HttpUrl
+from ..base import CommonBaseSchema, BaseInputSchema
+
 
 class OAuthUserSchema(BaseInputSchema):
     """
@@ -18,7 +18,7 @@ class OAuthUserSchema(BaseInputSchema):
         google_id (str): id пользователя от провайдера google
         yandex_id (str): id пользователя от провайдера yandex
     """
-    
+
     first_name: str = Field(default="Анонимус", min_length=2, max_length=50, description="Имя пользователя")
     last_name: str = Field(default="Пользователь", min_length=2, max_length=50, description="Фамилия пользователя")
     middle_name: Optional[str] = Field(None, max_length=50, description="Отчество пользователя")
@@ -34,6 +34,7 @@ class OAuthUserSchema(BaseInputSchema):
     google_id: Optional[int] = None
     yandex_id: Optional[int] = None
 
+
 class OAuthResponse(BaseInputSchema):
     """
     Схема ответа OAuth авторизации.
@@ -45,3 +46,46 @@ class OAuthResponse(BaseInputSchema):
 
     access_token: str
     token_type: str = "bearer"
+
+
+class BaseOAuthUserData(CommonBaseSchema):
+    id: str
+    email: EmailStr | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    avatar: HttpUrl | None = None
+
+class YandexUserData(BaseOAuthUserData):
+    default_email: EmailStr
+    login: str | None = None
+    emails: list[EmailStr] | None = None
+    psuid: str | None = None
+
+class GoogleUserData(BaseOAuthUserData):
+    verified_email: bool = False
+    given_name: str | None = None
+    family_name: str | None = None
+    picture: HttpUrl | None = None
+
+class VKUserData(BaseOAuthUserData):
+    phone: str | None = None
+    user_id: str | None = None
+
+class BaseOAuthTokenData(BaseInputSchema):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+
+class YandexTokenData(BaseOAuthTokenData):
+    refresh_token: str
+    scope: str
+
+class GoogleTokenData(BaseOAuthTokenData):
+    id_token: str
+    scope: str
+
+class VKTokenData(BaseOAuthTokenData):
+    user_id: int
+    email: EmailStr | None = None
+    state: str | None = None
+    scope: str | None = None
