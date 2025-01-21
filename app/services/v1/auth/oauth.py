@@ -7,7 +7,12 @@ from fastapi.responses import RedirectResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import OAuthUserSchema, TokenSchema, UserSchema
+from app.schemas import (
+    OAuthUserSchema, 
+    TokenSchema, 
+    UserSchema, 
+    RegistrationSchema
+)
 from app.core.exceptions import (
     UserNotFoundError, 
     InvalidProviderError, 
@@ -114,11 +119,11 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                     password=secrets.token_hex(16),  # Генерируем случайный пароль
                     **{provider_field: provider_id}  # Добавляем ID провайдера
                 )
-
+                self.logger.info(f"Создание нового пользователя с email: {user_email}")
                 oauth_user_dict = oauth_user.model_dump()
                 registration_data = RegistrationSchema(**oauth_user_dict)
                 created_user = await self._user_service.create_oauth_user(registration_data)
-
+                self.logger.info(f"Пользователь удачно создан с id: {created_user.id}")
                 # Генерация имени пользователя если оно пустое
                 display_name = created_user.first_name or f"User_{created_user.id}"
 
