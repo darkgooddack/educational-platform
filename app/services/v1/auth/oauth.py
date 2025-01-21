@@ -132,7 +132,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 )
                 
                 self.logger.debug(f"📝 Создание нового пользователя с email: {user_email}")
-                oauth_user_dict = oauth_user.model_dump()
+                oauth_user_dict = oauth_user.to_dict()
                 registration_data = RegistrationSchema(**oauth_user_dict)
 
                 try:

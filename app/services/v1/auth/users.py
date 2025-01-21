@@ -124,7 +124,7 @@ class UserService(HashingMixin, BaseService):
                 raise UserExistsError("phone", user.phone)
 
         # Создаем модель пользователя
-        user_data = user.model_dump(exclude_unset=True)
+        user_data = user.to_dict()
 
         vk_id = user_data.get("vk_id")
         google_id = user_data.get("google_id")
@@ -144,7 +144,7 @@ class UserService(HashingMixin, BaseService):
             google_id=int(google_id) if google_id is not None else None,
             yandex_id=int(yandex_id) if yandex_id is not None else None,
         )
-        
+
         try:
             return await data_manager.add_user(user_model)
         except Exception as e:

@@ -147,7 +147,7 @@ class AuthDataManager(BaseDataManager):
         Returns:
             Данные пользователя для сохранения.
         """
-        user_data = user.model_dump()
+        user_data = user.to_dict()
 
         # Конвертируем datetime в строки для отправки в Redis,
         # иначе TypeError: Object of type datetime is not JSON serializable
