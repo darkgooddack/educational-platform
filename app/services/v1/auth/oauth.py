@@ -129,7 +129,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         created_user = await self._user_service.create_oauth_user(registration_data)
         self.logger.debug(f"✅ Пользователь удачно создан с id: {created_user.id}")
         # Генерация имени пользователя если оно пустое
-        display_name = created_user.first_name or f"User_{created_user.id}
+        display_name = created_user.first_name or f"User_{created_user.id}"
         # Создаем UserSchema для токена
         user_schema = UserSchema(
             id=created_user.id,
