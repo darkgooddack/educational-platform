@@ -115,10 +115,10 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 # Создаем нового пользователя
                 oauth_user = OAuthUserSchema(
                     email=user_email,
-                    first_name=user_data.first_name or "Анонимус",
-                    last_name=user_data.last_name or "Пользователь",
-                    phone=user_data.phone if hasattr(user_data, 'phone') else "+7   (000) 000-00-00",
-                    password=secrets.token_hex(16),
+                    first_name=user_data.first_name or "Анонимус", #! Пересмотреть
+                    last_name=user_data.last_name or "Пользователь", #! Пересмотреть
+                    phone="+7 (000) 000-00-00" if hasattr(user_data, 'phone') else "+7 (000) 000-00-00", #! Пересмотреть
+                    password=secrets.token_hex(16), #! Пароль тогда нужно предлагать поменять или прислать по почте
                     **{provider_field: provider_id}
                 )
 
