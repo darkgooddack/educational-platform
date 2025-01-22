@@ -117,7 +117,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                     email=user_email,
                     first_name=user_data.first_name,
                     last_name=user_data.last_name,
-                    avatar=user_data.avatar if hasattr(user_data, 'avatar') else None,
+                    avatar=str(user_data.avatar) if hasattr(user_data, 'avatar') else None,
                     password=secrets.token_hex(16), #! Пароль тогда нужно предлагать поменять или прислать по почте
                     **{provider_field: provider_id}
                 )
