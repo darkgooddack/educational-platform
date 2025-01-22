@@ -1,4 +1,5 @@
-from pydantic import EmailStr, HttpUrl
+from typing import Optional
+from pydantic import EmailStr
 from app.schemas.v1.auth.register import RegistrationSchema
 from ..base import CommonBaseSchema, BaseInputSchema
 
@@ -27,7 +28,7 @@ class BaseOAuthUserData(CommonBaseSchema):
     email: EmailStr | None = None
     first_name: str | None = None
     last_name: str | None = None
-    avatar: HttpUrl | None = None
+    avatar: Optional[str] = None
 
 class YandexUserData(BaseOAuthUserData):
     default_email: EmailStr
@@ -39,7 +40,7 @@ class GoogleUserData(BaseOAuthUserData):
     verified_email: bool = False
     given_name: str | None = None
     family_name: str | None = None
-    picture: HttpUrl | None = None
+    picture: str | None = None
 
 class VKUserData(BaseOAuthUserData):
     phone: str | None = None
