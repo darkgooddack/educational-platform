@@ -2,91 +2,6 @@
 
 Платформа для онлайн-обучения.
 
-## Структура проекта
-```
-app
-├── main.py
-├── __init__.py
-├── core
-│   ├── lifespan.py
-│   ├── logging.py
-│   ├── security.py
-│   ├── clients
-│   │   ├── rabbitmq.py
-│   │   ├── redis.py
-│   │   └── __init__.py
-│   ├── config
-│   │   ├── app.py
-│   │   ├── settings.py
-│   │   └── __init__.py
-│   ├── dependencies
-│   │   ├── auth.py
-│   │   ├── database.py
-│   │   ├── rabbitmq.py
-│   │   ├── redis.py
-│   │   └── __init__.py
-│   ├── exceptions
-│   │   ├── __init__.py
-│   │   └── v1
-│   │       ├── base.py
-│   │       ├── __init__.py
-│   │       └── auth
-│   │           ├── auth.py
-│   │           ├── oauth.py
-│   │           ├── security.py
-│   │           ├── users.py
-│   │           └── __init__.py
-│   ├── middlewares
-│   │   ├── docs_auth.py
-│   │   ├── logging.py
-│   │   └── __init__.py
-│   └── migrations
-│       ├── env.py
-│       ├── README
-│       ├── script.py.mako
-│       └── versions
-│           ├── c54703e51b42_add_fields_for_oauth.py
-│           └── f58b4d906a74_initial_commit.py
-├── models
-│   ├── __init__.py
-│   └── v1
-│       ├── base.py
-│       ├── users.py
-│       └── __init__.py
-├── routes
-│   ├── __init__.py
-│   └── v1
-│       ├── main.py
-│       ├── __init__.py
-│       └── auth
-│           ├── auth.py
-│           ├── oauth.py
-│           ├── register.py
-│           └── __init__.py
-├── schemas
-│   ├── __init__.py
-│   └── v1
-│       ├── base.py
-│       ├── __init__.py
-│       └── auth
-│           ├── auth.py
-│           ├── oauth.py
-│           ├── register.py
-│           ├── users.py
-│           └── __init__.py
-└── services
-    ├── __init__.py
-    └── v1
-        ├── base.py
-        ├── __init__.py
-        └── auth
-            ├── auth.py
-            ├── oauth.py
-            ├── users.py
-            └── __init__.py
-
-```
-
 ### Разработка
 Для разработки используется uv package manager.
 
@@ -105,10 +20,10 @@ Linux:
 
 #### Запуск для разработки
 ```bash
-# Запуск в режиме разработки (с hot-reload), но необходима локальная rabbitmq, иначе выпадет ошибка, даже с контейнерами отдельно не заработала...
+# Запуск в режиме разработки (с hot-reload)
 uv run dev
 ```
-# Запуск инфраструктуры (контейнеров)
+# Запуск инфраструктуры (все в контейнерах)
 ```bash
 uv run infra-up
 ```
@@ -118,7 +33,7 @@ uv run infra-up
 # Применить все миграции
 uv run migrate
 
-# Создать новую миграцию
+# Создать новую миграцию (пока не работает)
 uv run create_migration "название_миграции"
 
 # Откатить последнюю миграцию
