@@ -18,7 +18,10 @@ from app.core.exceptions import (
     InvalidProviderError,
     OAuthInvalidGrantError,
     OAuthTokenError,
-    OAuthConfigError
+    OAuthConfigError,
+    OAuthUserCreationError,
+    OAuthUserDataError
+
 )
 from app.core.config import config
 from app.core.clients import RedisClient
@@ -86,7 +89,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
-        provider_id = user_data.id if provider == "google" else int(user_data.id)
+        provider_id = str(user_data.id) if provider == "google" else int(user_data.id)
 
         # Получаем email в зависимости от провайдера
         user_email = (
@@ -96,7 +99,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         if not user_email:
             self.logger.error("❌ Email не найден в данных пользователя.")
-            return None
+            raise OAuthUserDataError(provider, "Email не найден в данных пользователя")
 
         self.logger.debug("🔍 Ищем пользователя по провайдеру %s: %s", provider_field, provider_id)
 
@@ -131,7 +134,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                     self.logger.debug("✅ Пользователь удачно создан с id: %s",created_user.id)
                 except Exception as e:
                     self.logger.error("Ошибка при создании пользователя: %s", e)
-                    return None
+                    raise OAuthUserCreationError(f"Не удалось создать пользователя: {str(e)}")
 
                 # Создаем токен для нового пользователя
                 return await self._create_token(created_user)
@@ -286,7 +289,6 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 user_data = await resp.json()
 
         handler = PROVIDER_HANDLERS.get(provider)
-        if handler:
-            return await handler(user_data)
-
-        return user_data
+        if not handler:
+            raise InvalidProviderError(f"Провайдер {provider} не поддерживается")
+        return await handler(user_data)
