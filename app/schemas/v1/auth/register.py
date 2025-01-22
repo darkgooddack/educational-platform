@@ -18,9 +18,9 @@ class RegistrationSchema(BaseInputSchema):
         email (str): Email пользователя.
         phone (str): Телефон пользователя.
         password (str): Пароль пользователя.
-        vk_id (str): id пользователя от провайдера vk
+        vk_id (int): id пользователя от провайдера vk
         google_id (str): id пользователя от провайдера google
-        yandex_id (str): id пользователя от провайдера yandex
+        yandex_id (int): id пользователя от провайдера yandex
     """
 
     first_name: str = Field(min_length=2, max_length=50, description="Имя пользователя")
@@ -40,7 +40,7 @@ class RegistrationSchema(BaseInputSchema):
     avatar: Optional[str] = None
     password: str = Field(min_length=8, description="Пароль минимум 8 символов")
     vk_id: Optional[int] = None
-    google_id: Optional[int] = None
+    google_id: Optional[str] = None
     yandex_id: Optional[int] = None
 
 class RegistrationResponseSchema(BaseInputSchema):

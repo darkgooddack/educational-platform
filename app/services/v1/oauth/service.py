@@ -134,7 +134,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                     self.logger.debug("✅ Пользователь удачно создан с id: %s",created_user.id)
                 except Exception as e:
                     self.logger.error("Ошибка при создании пользователя: %s", e)
-                    raise OAuthUserCreationError(f"Не удалось создать пользователя: {str(e)}")
+                    raise OAuthUserCreationError(provider, str(e)) from e
 
                 # Создаем токен для нового пользователя
                 return await self._create_token(created_user)
