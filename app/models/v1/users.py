@@ -32,7 +32,7 @@ class UserModel(BaseModel):
         phone (str): Номер телефона пользователя.
         hashed_password (str): Хэшированный пароль пользователя.
         role (UserRole): Роль пользователя в системе.
-        avatar_url (str): Ссылка на аватар пользователя.
+        avatar (str): Ссылка на аватар пользователя.
         vk_id (int): ID пользователя в VK.
         google_id (int): ID пользователя в Google (BigInteger).
         yandex_id (int): ID пользователя в Yandex.

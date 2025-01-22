@@ -138,7 +138,7 @@ class UserService(HashingMixin, BaseService):
             phone=user.phone,
             hashed_password=self.hash_password(user.password),
             role=UserRole.USER,
-            avatar_url=None,
+            avatar=user.avatar,
             vk_id=int(vk_id) if vk_id is not None else None,
             google_id=int(google_id) if google_id is not None else None,
             yandex_id=int(yandex_id) if yandex_id is not None else None,
