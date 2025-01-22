@@ -244,7 +244,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session, schema=UserSchema, model=UserModel)
 
-    async def add_user(self, user: UserModel) -> UserSchema:
+    async def add_user(self, user: UserModel) -> UserModel:
         """
         Добавляет нового пользователя в базу данных.
 
@@ -259,10 +259,10 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         except IntegrityError as e:
             if "users.email" in str(e):
                 self.logger.error("add_user: Пользователь с email '%s' уже существует", user.email)
-                raise UserExistsError("email", user.email)
+                raise UserExistsError("email", user.email) from e
             elif "users.phone" in str(e):
                 self.logger.error("add_user: Пользователь с телефоном '%s' уже существует", user.phone)
-                raise UserExistsError("phone", user.phone)
+                raise UserExistsError("phone", user.phone) from e
             else:
                 self.logger.error("Ошибка при добавлении пользователя: %s", e)
                 raise
