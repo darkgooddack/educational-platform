@@ -1,3 +1,4 @@
+import base64
 import hashlib
 from urllib.parse import urlencode
 import secrets
@@ -219,18 +220,12 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         }
         if provider == "vk":
             code_verifier = secrets.token_urlsafe(64)
-            code_challenge = hashlib.sha256(code_verifier.encode()).hexdigest()
+            code_challenge = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode()).digest()).decode().rstrip('=')  # RFC-7636 требует base64url без padding
             params.update({
                 "state": secrets.token_urlsafe(32),
                 "code_challenge": code_challenge,
                 "code_challenge_method": "S256",
                 "v": "5.131",
-                "display": "page",
-                "scope": "email phone",  # Добавляем нужные scope
-                "prompt": "",  # Добавляем prompt
-                "provider": "vkid",  # Указываем провайдер
-                "lang_id": "0",  # Русский язык
-                "scheme": "light"  # Светлая тема
             })
             # Сохраняем verifier только для VK
             redis = await RedisClient.get_instance()
