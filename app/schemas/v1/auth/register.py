@@ -31,7 +31,8 @@ class RegistrationSchema(BaseInputSchema):
         None, max_length=50, description="Отчество пользователя"
     )
     email: EmailStr = Field(description="Email пользователя")
-    phone: str = Field(
+    phone: str | None = Field(
+        None,
         pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$",
         description="Телефон в формате +7 (XXX) XXX-XX-XX",
         examples=["+7 (999) 123-45-67"],
