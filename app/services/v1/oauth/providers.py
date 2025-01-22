@@ -1,4 +1,5 @@
 from app.schemas import YandexUserData, GoogleUserData, VKUserData
+from app.core.exceptions import OAuthUserDataError
 
 async def get_yandex_user_info(user_data: dict) -> YandexUserData:
     """
@@ -10,6 +11,9 @@ async def get_yandex_user_info(user_data: dict) -> YandexUserData:
     Returns:
         dict: Обработанные данные пользователя
     """
+    if not user_data.get('default_email'):
+        raise OAuthUserDataError('yandex', 'Email не предоставлен. Убедитесь что у аккаунта Яндекс есть email')
+
     return YandexUserData(
         id=user_data["id"],
         email=user_data["default_email"],
@@ -17,7 +21,7 @@ async def get_yandex_user_info(user_data: dict) -> YandexUserData:
         last_name=user_data.get("last_name", ""),
         default_email=user_data["default_email"],
         login=user_data.get("login"),
-        emails=user_data.get("emails"),
+        emails=user_data.get('emails', []),
         psuid=user_data.get("psuid")
     )
 

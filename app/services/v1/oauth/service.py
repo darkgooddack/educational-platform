@@ -225,7 +225,12 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 "code_challenge": code_challenge,
                 "code_challenge_method": "S256",
                 "v": "5.131",
-                "display": "page"
+                "display": "page",
+                "scope": "email phone",  # Добавляем нужные scope
+                "prompt": "",  # Добавляем prompt
+                "provider": "vkid",  # Указываем провайдер
+                "lang_id": "0",  # Русский язык
+                "scheme": "light"  # Светлая тема
             })
             # Сохраняем verifier только для VK
             redis = await RedisClient.get_instance()
