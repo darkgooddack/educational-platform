@@ -23,6 +23,7 @@ class OAuthUserSchema(BaseInputSchema):
     last_name: str = Field(default="Пользователь", min_length=2, max_length=50, description="Фамилия пользователя")
     middle_name: Optional[str] = Field(None, max_length=50, description="Отчество пользователя")
     email: EmailStr = Field(description="Email пользователя")
+    avatar: Optional[str] = Field(None)
     phone: Optional[str] = Field(
         None,
         pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$",

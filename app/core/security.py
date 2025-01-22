@@ -13,7 +13,8 @@ Example:
     >>>         hashed = self.hash_password(password)
 
 """
-
+import logging
+import passlib
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
@@ -30,7 +31,7 @@ pwd_context = CryptContext(
     argon2__parallelism=8,
 )
 
-
+logger = logging.getLogger(__name__)
 class HashingMixin:
     """
     Миксин для хеширования паролей.
@@ -68,7 +69,7 @@ class HashingMixin:
             return pwd_context.verify(plain_password, hashed_password)
 
         except passlib.exc.UnknownHashError:
-
+            logger.warning("Неизвестный формат хеша пароля")
             return False
 
 

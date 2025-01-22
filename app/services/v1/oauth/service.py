@@ -86,7 +86,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
-        provider_id = int(user_data.id)
+        provider_id = user_data.id if provider == "google" else int(user_data.id)
 
         # Получаем email в зависимости от провайдера
         user_email = (
@@ -115,9 +115,9 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
                 # Создаем нового пользователя
                 oauth_user = OAuthUserSchema(
                     email=user_email,
-                    first_name=user_data.first_name or "Анонимус", #! Пересмотреть
-                    last_name=user_data.last_name or "Пользователь", #! Пересмотреть
-                    phone="+7 (000) 000-00-00" if hasattr(user_data, 'phone') else "+7 (000) 000-00-00", #! Пересмотреть
+                    first_name=user_data.first_name,
+                    last_name=user_data.last_name,
+                    avatar=user_data.avatar if hasattr(user_data, 'avatar') else None,
                     password=secrets.token_hex(16), #! Пароль тогда нужно предлагать поменять или прислать по почте
                     **{provider_field: provider_id}
                 )
@@ -229,8 +229,6 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             redis.set(f"oauth:verifier:{params['state']}", code_verifier, ex=300)
 
         return f"{_config['auth_url']}?{urlencode(params)}"
-
-
 
     # Методы работы с провайдерами
     async def _get_provider_token(self, provider: str, code: str) -> dict:
