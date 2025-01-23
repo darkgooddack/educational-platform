@@ -204,7 +204,13 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
             if user_schema is None:
                 self.logger.warning("❌ Пользователь не найден по email, создаем нового пользователя...")
-
+                
+                self.logger.debug("Данные для нового пользователя: first_name=%s, last_name=%s, avatar=%s, provider_id=%s",
+                    user_data.first_name, 
+                    user_data.last_name, 
+                    user_data.avatar, 
+                    provider_id)
+                    
                 # Создаем нового пользователя
                 oauth_user = OAuthUserSchema(
                     email=user_email,
