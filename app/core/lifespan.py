@@ -4,7 +4,7 @@
 Этот модуль содержит функцию жизненного цикла приложения,
 которая инициализирует и закрывает подключения к Redis и RabbitMQ.
 """
-
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
