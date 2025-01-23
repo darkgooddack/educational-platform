@@ -26,6 +26,10 @@ async def lifespan(_app: FastAPI):
 
     await RedisClient.get_instance()
     await RabbitMQClient.get_instance()
+    if not RabbitMQClient.is_connected():
+        logging.warning("RabbitMQ: ошибка подключения!")
+    else:
+        logging.info("RabbitMQ: подключение успешно!")
 
     yield
 
