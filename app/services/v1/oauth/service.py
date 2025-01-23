@@ -24,8 +24,9 @@ from app.core.exceptions import (
     OAuthTokenError,
     OAuthConfigError,
     OAuthUserCreationError,
-    OAuthUserDataError
-
+    OAuthUserDataError,
+    InvalidReturnURLError,
+    InvalidCallbackError
 )
 from app.core.config import config
 from app.core.storages.redis.oauth import OAuthRedisStorage
@@ -127,7 +128,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         ).decode().rstrip('=')
 
 
-    async def oauthenticate(self, provider: str, code: str) -> TokenSchema:
+    async def oauthenticate(self, provider: str, code: str, return_to: str = None) -> TokenSchema:
         """
         Полный процесс OAuth аутентификации
 
@@ -138,6 +139,14 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         Returns:
             Токен доступа
         """
+        if provider == "vk":
+            if not return_to:
+                raise InvalidCallbackError()
+            if not return_to.startswith(config.app_url):
+                raise InvalidReturnURLError(return_to)
+        elif return_to:
+            raise InvalidCallbackError()
+
         # Получаем токен от провайдера
         token_data = await self._get_provider_token(provider, code)
 

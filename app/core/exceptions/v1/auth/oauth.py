@@ -61,3 +61,19 @@ class OAuthUserCreationError(OAuthError):
             detail=f"Ошибка создания пользователя через {provider}: {error}",
             extra={"provider": provider, "error": error}
         )
+
+class InvalidReturnURLError(OAuthError):
+    """Ошибка невалидного return_to URL"""
+    def __init__(self, url: str):
+        super().__init__(
+            detail=f"URL '{url}' не является доверенным",
+            extra={"url": url}
+        )
+
+class InvalidCallbackError(OAuthError):
+    """Ошибка неверного callback endpoint"""
+    def __init__(self):
+        super().__init__(
+            detail="Для VK OAuth используйте /callback_vk",
+            extra={"requires_vk_callback": True}
+        )

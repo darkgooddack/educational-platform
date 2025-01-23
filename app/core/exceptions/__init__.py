@@ -23,7 +23,9 @@ from .v1.auth.oauth import (
     OAuthTokenError,
     OAuthUserDataError,
     OAuthInvalidGrantError,
-    OAuthUserCreationError
+    OAuthUserCreationError,
+    InvalidReturnURLError,
+    InvalidCallbackError
 )
 
 from .v1.auth.users import (
@@ -55,6 +57,8 @@ __all__ = [
     "OAuthUserDataError",
     "OAuthInvalidGrantError",
     "OAuthUserCreationError",
+    "InvalidReturnURLError",
+    "InvalidCallbackError",
     "UserExistsError",
     "UserNotFoundError",
     "UserCreationError"
