@@ -11,7 +11,6 @@
 - oauth2_schema: Схема OAuth2 для FastAPI.
 
 """
-
 from .auth import get_current_user, oauth2_schema
 from .database import get_db_session
 from .rabbitmq import get_rabbitmq

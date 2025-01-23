@@ -14,6 +14,7 @@ from .v1.oauth.oauth import (
     GoogleUserData,
     VKUserData
 )
+from .v1.oauth.schemas import OAuthConfig, OAuthParams, VKOAuthParams
 from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema
 from .v1.users.users import UserRole, UserSchema, UserUpdateSchema
 
@@ -22,6 +23,9 @@ __all__ = [
     "BaseInputSchema",
     "OAuthUserSchema",
     "OAuthResponse",
+    "OAuthConfig",
+    "OAuthParams",
+    "VKOAuthParams",
     "RegistrationSchema",
     "RegistrationResponseSchema",
     "UserSchema",

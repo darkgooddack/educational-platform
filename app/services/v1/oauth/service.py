@@ -13,7 +13,10 @@ from app.schemas import (
     UserSchema,
     RegistrationSchema,
     BaseOAuthUserData,
-    YandexUserData
+    YandexUserData,
+    OAuthConfig,
+    OAuthParams,
+    VKOAuthParams
 )
 from app.core.exceptions import (
     InvalidProviderError,
@@ -25,7 +28,7 @@ from app.core.exceptions import (
 
 )
 from app.core.config import config
-from app.core.clients import RedisClient
+from app.core.storages.redis.oauth import OAuthRedisStorage
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
 from app.services import (
@@ -34,7 +37,6 @@ from app.services import (
     UserService
 )
 from app.services.v1.oauth.providers import PROVIDER_HANDLERS
-from ..auth import AuthDataManager
 
 
 class OAuthService(HashingMixin, TokenMixin, BaseService):
@@ -45,7 +47,85 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         self.providers = config.oauth_providers
         self._auth_service = AuthService(session)
         self._user_service = UserService(session)
-        self._data_manager = AuthDataManager(session)
+
+        self._redis_storage = OAuthRedisStorage()
+
+    async def get_oauth_url(self, provider: str) -> RedirectResponse:
+        """
+        Получение URL для OAuth2 авторизации
+
+        Args:
+            provider: Имя провайдера (vk/google/yandex)
+
+        Returns:
+            URL для OAuth2 авторизации
+        """
+        if provider not in self.providers:
+            raise InvalidProviderError(provider)
+
+        provider_config = self.providers[provider]
+        self._validate_provider_config(provider, provider_config)
+        auth_url = await self._build_auth_url(provider, provider_config)
+
+        return RedirectResponse(auth_url)
+
+    def _validate_provider_config(self, provider: str, provider_config: dict) -> None:
+        """
+        Валидация конфигурации провайдера.
+        Проверяет наличие обязательных полей.
+
+        Args:
+            provider_config (dict): Конфигурация провайдера
+
+        Raises:
+            HTTPException: Если отсутствуют обязательные поля
+        """
+        required_fields = ["client_id", "client_secret"]
+        missing = [field for field in required_fields if field not in provider_config]
+        if missing:
+            raise OAuthConfigError(provider, missing)
+
+    async def _build_auth_url(self, provider: str, _config: dict) -> str:
+        """
+        Построение URL для авторизации.
+
+        Args:
+            provider (str): Имя провайдера
+            provider_config (dict): Конфигурация провайдера
+
+        Returns:
+            str: URL для авторизации
+        """
+        oauth_config = OAuthConfig(**_config)
+
+        base_params = OAuthParams(
+            client_id=oauth_config.client_id,
+            redirect_uri=f"{config.app_url}/api/v1/oauth/{provider}/callback",
+            scope=oauth_config.scope
+        )
+
+        if provider == "vk":
+            code_verifier = secrets.token_urlsafe(64)
+            code_challenge = self._generate_code_challenge(code_verifier)
+
+            params = VKOAuthParams(
+                **base_params.model_dump(),
+                code_challenge=code_challenge
+            )
+            self._redis_storage.save_verifier(params.state, code_verifier)
+        else:
+            params = base_params
+        return f"{oauth_config.auth_url}?{urlencode(params.model_dump())}"
+
+
+    def _generate_code_challenge(self, verifier: str) -> str:
+        """
+        Генерация кода challenge для OAuth2 (используется для VK).
+        """
+        return base64.urlsafe_b64encode(
+            hashlib.sha256(verifier.encode()).digest()
+        ).decode().rstrip('=')
+
 
     async def oauthenticate(self, provider: str, code: str) -> TokenSchema:
         """
@@ -166,75 +246,8 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         # Создаем и возвращаем токен
         return await self._auth_service.create_token(user_schema)
 
-    async def get_oauth_url(self, provider: str) -> RedirectResponse:
-        """
-        Получение URL для OAuth2 авторизации
-
-        Args:
-            provider: Имя провайдера (vk/google/yandex)
-
-        Returns:
-            URL для OAuth2 авторизации
-        """
-        if provider not in self.providers:
-            raise InvalidProviderError(provider)
-
-        provider_config = self.providers[provider]
-        self._validate_provider_config(provider, provider_config)
-        auth_url = await self._build_auth_url(provider, provider_config)
-
-        return RedirectResponse(auth_url)
-
-    def _validate_provider_config(self, provider: str, provider_config: dict) -> None:
-        """
-        Валидация конфигурации провайдера.
-        Проверяет наличие обязательных полей.
-
-        Args:
-            provider_config (dict): Конфигурация провайдера
-
-        Raises:
-            HTTPException: Если отсутствуют обязательные поля
-        """
-        required_fields = ["client_id", "client_secret"]
-        missing = [field for field in required_fields if field not in provider_config]
-        if missing:
-            raise OAuthConfigError(provider, missing)
-
-    async def _build_auth_url(self, provider: str, _config: dict) -> str:
-        """
-        Построение URL для авторизации.
-
-        Args:
-            provider (str): Имя провайдера
-            provider_config (dict): Конфигурация провайдера
-
-        Returns:
-            str: URL для авторизации
-        """
-        params = {
-            "client_id": _config["client_id"],
-            "redirect_uri": f"{config.app_url}/api/v1/oauth/{provider}/callback",
-            "scope": _config.get("scope", ""),
-            "response_type": "code",
-        }
-        if provider == "vk":
-            code_verifier = secrets.token_urlsafe(64)
-            code_challenge = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode()).digest()).decode().rstrip('=')  # RFC-7636 требует base64url без padding
-            params.update({
-                "state": secrets.token_urlsafe(32),
-                "code_challenge": code_challenge,
-                "code_challenge_method": "S256",
-                "v": "5.131",
-            })
-            # Сохраняем verifier только для VK
-            redis = await RedisClient.get_instance()
-            redis.set(f"oauth:verifier:{params['state']}", code_verifier, ex=300)
-
-        return f"{_config['auth_url']}?{urlencode(params)}"
-
     # Методы работы с провайдерами
-    async def _get_provider_token(self, provider: str, code: str) -> dict:
+    async def _get_provider_token(self, provider: str, code: str, state: str = None) -> dict:
         """
         Получение токена от провайдера.
 
@@ -253,6 +266,13 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             "redirect_uri": f"{config.app_url}/{config.oauth_url}/{provider}/callback",
             "grant_type": "authorization_code",
         }
+
+        if provider == "vk" and state:
+            verifier = await self._redis_storage.get_verifier(state)
+            if not verifier:
+                raise OAuthTokenError(provider, "Invalid state/verifier")
+            token_params["code_verifier"] = verifier
+            await self._redis_storage.delete_verifier(state)
 
         async with aiohttp.ClientSession() as session:
             async with session.post(

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Generic, List, Type, TypeVar
+from typing import Any, Generic, List, Type, TypeVar, Optional
 
 from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -244,6 +244,20 @@ class BaseEntityManager(BaseDataManager[T]):
         for model in models:
             schemas.append(model)
         return schemas
+
+    async def get_by_field(self, field: str, value: Any) -> Optional[T]:
+        """
+        Получает запись по значению поля
+
+        Args:
+            field: Имя поля
+            value: Значение поля
+
+        Returns:
+            T | None: Найденная запись или None
+        """
+        statement = select(self.model).where(getattr(self.model, field) == value)
+        return await self.get_one(statement)
 
     async def get_by_email(self, email: str) -> Any | None:
         """
