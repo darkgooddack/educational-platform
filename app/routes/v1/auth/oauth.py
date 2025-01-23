@@ -57,12 +57,31 @@ def setup_routes(router: APIRouter):
         - **code**: Код авторизации от провайдера
 
         **Returns**:
-        - **OAuthResponse**: Токен доступа и провайдер
-
-        **Raises**:
-        - **HTTPException**: При ошибке получения токена или данных пользователя
+        - **OAuthResponse**: Токен доступа
         """
         return await OAuthService(db_session).oauthenticate(provider, code)
 
+    @router.get("/callback_vk", response_model=OAuthResponse)
+    async def vk_oauth_callback(
+        code: str,
+        return_to: str,
+        db_session: AsyncSession = Depends(get_db_session),
+    ) -> OAuthResponse:
+        """
+        🔄 **Обработка ответа от OAuth VK.**
+
+        **Args**:
+        - **provider**: Имя провайдера (vk)
+        - **code**: Код авторизации от провайдера
+        - **return_to**: URL для редиректа после авторизации
+
+        **Returns**:
+        - **OAuthResponse**: Токен доступа
+        """
+        return await OAuthService(db_session).oauthenticate(
+            provider="vk",
+            code=code,
+            return_to=return_to
+        )
 
 __all__ = ["setup_routes"]

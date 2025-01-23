@@ -2,7 +2,7 @@
 Схемы для регистрации пользователей.
 """
 from typing import Optional
-from pydantic import EmailStr, Field
+from pydantic import EmailStr, Field, HttpUrl
 
 from ..base import BaseInputSchema
 
@@ -18,9 +18,9 @@ class RegistrationSchema(BaseInputSchema):
         email (str): Email пользователя.
         phone (str): Телефон пользователя.
         password (str): Пароль пользователя.
-        vk_id (str): id пользователя от провайдера vk
+        vk_id (int): id пользователя от провайдера vk
         google_id (str): id пользователя от провайдера google
-        yandex_id (str): id пользователя от провайдера yandex
+        yandex_id (int): id пользователя от провайдера yandex
     """
 
     first_name: str = Field(min_length=2, max_length=50, description="Имя пользователя")
@@ -31,14 +31,16 @@ class RegistrationSchema(BaseInputSchema):
         None, max_length=50, description="Отчество пользователя"
     )
     email: EmailStr = Field(description="Email пользователя")
-    phone: str = Field(
+    phone: str | None = Field(
+        None,
         pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$",
         description="Телефон в формате +7 (XXX) XXX-XX-XX",
         examples=["+7 (999) 123-45-67"],
     )
+    avatar: Optional[str] = None
     password: str = Field(min_length=8, description="Пароль минимум 8 символов")
     vk_id: Optional[int] = None
-    google_id: Optional[int] = None
+    google_id: Optional[str] = None
     yandex_id: Optional[int] = None
 
 class RegistrationResponseSchema(BaseInputSchema):

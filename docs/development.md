@@ -105,9 +105,9 @@ docker-compose -f docker-compose.dev.yml exec redis redis-cli -a default
 ```
 
 #### Или через RedisInsight:
-- ost: localhost
-- ort: 6379
-- assword: default
+- host: localhost
+- port: 6379
+- password: default
 
 #### Веб-интерфейс
 - http://localhost:15672

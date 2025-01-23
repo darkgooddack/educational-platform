@@ -2,7 +2,6 @@
 Схемы для аутентификации и управления пользователями.
 """
 
-from typing import Optional
 from pydantic import EmailStr, Field
 
 from ..base import BaseInputSchema

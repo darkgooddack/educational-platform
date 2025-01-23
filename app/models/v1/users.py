@@ -32,7 +32,7 @@ class UserModel(BaseModel):
         phone (str): Номер телефона пользователя.
         hashed_password (str): Хэшированный пароль пользователя.
         role (UserRole): Роль пользователя в системе.
-        avatar_url (str): Ссылка на аватар пользователя.
+        avatar (str): Ссылка на аватар пользователя.
         vk_id (int): ID пользователя в VK.
         google_id (int): ID пользователя в Google (BigInteger).
         yandex_id (int): ID пользователя в Yandex.
@@ -45,10 +45,10 @@ class UserModel(BaseModel):
     last_name: Mapped[str] = mapped_column(nullable=False)
     middle_name: Mapped[str] = mapped_column(nullable=True)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    phone: Mapped[str] = mapped_column(unique=True, nullable=False)
+    phone: Mapped[str] = mapped_column(unique=True, nullable=True)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
-    avatar_url: Mapped[str] = mapped_column(nullable=True)
+    avatar: Mapped[str] = mapped_column(nullable=True)
     vk_id: Mapped[int] = mapped_column(unique=True, nullable=True)
-    google_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=True)
+    google_id: Mapped[str] = mapped_column(unique=True, nullable=True)
     yandex_id: Mapped[int] = mapped_column(unique=True, nullable=True)

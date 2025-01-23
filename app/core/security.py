@@ -13,13 +13,15 @@ Example:
     >>>         hashed = self.hash_password(password)
 
 """
-
 from datetime import datetime, timedelta, timezone
+import logging
+import passlib
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
 from app.core.config import config
-from app.core.exceptions import TokenExpiredError, TokenInvalidError
+from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
+                                 TokenMissingError, TokenInvalidError)
 from app.schemas import UserSchema
 
 pwd_context = CryptContext(
@@ -30,7 +32,7 @@ pwd_context = CryptContext(
     argon2__parallelism=8,
 )
 
-
+logger = logging.getLogger(__name__)
 class HashingMixin:
     """
     Миксин для хеширования паролей.
@@ -68,7 +70,7 @@ class HashingMixin:
             return pwd_context.verify(plain_password, hashed_password)
 
         except passlib.exc.UnknownHashError:
-
+            logger.warning("Неизвестный формат хеша пароля")
             return False
 
 
@@ -116,10 +118,10 @@ class TokenMixin:
                 key=TokenMixin.get_token_key(),
                 algorithms=[config.token_algorithm],
             )
-        except ExpiredSignatureError:
-            raise TokenExpiredError()
+        except ExpiredSignatureError as e:
+            raise TokenExpiredError() from e
         except JWTError:
-            raise TokenInvalidError()
+            raise TokenInvalidError() from e
 
     @staticmethod
     def create_payload(user: UserSchema) -> dict:
@@ -148,14 +150,14 @@ class TokenMixin:
         return config.token_key.get_secret_value()
 
     @staticmethod
-    def get_token_expiration() -> str:
+    def get_token_expiration() -> int:
         """
-        Получает время истечения срока действия токена.
+        Получает время истечения срока действия токена в секундах.
+
+        Returns:
+            int: Количество секунд до истечения токена
         """
-        expires_at = datetime.now(timezone.utc) + timedelta(
-            minutes=config.token_expire_minutes
-        )
-        return expires_at.strftime("%Y-%m-%d %H:%M:%S")
+        return config.token_expire_minutes * 60
 
     @staticmethod
     def is_expired(expires_at: str) -> bool:
@@ -163,12 +165,47 @@ class TokenMixin:
         Проверяет, истек ли срок действия токена.
 
         Args:
-            expires_at: Время истечения срока действия токена.
+            expires_at: Время истечения в секундах
 
         Returns:
             True, если токен истек, иначе False.
         """
-        expires_dt = datetime.strptime(expires_at, "%Y-%m-%d %H:%M:%S").replace(
-            tzinfo=timezone.utc
-        )
-        return expires_dt < datetime.now(timezone.utc)
+        current_timestamp = int(datetime.now(timezone.utc).timestamp())
+        return current_timestamp > expires_at
+
+    @staticmethod
+    def verify_token(token: str) -> dict:
+        """
+        Проверяет JWT токен и возвращает payload
+
+        Args:
+            token: Токен пользователя.
+
+        Returns:
+            payload: Данные пользователя.
+        """
+        if not token:
+            raise TokenMissingError()
+        return TokenMixin.decode_token(token)
+
+    @staticmethod
+    def validate_payload(payload: dict) -> str:
+        """
+        Валидирует данные из payload
+
+        Args:
+            payload: Данные пользователя.
+
+        Returns:
+            email: Email пользователя.
+        """
+        email = payload.get("sub")
+        expires_at = payload.get("expires_at")
+
+        if not email:
+            raise InvalidCredentialsError()
+
+        if TokenMixin.is_expired(expires_at):
+            raise TokenExpiredError()
+
+        return email
