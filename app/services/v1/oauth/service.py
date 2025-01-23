@@ -288,26 +288,21 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             token_params["code_verifier"] = verifier
             await self._redis_storage.delete_verifier(state)
 
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
         async with aiohttp.ClientSession() as session:
-            if provider == "vk":
-                headers = {"Content-Type": "application/x-www-form-urlencoded"}
-                async with session.post(
-                    provider_config["token_url"],
-                    data=token_params,
-                    headers=headers
-                ) as resp:
-                    token_data = await resp.json()
-            else:
-                async with session.post(
-                    provider_config["token_url"],
-                    data=token_params
-                ) as resp:
-                    token_data = await resp.json()
-                if "error" in token_data and token_data["error"] == "invalid_grant":
-                    raise OAuthInvalidGrantError(provider)
-                elif "error" in token_data:
-                    raise OAuthTokenError(provider, token_data["error"])
-                return token_data
+            async with session.post(
+                provider_config["token_url"],
+                data=token_params,
+                headers=headers
+            ) as resp:
+                token_data = await resp.json()
+
+            if "error" in token_data and token_data["error"] == "invalid_grant":
+                raise OAuthInvalidGrantError(provider)
+            elif "error" in token_data:
+                raise OAuthTokenError(provider, token_data["error"])
+            return token_data
 
     async def _get_user_info(self, provider: str, token_data: dict) -> BaseOAuthUserData:
         """
