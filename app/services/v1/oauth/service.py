@@ -289,11 +289,20 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             await self._redis_storage.delete_verifier(state)
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(
-                provider_config["token_url"],
-                data=token_params
-            ) as resp:
-                token_data = await resp.json()
+            if provider == "vk":
+                headers = {"Content-Type": "application/x-www-form-urlencoded"}
+                async with session.post(
+                    provider_config["token_url"],
+                    data=token_params,
+                    headers=headers
+                ) as resp:
+                    token_data = await resp.json()
+            else:
+                async with session.post(
+                    provider_config["token_url"],
+                    data=token_params
+                ) as resp:
+                    token_data = await resp.json()
                 if "error" in token_data and token_data["error"] == "invalid_grant":
                     raise OAuthInvalidGrantError(provider)
                 elif "error" in token_data:
