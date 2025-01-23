@@ -176,7 +176,11 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         Returns:
             TokenSchema с access_token
         """
-
+        self.logger.debug("Данные на входе: first_name=%s, last_name=%s, avatar=%s, provider=%s",
+                    user_data.first_name, 
+                    user_data.last_name, 
+                    user_data.avatar, 
+                    provider)
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
         provider_id = str(user_data.id) if provider == "google" else int(user_data.id)
