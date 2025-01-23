@@ -246,6 +246,11 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         # Создаем и возвращаем токен
         return await self._auth_service.create_token(user_schema)
 
+    def _get_callback_url(self, provider: str) -> str:
+        if provider == "vk":
+            return f"{config.app_url}/callback_vk?return_to={config.app_url}/profile"
+        return f"{config.app_url}/{config.oauth_url}/{provider}/callback"
+
     # Методы работы с провайдерами
     async def _get_provider_token(self, provider: str, code: str, state: str = None) -> dict:
         """
@@ -263,7 +268,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             "client_id": provider_config["client_id"],
             "client_secret": provider_config["client_secret"],
             "code": code,
-            "redirect_uri": f"{config.app_url}/{config.oauth_url}/{provider}/callback",
+            "redirect_uri": self._get_callback_url(provider),
             "grant_type": "authorization_code",
         }
 
