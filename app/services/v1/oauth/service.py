@@ -100,7 +100,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
         base_params = OAuthParams(
             client_id=oauth_config.client_id,
-            redirect_uri=f"{config.app_url}/api/v1/oauth/{provider}/callback",
+            redirect_uri=self._get_callback_url(provider),
             scope=oauth_config.scope
         )
 
