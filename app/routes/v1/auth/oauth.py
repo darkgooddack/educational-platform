@@ -43,12 +43,12 @@ def setup_routes(router: APIRouter):
         """
         return await OAuthService(db_session).get_oauth_url(provider)
 
-    @router.get("/{provider}/callback", response_model=OAuthResponse)
+    @router.get("/{provider}/callback")
     async def oauth_callback(
         provider: str,
         code: str,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> OAuthResponse:
+    ):
         """
         🔄 **Обработка ответа от OAuth провайдера.**
 
@@ -61,12 +61,12 @@ def setup_routes(router: APIRouter):
         """
         return await OAuthService(db_session).oauthenticate(provider, code)
 
-    @router.get("/callback_vk", response_model=OAuthResponse)
+    @router.get("/callback_vk")
     async def vk_oauth_callback(
         code: str,
         return_to: str,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> OAuthResponse:
+    ):
         """
         🔄 **Обработка ответа от OAuth VK.**
 
