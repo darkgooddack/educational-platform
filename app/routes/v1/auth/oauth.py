@@ -47,7 +47,7 @@ def setup_routes(router: APIRouter):
     async def oauth_callback(
         provider: str,
         code: str,
-        state: str,
+        redirect_uri: str,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> RedirectResponse:
         """
@@ -56,14 +56,14 @@ def setup_routes(router: APIRouter):
         **Args**:
         - **provider**: Имя провайдера
         - **code**: Код авторизации от провайдера
-        - **state**: URL для редиректа после авторизации
+        - **redirect_uri**: URL для редиректа после авторизации
         **Returns**: 
         - **OAuthResponse**: Токен доступа
         """
         auth_result = await OAuthService(db_session).oauthenticate(
             provider=provider,
             code=code,
-            redirect_uri=state
+            redirect_uri=redirect_uri
         )
     
         return RedirectResponse(f"{redirect_uri}?token={auth_result.access_token}")
