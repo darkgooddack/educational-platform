@@ -43,13 +43,12 @@ def setup_routes(router: APIRouter):
         """
         return await OAuthService(db_session).get_oauth_url(provider)
 
-    @router.get("/{provider}/callback", response_class=RedirectResponse)
+    @router.get("/{provider}/callback", response_class=OAuthResponse)
     async def oauth_callback(
         provider: str,
         code: str,
-        redirect_uri: str,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> RedirectResponse:
+    ) -> OAuthResponse:
         """
         🔄 **Обработка ответа от OAuth провайдера.**
 
@@ -57,16 +56,10 @@ def setup_routes(router: APIRouter):
         - **provider**: Имя провайдера
         - **code**: Код авторизации от провайдера
         - **redirect_uri**: URL для редиректа после авторизации
-        **Returns**: 
+        **Returns**:
         - **OAuthResponse**: Токен доступа
         """
-        auth_result = await OAuthService(db_session).oauthenticate(
-            provider=provider,
-            code=code,
-            redirect_uri=redirect_uri
-        )
-    
-        return RedirectResponse(f"{redirect_uri}?token={auth_result.access_token}")
+        return await OAuthService(db_session).oauthenticate(provider, code)
 
 
 __all__ = ["setup_routes"]
