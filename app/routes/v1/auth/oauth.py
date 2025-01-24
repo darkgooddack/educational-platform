@@ -24,11 +24,11 @@ def setup_routes(router: APIRouter):
         GET /{provider}/callback:
             Обработка callback запроса от провайдера.
     """
-    @router.get("/{provider}", response_class=RedirectResponse)
+    @router.get("/{provider}")
     async def oauth(
         provider: str,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> RedirectResponse:
+    ):
         """
         🌐 **Редирект на страницу авторизации провайдера.**
 
