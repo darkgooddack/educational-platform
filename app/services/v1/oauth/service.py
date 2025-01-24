@@ -128,7 +128,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         ).decode().rstrip('=')
 
 
-    async def oauthenticate(self, provider: str, code: str, redirect_uri: str = None) -> TokenSchema:
+    async def oauthenticate(self, provider: str, code: str) -> TokenSchema:
         """
         Полный процесс OAuth аутентификации
 
@@ -142,8 +142,8 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         # if not redirect_uri:
         #     raise InvalidCallbackError()
 
-        if not redirect_uri.startswith(config.app_url):
-            raise InvalidReturnURLError(redirect_uri)
+        # if not redirect_uri.startswith(config.app_url):
+        #     raise InvalidReturnURLError(redirect_uri)
 
         # Получаем токен от провайдера
         token_data = await self._get_provider_token(provider, code)
@@ -265,8 +265,12 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
     def _get_callback_url(self, provider: str) -> str:
         if provider == "vk":
-            return f"{config.app_url}/callback_vk?return_to={config.app_url}/profile"
-        return f"{config.app_url}/{config.oauth_url}/{provider}/callback"
+            callback_url = f"{config.app_url}/callback_vk?return_to={config.app_url}/profile"
+            self.logger("🔗 Callback URL для VK: %s", callback_url)
+            return callback_url
+        callback_url = f"{config.app_url}/{config.oauth_url}/{provider}/callback"
+        self.logger.debug("🔗 Callback URL для %s: %s", provider, callback_url)
+        return callback_url
 
     # Методы работы с провайдерами
     async def _get_provider_token(self, provider: str, code: str, state: str = None) -> dict:
