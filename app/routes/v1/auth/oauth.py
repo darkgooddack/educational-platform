@@ -43,45 +43,30 @@ def setup_routes(router: APIRouter):
         """
         return await OAuthService(db_session).get_oauth_url(provider)
 
-    @router.get("/{provider}/callback")
+    @router.get("/{provider}/callback", response_class=RedirectResponse)
     async def oauth_callback(
         provider: str,
         code: str,
+        redirect_uri: str
         db_session: AsyncSession = Depends(get_db_session),
-    ):
+    ) -> RedirectResponse:
         """
         🔄 **Обработка ответа от OAuth провайдера.**
 
         **Args**:
         - **provider**: Имя провайдера
         - **code**: Код авторизации от провайдера
-
-        **Returns**:
+        - **redirect_uri**: URL для редиректа после авторизации
+        **Returns**: 
         - **OAuthResponse**: Токен доступа
         """
-        return await OAuthService(db_session).oauthenticate(provider, code)
-
-    @router.get("/callback_vk")
-    async def vk_oauth_callback(
-        code: str,
-        return_to: str,
-        db_session: AsyncSession = Depends(get_db_session),
-    ):
-        """
-        🔄 **Обработка ответа от OAuth VK.**
-
-        **Args**:
-        - **provider**: Имя провайдера (vk)
-        - **code**: Код авторизации от провайдера
-        - **return_to**: URL для редиректа после авторизации
-
-        **Returns**:
-        - **OAuthResponse**: Токен доступа
-        """
-        return await OAuthService(db_session).oauthenticate(
-            provider="vk",
+        auth_result = await OAuthService(db_session).oauthenticate(
+            provider=provider,
             code=code,
-            return_to=return_to
+            redirect_uri=redirect_uri
         )
+    
+        return RedirectResponse(f"{redirect_uri}?token={auth_result.access_token}")
+
 
 __all__ = ["setup_routes"]

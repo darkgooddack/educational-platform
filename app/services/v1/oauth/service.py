@@ -128,7 +128,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         ).decode().rstrip('=')
 
 
-    async def oauthenticate(self, provider: str, code: str, return_to: str = None) -> TokenSchema:
+    async def oauthenticate(self, provider: str, code: str, redirect_uri: str) -> TokenSchema:
         """
         Полный процесс OAuth аутентификации
 
@@ -139,13 +139,11 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         Returns:
             Токен доступа
         """
-        if provider == "vk":
-            if not return_to:
-                raise InvalidCallbackError()
-            if not return_to.startswith(config.app_url):
-                raise InvalidReturnURLError(return_to)
-        elif return_to:
+        if not redirect_uri:
             raise InvalidCallbackError()
+    
+        if not redirect_uri.startswith(config.app_url):
+            raise InvalidReturnURLError(redirect_uri)
 
         # Получаем токен от провайдера
         token_data = await self._get_provider_token(provider, code)
