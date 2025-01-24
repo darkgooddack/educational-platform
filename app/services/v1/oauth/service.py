@@ -139,8 +139,8 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         Returns:
             Токен доступа
         """
-        if not redirect_uri:
-            raise InvalidCallbackError()
+        # if not redirect_uri:
+        #     raise InvalidCallbackError()
 
         if not redirect_uri.startswith(config.app_url):
             raise InvalidReturnURLError(redirect_uri)
