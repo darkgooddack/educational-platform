@@ -47,7 +47,7 @@ def setup_routes(router: APIRouter):
     async def oauth_callback(
         provider: str,
         code: str,
-        redirect_uri: str
+        redirect_uri: str,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> RedirectResponse:
         """
