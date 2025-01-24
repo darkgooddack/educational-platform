@@ -128,7 +128,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         ).decode().rstrip('=')
 
 
-    async def oauthenticate(self, provider: str, code: str, redirect_uri: str) -> TokenSchema:
+    async def oauthenticate(self, provider: str, code: str, redirect_uri: str = None) -> TokenSchema:
         """
         Полный процесс OAuth аутентификации
 
@@ -141,7 +141,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         """
         if not redirect_uri:
             raise InvalidCallbackError()
-    
+
         if not redirect_uri.startswith(config.app_url):
             raise InvalidReturnURLError(redirect_uri)
 
@@ -175,9 +175,9 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
             TokenSchema с access_token
         """
         self.logger.debug("Данные на входе: first_name=%s, last_name=%s, avatar=%s, provider=%s",
-                    user_data.first_name, 
-                    user_data.last_name, 
-                    user_data.avatar, 
+                    user_data.first_name,
+                    user_data.last_name,
+                    user_data.avatar,
                     provider)
         # Ищем пользователя по provider_id
         provider_field = f"{provider}_id"
@@ -206,13 +206,13 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
 
             if user_schema is None:
                 self.logger.warning("❌ Пользователь не найден по email, создаем нового пользователя...")
-                
+
                 self.logger.debug("Данные для нового пользователя: first_name=%s, last_name=%s, avatar=%s, provider_id=%s",
-                    user_data.first_name, 
-                    user_data.last_name, 
-                    user_data.avatar, 
+                    user_data.first_name,
+                    user_data.last_name,
+                    user_data.avatar,
                     provider_id)
-                    
+
                 # Создаем нового пользователя
                 oauth_user = OAuthUserSchema(
                     email=user_email,
