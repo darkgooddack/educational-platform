@@ -43,7 +43,7 @@ def setup_routes(router: APIRouter):
         """
         return await OAuthService(db_session).get_oauth_url(provider)
 
-    @router.post("/{provider}/callback")
+    @router.get("/{provider}/callback")
     async def oauth_callback(
         provider: str,
         code: str,
