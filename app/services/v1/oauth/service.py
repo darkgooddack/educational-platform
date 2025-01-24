@@ -139,12 +139,6 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
         Returns:
             Токен доступа
         """
-        # if not redirect_uri:
-        #     raise InvalidCallbackError()
-
-        # if not redirect_uri.startswith(config.app_url):
-        #     raise InvalidReturnURLError(redirect_uri)
-
         # Получаем токен от провайдера
         token_data = await self._get_provider_token(provider, code)
 
@@ -266,7 +260,7 @@ class OAuthService(HashingMixin, TokenMixin, BaseService):
     def _get_callback_url(self, provider: str) -> str:
         if provider == "vk":
             callback_url = f"{config.app_url}/callback_vk?return_to={config.app_url}/profile"
-            self.logger("🔗 Callback URL для VK: %s", callback_url)
+            self.logger.debug("🔗 Callback URL для VK: %s", callback_url)
             return callback_url
         callback_url = f"{config.app_url}/{config.oauth_url}/{provider}/callback"
         self.logger.debug("🔗 Callback URL для %s: %s", provider, callback_url)
