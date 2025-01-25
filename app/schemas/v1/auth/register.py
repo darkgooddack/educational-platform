@@ -23,9 +23,9 @@ class RegistrationSchema(BaseInputSchema):
         yandex_id (int): id пользователя от провайдера yandex
     """
 
-    first_name: str = Field(min_length=2, max_length=50, description="Имя пользователя")
+    first_name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
     last_name: str = Field(
-        min_length=2, max_length=50, description="Фамилия пользователя"
+        min_length=0, max_length=50, description="Фамилия пользователя"
     )
     middle_name: str | None = Field(
         None, max_length=50, description="Отчество пользователя"

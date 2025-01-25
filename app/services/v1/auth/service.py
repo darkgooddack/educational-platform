@@ -80,7 +80,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         token = TokenMixin.generate_token(payload)
         await self._redis_storage.save_token(user_schema, token)
 
-        return TokenSchema(access_token=token)
+        return TokenSchema(access_token=token, token_type="bearer")
 
     async def logout(self, token: str) -> dict:
         """

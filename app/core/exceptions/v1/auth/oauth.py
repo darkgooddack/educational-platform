@@ -10,35 +10,11 @@ class OAuthError(BaseAPIException):
             extra=extra
         )
 
-class InvalidProviderError(OAuthError):
-    """Неподдерживаемый провайдер OAuth"""
-    def __init__(self, provider: str):
-        super().__init__(
-            detail=f"Провайдер {provider} не поддерживается",
-            extra={"provider": provider}
-        )
-
-class OAuthConfigError(OAuthError):
-    """Ошибка конфигурации OAuth"""
-    def __init__(self, provider: str, missing_fields: list):
-        super().__init__(
-            detail=f"Провайдер {provider}: Отсутствуют обязательные поля конфигурации: {', '.join(missing_fields)}",
-            extra={"missing_fields": missing_fields}
-        )
-
 class OAuthTokenError(OAuthError):
     """Ошибка получения токена OAuth"""
     def __init__(self, provider: str, error: str):
         super().__init__(
             detail=f"Ошибка получения токена от {provider}: {error}",
-            extra={"provider": provider, "error": error}
-        )
-
-class OAuthUserDataError(OAuthError):
-    """Ошибка получения данных пользователя"""
-    def __init__(self, provider: str, error: str):
-        super().__init__(
-            detail=f"Ошибка получения данных пользователя от {provider}: {error}",
             extra={"provider": provider, "error": error}
         )
 
@@ -52,6 +28,30 @@ class OAuthInvalidGrantError(OAuthError):
                 "error_code": "invalid_grant",
                 "requires_reauth": True
             }
+        )
+
+class OAuthConfigError(OAuthError):
+    """Ошибка конфигурации OAuth"""
+    def __init__(self, provider: str, missing_fields: list):
+        super().__init__(
+            detail=f"Провайдер {provider}: Отсутствуют обязательные поля конфигурации: {', '.join(missing_fields)}",
+            extra={"missing_fields": missing_fields}
+        )
+
+class InvalidProviderError(OAuthError):
+    """Неподдерживаемый провайдер OAuth"""
+    def __init__(self, provider: str):
+        super().__init__(
+            detail=f"Провайдер {provider} не поддерживается",
+            extra={"provider": provider}
+        )
+
+class OAuthUserDataError(OAuthError):
+    """Ошибка получения данных пользователя"""
+    def __init__(self, provider: str, error: str):
+        super().__init__(
+            detail=f"Ошибка получения данных пользователя от {provider}: {error}",
+            extra={"provider": provider, "error": error}
         )
 
 class OAuthUserCreationError(OAuthError):

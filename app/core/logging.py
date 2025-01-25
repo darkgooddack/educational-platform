@@ -8,6 +8,12 @@ def setup_logging():
     """
     Настройка логгера для всего приложения
     """
+    # Очищаем существующие хендлеры
+    root = logging.getLogger()
+    if root.handlers:
+        for handler in root.handlers:
+            root.removeHandler(handler)
+
     log_config = config.LOGGING.to_dict()
 
     # Убираем параметры хендлера из базового конфига
@@ -19,14 +25,26 @@ def setup_logging():
     # Настраиваем базовое логирование
     logging.basicConfig(**log_config)
 
+    # Добавляем консольный хендлер
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter(config.LOGGING.FORMAT))
+    logging.getLogger().addHandler(console_handler)
+
     # Добавляем ротирующий файловый хендлер если нужно
     if handler_params['maxBytes']:
-        handler = RotatingFileHandler(
+        file_handler = RotatingFileHandler(
             filename=log_config.get('filename'),
             maxBytes=handler_params['maxBytes'],
             backupCount=handler_params['backupCount']
         )
-        logging.getLogger().addHandler(handler)
+        file_handler.setFormatter(logging.Formatter(config.LOGGING.FORMAT))
+        logging.getLogger().addHandler(file_handler)
+
+    # Настройка логгера для OAuth
+    oauth_logger = logging.getLogger('BaseOAuthProvider')
+    oauth_logger.setLevel(logging.INFO)
+    oauth_logger.addHandler(console_handler)
+    oauth_logger.addHandler(file_handler)
 
     # Филильтрация логов
     logging.getLogger("aio_pika.robust_connection").setLevel(logging.INFO)

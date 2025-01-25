@@ -37,13 +37,10 @@ def setup_routes(router: APIRouter):
 
         **Returns**:
         - **RedirectResponse**: Редирект на страницу авторизации
-
-        **Raises**:
-        - **HTTPException**: Если провайдер не поддерживается
         """
         return await OAuthService(db_session).get_oauth_url(provider)
 
-    @router.get("/{provider}/callback", response_model=OAuthResponse)
+    @router.get("/{provider}/callback")
     async def oauth_callback(
         provider: str,
         code: str,
@@ -59,29 +56,7 @@ def setup_routes(router: APIRouter):
         **Returns**:
         - **OAuthResponse**: Токен доступа
         """
-        return await OAuthService(db_session).oauthenticate(provider, code)
+        return await OAuthService(db_session).authenticate(provider, code)
 
-    @router.get("/callback_vk", response_model=OAuthResponse)
-    async def vk_oauth_callback(
-        code: str,
-        return_to: str,
-        db_session: AsyncSession = Depends(get_db_session),
-    ) -> OAuthResponse:
-        """
-        🔄 **Обработка ответа от OAuth VK.**
-
-        **Args**:
-        - **provider**: Имя провайдера (vk)
-        - **code**: Код авторизации от провайдера
-        - **return_to**: URL для редиректа после авторизации
-
-        **Returns**:
-        - **OAuthResponse**: Токен доступа
-        """
-        return await OAuthService(db_session).oauthenticate(
-            provider="vk",
-            code=code,
-            return_to=return_to
-        )
 
 __all__ = ["setup_routes"]
