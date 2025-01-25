@@ -13,7 +13,6 @@
 Этот модуль предназначен для использования в сочетании с SQLAlchemy ORM
 для выполнения операций с базой данных, связанных с пользователями.
 """
-from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models import BaseModel
@@ -34,7 +33,7 @@ class UserModel(BaseModel):
         role (UserRole): Роль пользователя в системе.
         avatar (str): Ссылка на аватар пользователя.
         vk_id (int): ID пользователя в VK.
-        google_id (int): ID пользователя в Google (BigInteger).
+        google_id (str): ID пользователя в Google.
         yandex_id (int): ID пользователя в Yandex.
 
     """
@@ -49,6 +48,7 @@ class UserModel(BaseModel):
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
     avatar: Mapped[str] = mapped_column(nullable=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
     vk_id: Mapped[int] = mapped_column(unique=True, nullable=True)
     google_id: Mapped[str] = mapped_column(unique=True, nullable=True)
     yandex_id: Mapped[int] = mapped_column(unique=True, nullable=True)
