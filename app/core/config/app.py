@@ -150,14 +150,10 @@ class AppConfig:
 
     LOGGING = LogConfig()
 
-    app_url: str = "https://api.ebtest.ru"
+    oauth_success_redirect_uri: str = "https://ebtest.ru"
 
     auth_url: str = Field(
         default="api/v1/auth", description="URL для аутентификации пользователя"
-    )
-
-    oauth_url: str = Field(
-        default="api/v1/oauth", description="URL для аутентификации пользователя через OAuth (временно, далее можно сделать формирование ссылки автоматически)"
     )
 
     token_type: str = Field(default="bearer", description="Тип токена авторизации")

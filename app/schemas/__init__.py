@@ -9,12 +9,18 @@ from .v1.auth.auth import AuthSchema, TokenSchema
 from .v1.oauth.oauth import (
     OAuthUserSchema,
     OAuthResponse,
-    BaseOAuthUserData,
+    OAuthUserData,
     YandexUserData,
     GoogleUserData,
-    VKUserData
+    VKUserData,
+    OAuthProvider,
+    OAuthProviderResponse,
+    OAuthTokenParams,
+    OAuthConfig,
+    OAuthParams,
+    VKOAuthParams
+
 )
-from .v1.oauth.schemas import OAuthConfig, OAuthParams, VKOAuthParams
 from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema
 from .v1.users.users import UserRole, UserSchema, UserUpdateSchema
 
@@ -25,6 +31,9 @@ __all__ = [
     "OAuthResponse",
     "OAuthConfig",
     "OAuthParams",
+    "OAuthProvider",
+    "OAuthProviderResponse",
+    "OAuthTokenParams",
     "VKOAuthParams",
     "RegistrationSchema",
     "RegistrationResponseSchema",
@@ -33,7 +42,7 @@ __all__ = [
     "TokenSchema",
     "UserRole",
     "AuthSchema",
-    "BaseOAuthUserData",
+    "OAuthUserData",
     "YandexUserData",
     "GoogleUserData",
     "VKUserData"

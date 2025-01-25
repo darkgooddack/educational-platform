@@ -37,9 +37,6 @@ def setup_routes(router: APIRouter):
 
         **Returns**:
         - **RedirectResponse**: Редирект на страницу авторизации
-
-        **Raises**:
-        - **HTTPException**: Если провайдер не поддерживается
         """
         return await OAuthService(db_session).get_oauth_url(provider)
 
@@ -55,11 +52,11 @@ def setup_routes(router: APIRouter):
         **Args**:
         - **provider**: Имя провайдера
         - **code**: Код авторизации от провайдера
-        - **redirect_uri**: URL для редиректа после авторизации
+
         **Returns**:
         - **OAuthResponse**: Токен доступа
         """
-        return await OAuthService(db_session).oauthenticate(provider, code)
+        return await OAuthService(db_session).authenticate(provider, code)
 
 
 __all__ = ["setup_routes"]
