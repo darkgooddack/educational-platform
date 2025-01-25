@@ -29,21 +29,51 @@ class OAuthService:
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def get_provider(self, provider: OAuthProvider):
-        """Получение инстанса провайдера"""
+        """
+        Получение инстанса провайдера
+
+        Args:
+            provider: OAuthProvider
+
+        Returns:
+            BaseOAuthProvider: Инстанс провайдера
+        """
         provider_class = self.PROVIDERS[provider]
         return provider_class(self.session)
 
-    async def get_oauth_url(self, provider: OAuthProvider):
-        """Получение URL для OAuth авторизации"""
+    async def get_oauth_url(self, provider: OAuthProvider) -> str:
+        """
+        Получение URL для OAuth авторизации
+
+        Args:
+            provider: OAuthProvider
+
+        Returns:
+            str: URL для OAuth авторизации
+        """
         oauth_provider = self.get_provider(provider)
         return await oauth_provider.get_auth_url()
 
     async def authenticate(self, provider: OAuthProvider, code: str) -> OAuthResponse:
-        """Аутентификация через OAuth"""
+        """
+        Аутентификация через OAuth
+
+        Flow:
+        1. Получение токена по коду авторизации (get_token)
+        2. Получение данных пользователя по токену (get_user_info)
+        3. Аутентификация и выдача токенов (authenticate)
+
+        Args:
+            provider: OAuthProvider
+            code: Код авторизации
+
+        Returns:
+            OAuthResponse: Токены и данные пользователя
+        """
         oauth_provider = self.get_provider(provider)
-        self.logger.debug(f"Authenticating with {provider} using code {code}")
+
         token = await oauth_provider.get_token(code)
-        self.logger.debug(f"Token received: {token}")
+
         user_data = await oauth_provider.get_user_info(token["access_token"])
-        self.logger.debug(f"User data received: {user_data}")
+
         return await oauth_provider.authenticate(user_data)

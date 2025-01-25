@@ -2,7 +2,6 @@ import logging
 import secrets
 from abc import ABC, abstractmethod
 from urllib.parse import urlencode
-from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -218,11 +217,14 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             RegistrationSchema(**oauth_user.model_dump())
         )
 
+        # TODO: Подумать, как можно избежать возможной ошибки: AttributeError: 'UserSchema' object has no attribute 'first_name' Возникновение при первой попытки аутентификации. Причем обращений типа .first_name к UserSchema не нашел в коде. Все работает, но этот момент требует дополнительного изучения.
+        #! created_user: UserModel, не UserSchema!
+
         if hasattr(created_user, 'first_name'):
-            self.logger.info(f"Создан новый пользователь {created_user.first_name}")
+            self.logger.info("Создан новый пользователь %s", created_user.first_name)
         else:
             self.logger.warning("Созданный пользователь не имеет поля first_name")
-        # Попытка избежать странной ошибки: AttributeError: 'UserSchema' object has no attribute 'first_name' - причем обращений не было
+
         return UserSchema(
             id=created_user.id,
             email=created_user.email,
@@ -250,13 +252,8 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             # Returns: OAuthResponse(
             #    access_token="eyJ...",
             #    refresh_token="eyJ...",
-            #    redirect_uri="/profile"
+            #    redirect_uri="/home"
             # )
-
-        TODO:
-            - Вынести redirect_uri в конфигурацию
-            - Добавить валидацию redirect_uri
-            - Сделать redirect_uri настраиваемым для разных провайдеров
         """
         access_token = await self._auth_service.create_token(user)
         refresh_token = TokenMixin.generate_token({
@@ -270,10 +267,30 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             redirect_uri=config.oauth_success_redirect_uri
         )
 
+    def _validate_config(self) -> None:
+        """
+        Валидация конфигурации провайдера
+
+        Проверяет наличие обязательных полей в конфигурации провайдера:
+            - client_id
+            - client_secret
+
+        Данные параметрые необходимо получить у провайдера и хранить в секретах.
+
+        Если какое-то из полей не указано, выбрасывается исключение OAuthConfigError
+        """
+        if not self.config.client_id or not self.config.client_secret:
+            raise OAuthConfigError(
+                self.provider,
+                ["client_id", "client_secret"]
+            )
+
     @abstractmethod
     async def get_auth_url(self) -> RedirectResponse:
         """
         Получение URL для OAuth авторизации.
+
+        #! Этот метод должен быть реализован в каждом наследуемом классе.
 
         Базовая реализация:
         1. Валидирует конфигурацию провайдера
@@ -325,6 +342,8 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         """
         Получение токена доступа от OAuth провайдера.
 
+        #! Этот метод должен быть реализован в каждом наследуемом классе.
+
         Flow:
         1. Формирование параметров запроса
         2. Обработка state параметра если требуется
@@ -374,6 +393,8 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         """
         Получение данных пользователя от OAuth провайдера.
 
+        #! Этот метод должен быть реализован в каждом наследуемом классе.
+
         Flow:
         1. Запрос к API провайдера с токеном
         2. Преобразование ответа в единый формат через handler
@@ -409,6 +430,8 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         """
         Генерирует callback URL для OAuth провайдера.
 
+        #! Этот метод должен быть реализован в каждом наследуемом классе.
+
         Этот метод использует конфигурацию приложения для формирования полного URL,
         который включает в себя текущий домен, версию API и имя провайдера.
 
@@ -425,6 +448,8 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
     async def _handle_state(self, state: str, token_params: dict) -> None:
         """
         Обработка state параметра для OAuth провайдера.
+
+        #! Этот метод должен быть реализован в каждом наследуемом классе.
 
         Метод реализует различные механизмы безопасности OAuth flow:
         - VK: PKCE (Proof Key for Code Exchange) с code_verifier
@@ -451,21 +476,3 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
                     raise OAuthTokenError(self.provider, "Invalid state")
         """
         pass
-
-    def _validate_config(self) -> None:
-        """
-        Валидация конфигурации провайдера
-
-        Проверяет наличие обязательных полей в конфигурации провайдера:
-            - client_id
-            - client_secret
-
-        Данные параметрые необходимо получить у провайдера и хранить в секретах.
-
-        Если какое-то из полей не указано, выбрасывается исключение OAuthConfigError
-        """
-        if not self.config.client_id or not self.config.client_secret:
-            raise OAuthConfigError(
-                self.provider,
-                ["client_id", "client_secret"]
-            )
