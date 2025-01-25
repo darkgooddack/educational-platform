@@ -3,7 +3,6 @@ from urllib.parse import urlencode
 from fastapi.responses import RedirectResponse
 from app.services.v1.oauth.base import BaseOAuthProvider
 from app.schemas import OAuthProvider, GoogleUserData, OAuthParams, OAuthProviderResponse
-from app.core.exceptions import OAuthTokenError
 
 class GoogleOAuthProvider(BaseOAuthProvider):
     """
@@ -56,8 +55,3 @@ class GoogleOAuthProvider(BaseOAuthProvider):
     async def _handle_state(self, state: str, token_params: dict) -> None:
         """Проверка state для защиты от CSRF - не исплользуется в Google"""
         pass
-        # stored_state = await self._redis_storage.get(f"google_state_{state}")
-        # self.logger.debug(f"Stored state: {stored_state}, received state: {state}")
-        # if not stored_state or stored_state != state:
-        #     raise OAuthTokenError(self.provider, "Invalid state parameter")
-        # await self._redis_storage.delete(f"google_state_{state}")
