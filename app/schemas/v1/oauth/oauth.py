@@ -30,7 +30,6 @@ class VKOAuthParams(OAuthParams):
     state: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
     code_challenge: str
     code_challenge_method: str = "S256"
-    v: str = "5.131"
 
 class OAuthResponse(TokenSchema):
     """
