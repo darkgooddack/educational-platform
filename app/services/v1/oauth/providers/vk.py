@@ -4,7 +4,7 @@ import secrets
 from urllib.parse import urlencode
 from fastapi.responses import RedirectResponse
 from app.services.v1.oauth.base import BaseOAuthProvider
-from app.schemas import OAuthProvider, VKUserData, OAuthParams, OAuthProviderResponse
+from app.schemas import OAuthProvider, VKUserData, VKOAuthParams, OAuthProviderResponse
 from app.core.exceptions import OAuthTokenError, OAuthUserDataError
 
 class VKOAuthProvider(BaseOAuthProvider):
@@ -59,7 +59,7 @@ class VKOAuthProvider(BaseOAuthProvider):
             code_verifier
         )
 
-        params = OAuthParams(
+        params = VKOAuthParams(
             client_id=self.config.client_id,
             redirect_uri=await self._get_callback_url(),
             scope=self.config.scope,
