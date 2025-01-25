@@ -1,13 +1,13 @@
 import logging
 from typing import Any, Generic, List, Type, TypeVar, Optional
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, func, desc, asc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import Executable
 
 from app.models import BaseModel
-from app.schemas import BaseSchema
+from app.schemas import BaseSchema, PaginationParams
 
 M = TypeVar("M", bound=BaseModel)
 T = TypeVar("T", bound=BaseSchema)
@@ -124,6 +124,46 @@ class BaseDataManager(SessionMixin, Generic[T]):
         except SQLAlchemyError as e:
             self.logger.error("❌ Ошибка при получении записей: %s", e)
             return []
+
+
+    async def get_paginated(
+        self,
+        select_statement: Executable,
+        pagination: PaginationParams,
+    ) -> tuple[List[T], int]:
+        """
+        Получает пагинированные записи из базы данных.
+
+        Args:
+            select_statement (Executable): SQL-запрос для выборки.
+            pagination (PaginationParams): Параметры пагинации.
+
+        Returns:
+            tuple[List[T], int]: Список пагинированных записей и общее количество записей.
+
+        Raises:
+            SQLAlchemyError: Если произошла ошибка при получении пагинированных записей.
+        """
+        try:
+            total = await self.session.scalar(
+                select(func.count()).select_from(select_statement.subselect_statement())
+            )
+
+            sort_column = getattr(self.model, pagination.sort_by)
+
+            select_statement = select_statement.order_by(
+                desc(sort_column) if pagination.sort_desc else asc(sort_column)
+            )
+
+            select_statement = select_statement.offset(pagination.skip).limit(pagination.limit)
+
+            items = await self.get_all(select_statement)
+
+            return items, total
+        except SQLAlchemyError as e:
+            logging.error("❌ Ошибка при получении пагинированных записей: %s", e)
+            return [], 0
+
 
     async def delete(self, delete_statement: Executable) -> bool:
         """

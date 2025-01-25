@@ -4,6 +4,7 @@
 
 from enum import Enum
 from pydantic import Field
+from app.schemas.v1.auth.register import RegistrationSchema
 from ..base import BaseInputSchema
 
 
@@ -15,11 +16,15 @@ class UserRole(str, Enum):
         ADMIN (str): Роль администратора.
         MODERATOR (str): Роль модератора.
         USER (str): Роль пользователя.
+        MANAGER (str): Роль менеджера.
+        TUTOR (str): Роль наставника.
     """
 
     ADMIN = "admin"
     MODERATOR = "moderator"
     USER = "user"
+    MANAGER = "manager"
+    TUTOR = "tutor"
 
 
 class UserSchema(BaseInputSchema):
@@ -37,6 +42,14 @@ class UserSchema(BaseInputSchema):
     name: str | None = None
     email: str
     hashed_password: str | None = None
+
+class UserCreateSchema(RegistrationSchema):
+    """
+    Схема создания пользователя.
+
+    см. в RegistrationSchema
+    """
+
 
 class UserUpdateSchema(BaseInputSchema):
     """

@@ -6,7 +6,6 @@
 
 Модуль обеспечивает удобную работу с моделями данных и их преобразование в различные форматы.
 """
-
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Type, TypeVar
 

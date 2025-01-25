@@ -8,12 +8,14 @@ API_MODULES - с префиксом api/v1:
 - auth (аутентификация)
 - register (регистрация)
 - oauth (OAuth)
+- feedbacks (отзывы)
 
 """
 
 from fastapi import APIRouter
 from app.core.config import config
 from .auth import auth_router, oauth_router, register_router
+from .feedbacks import feedbacks_router
 
 from . import main
 
@@ -29,6 +31,7 @@ VERSIONS_MODULES = {
     "auth": auth_router,
     "oauth": oauth_router,
     "register": register_router,
+    "feedbacks": feedbacks_router,
 }
 
 
