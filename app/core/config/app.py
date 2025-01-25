@@ -144,6 +144,7 @@ class AppConfig:
         "auth": ServiceConfig("auth", ["Authentication"]),
         "oauth": ServiceConfig("oauth", ["OAuth"]),
         "register": ServiceConfig("register", ["Registration"]),
+        "feedbacks": ServiceConfig("feedbacks", ["Feedbacks"]),
     }
 
     PATHS = PathConfig()

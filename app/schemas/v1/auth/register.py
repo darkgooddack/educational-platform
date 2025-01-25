@@ -2,7 +2,7 @@
 Схемы для регистрации пользователей.
 """
 from typing import Optional
-from pydantic import EmailStr, Field, HttpUrl
+from pydantic import EmailStr, Field
 
 from ..base import BaseInputSchema
 

@@ -4,7 +4,7 @@
 Предоставляет единую точку доступа ко всем Pydantic схемам.
 """
 
-from .v1.base import BaseInputSchema, BaseSchema
+from .v1.base import BaseInputSchema, BaseSchema, PaginationParams, Page
 from .v1.auth.auth import AuthSchema, TokenSchema
 from .v1.oauth.oauth import (
     OAuthUserSchema,
@@ -23,10 +23,13 @@ from .v1.oauth.oauth import (
 )
 from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema
 from .v1.users.users import UserRole, UserSchema, UserUpdateSchema
+from .v1.feedbacks.feedbacks import FeedbackStatus, FeedbackSchema, FeedbackCreateSchema, FeedbackUpdateSchema, FeedbackResponse
 
 __all__ = [
     "BaseSchema",
     "BaseInputSchema",
+    "PaginationParams",
+    "Page",
     "OAuthUserSchema",
     "OAuthResponse",
     "OAuthConfig",
@@ -45,5 +48,10 @@ __all__ = [
     "OAuthUserData",
     "YandexUserData",
     "GoogleUserData",
-    "VKUserData"
+    "VKUserData",
+    "FeedbackStatus",
+    "FeedbackSchema",
+    "FeedbackCreateSchema",
+    "FeedbackUpdateSchema",
+    "FeedbackResponse",
 ]
