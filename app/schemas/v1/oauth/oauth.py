@@ -240,6 +240,7 @@ class OAuthUserSchema(RegistrationSchema):
 
     см. в RegistrationSchema
     """
+    avatar: Optional[str] = None
     vk_id: Optional[int] = None
     google_id: Optional[str] = None
     yandex_id: Optional[int] = None
