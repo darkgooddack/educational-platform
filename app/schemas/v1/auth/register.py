@@ -36,7 +36,6 @@ class RegistrationSchema(BaseInputSchema):
         description="Телефон в формате +7 (XXX) XXX-XX-XX",
         examples=["+7 (999) 123-45-67"],
     )
-    avatar: Optional[str] = None
     password: str = Field(min_length=8, description="Пароль минимум 8 символов")
 
 
