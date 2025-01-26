@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 from app.core.config import config
 from app.core.security import HashingMixin, TokenMixin
 from app.models import UserModel
-from app.schemas import UserSchema
+from app.schemas import UserCredentialsSchema
 ```
 Относительные импорты для связанных модулей в том же пакете:
 ```python
@@ -32,7 +32,7 @@ from sqlalchemy.orm import Session
 # Модули приложения
 from app.core.config import config
 from app.models import UserModel
-from app.schemas import UserSchema
+from app.schemas import UserCredentialsSchema
 
 # Относительные импорты
 from ..users import UserDataManager

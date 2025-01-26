@@ -7,6 +7,7 @@
 - Конфигурацию CORS политик
 - Управление доступом к документации API
 """
+
 import logging
 import secrets
 from typing import Any, Dict, List
@@ -17,6 +18,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from .app import AppConfig
 
 logger = logging.getLogger(__name__)
+
 
 class Settings(BaseSettings):
     """
@@ -97,7 +99,7 @@ class Settings(BaseSettings):
     )
     oauth_callback_base_url: str = Field(
         default="http://localhost:8000/api/v1/oauth/{provider}/callback",
-        description="Base URL for OAuth callbacks"
+        description="Base URL for OAuth callbacks",
     )
     oauth_providers: Dict[str, Dict[str, str]] = Field(
         default={
@@ -108,7 +110,7 @@ class Settings(BaseSettings):
                 "token_url": "https://oauth.yandex.ru/token",
                 "user_info_url": "https://login.yandex.ru/info",
                 "scope": "login:email",
-                "callback_url": "http://localhost:8000/api/v1/oauth/yandex/callback"
+                "callback_url": "http://localhost:8000/api/v1/oauth/yandex/callback",
             },
             "vk": {
                 "client_id": "",
@@ -117,7 +119,7 @@ class Settings(BaseSettings):
                 "token_url": "https://id.vk.com/oauth2/auth",
                 "user_info_url": "https://id.vk.com/oauth2/user_info",
                 "scope": "email",
-                "callback_url": "http://localhost:8000/api/v1/oauth/vk/callback"
+                "callback_url": "http://localhost:8000/api/v1/oauth/vk/callback",
             },
             "google": {
                 "client_id": "",
@@ -126,7 +128,7 @@ class Settings(BaseSettings):
                 "token_url": "https://oauth2.googleapis.com/token",
                 "user_info_url": "https://www.googleapis.com/oauth2/v2/userinfo",
                 "scope": "email profile",
-                "callback_url": "http://localhost:8000/api/v1/oauth/google/callback"
+                "callback_url": "http://localhost:8000/api/v1/oauth/google/callback",
             },
         }
     )

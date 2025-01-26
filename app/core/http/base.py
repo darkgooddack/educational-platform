@@ -1,5 +1,7 @@
-import aiohttp
 from typing import Optional
+
+import aiohttp
+
 
 class BaseHttpClient:
     def __init__(self):

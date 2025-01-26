@@ -7,40 +7,25 @@ Example:
     >>> from app.core.exceptions import UserNotFoundError, UserExistsError
     >>> raise UserNotFoundError(user_id=42)
 """
-from .v1.base import BaseAPIException, ValueNotFoundError
-from .v1.auth.auth import (
-    AuthenticationError,
-    InvalidCredentialsError,
-    InvalidEmailFormatError,
-    InvalidPasswordError,
-    WeakPasswordError,
-    )
 
-from .v1.auth.oauth import (
-    OAuthError,
-    InvalidProviderError,
-    OAuthConfigError,
-    OAuthTokenError,
-    OAuthUserDataError,
-    OAuthInvalidGrantError,
-    OAuthUserCreationError,
-    InvalidReturnURLError,
-    InvalidCallbackError
-)
-
-from .v1.auth.users import (
-    UserExistsError,
-    UserNotFoundError,
-    UserCreationError
-)
-from .v1.auth.security import (
-    TokenInvalidError,
-    TokenExpiredError,
-    TokenMissingError
-)
+from .v1.auth.auth import (AuthenticationError, InvalidCredentialsError,
+                           InvalidEmailFormatError, InvalidPasswordError,
+                           WeakPasswordError)
+from .v1.auth.oauth import (InvalidCallbackError, InvalidProviderError,
+                            InvalidReturnURLError, OAuthConfigError,
+                            OAuthError, OAuthInvalidGrantError,
+                            OAuthTokenError, OAuthUserCreationError,
+                            OAuthUserDataError)
+from .v1.auth.security import (TokenExpiredError, TokenInvalidError,
+                               TokenMissingError)
+from .v1.auth.users import (UserCreationError, UserExistsError,
+                            UserNotFoundError)
+from .v1.base import BaseAPIException, DatabaseError, ValueNotFoundError
+from .v1.feedback.feedback import FeedbackAddError
 
 __all__ = [
     "BaseAPIException",
+    "DatabaseError",
     "ValueNotFoundError",
     "AuthenticationError",
     "InvalidCredentialsError",
@@ -61,5 +46,6 @@ __all__ = [
     "InvalidCallbackError",
     "UserExistsError",
     "UserNotFoundError",
-    "UserCreationError"
+    "UserCreationError",
+    "FeedbackAddError",
 ]

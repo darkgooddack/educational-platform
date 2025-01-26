@@ -1,27 +1,31 @@
-
 from typing import List
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.schemas import (FeedbackCreateSchema, FeedbackResponse,
+                         FeedbackSchema, FeedbackStatus, PaginationParams)
 from app.services import BaseService
-from app.schemas import PaginationParams, FeedbackStatus, FeedbackResponse, FeedbackCreateSchema
 
 from .data_manager import FeedbackDataManager
 
 
 class FeedbackService(BaseService):
     """
-    Сервис для работы с отзывами.
+    Сервис для работы с обратной связью.
 
     Args:
         session (AsyncSession): Сессия для работы с базой данных
 
     Methods:
-        create_feedback: Создает новый отзыв.
-        get_feedback: Получает отзыв по его ID.
-        proccess_feedback: Обрабатывает отзыв.
-        get_feedbacks: Получает список отзывов с пагинацией и фильтрацией.
-        soft_delete_feedback: Удаляет отзыв мягким удалением.
-        delete_feedback: Удаляет отзыв.
+        create_feedback: Создает новую обратную связь.
+        get_feedback: Получает обратную связь по его ID.
+        proccess_feedback: Обрабатывает обратную связь.
+        restore_feedback: Восстанавливает удаленную (обработанную) обратную связь.
+        get_feedbacks: Получает список обратных связей с возможностью пагинации, поиска и фильтрации.
+        soft_delete_feedback: Удаляет обратную связь мягким удалением.
+        delete_feedback: Удаляет обратную связь из базы данных.
     """
+
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.session = session
@@ -32,92 +36,121 @@ class FeedbackService(BaseService):
         feedback: FeedbackCreateSchema,
     ) -> FeedbackResponse:
         """
-        Создает новый отзыв.
+        Создает новую обратную связь.
 
         Args:
-            feedback (FeedbackCreateSchema): Схема отзыва
+            feedback (FeedbackCreateSchema): Схема создания обратной связи
 
         Returns:
-            FeedbackResponse: Схема отзыва
+            FeedbackResponse: Схема ответа на создание обратной связи
+
+        TODO: Подумать как сделать оповещение о новой обратной связи, это нужно делать от сюда.
         """
         return await self.feedback_manager.create_feedback(feedback)
 
     async def get_feedback(
         self,
         feedback_id: int,
-    ) -> FeedbackResponse:
+    ) -> FeedbackSchema:
         """
-        Получает отзыв по его ID.
+        Получает обратную связь по его ID.
 
         Args:
-            feedback_id (int): ID отзыва
+            feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackResponse: Схема отзыва
+            FeedbackSchema: Схема обратной связи
         """
         return await self.feedback_manager.get_feedback(feedback_id)
 
     async def proccess_feedback(
         self,
         feedback_id: int,
-    ) -> FeedbackResponse:
+    ) -> FeedbackSchema:
         """
-        Обрабатывает отзыв.
+        Обрабатывает обратнцю связь.
+
+        Изменяет статус обратной связи на "Обработан".
 
         Args:
-            feedback_id (int): ID отзыва
+            feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackResponse: Схема отзыва
+            FeedbackSchema: Схема обратной связи
         """
-        return await self.feedback_manager.update_feedback_status(feedback_id, FeedbackStatus.PROCESSED) #? Точно передаст то, что я хочу?
+        return await self.feedback_manager.update_feedback_status(
+            feedback_id, FeedbackStatus.PROCESSED.value
+        )
+
+    async def restore_feedback(
+        self,
+        feedback_id: int,
+    ) -> FeedbackSchema:
+        """
+        Восстанавливает удаленную (обработанную) обратную связь.
+
+        Можно также использовть для возвращения обратной связи в статус "Ожидает обработки" из "Обработан", не только из "Удален".
+
+        Изменяет статус обратной связи на "Ожидает обработки".
+
+        Args:
+            feedback_id (int): ID обратной связи
+
+        Returns:
+            FeedbackSchema: Схема обратной связи
+        """
+        return await self.feedback_manager.update_feedback_status(
+            feedback_id, FeedbackStatus.PENDING.value
+        )
 
     async def soft_delete_feedback(
         self,
         feedback_id: int,
-    ) -> FeedbackResponse:
+    ) -> FeedbackSchema:
         """
-        Удаляет отзыв мягким удалением.
+        Удаляет обратную связь мягким удалением.
 
         Args:
-            feedback_id (int): ID отзыва
+            feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackResponse: Схема отзыва
+            FeedbackSchema: Схема обратной связи
         """
-        return await self.feedback_manager.update_feedback_status(feedback_id, FeedbackStatus.DELETED)
+        return await self.feedback_manager.update_feedback_status(
+            feedback_id, FeedbackStatus.DELETED.value
+        )
 
     async def delete_feedback(
         self,
         feedback_id: int,
     ) -> FeedbackResponse:
         """
-        Удаляет отзыв.
+        Удаляет обратную связь из базы данных.
 
         Args:
-            feedback_id (int): ID отзыва
+            feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackResponse: Схема отзыва
+            FeedbackResponse: Схема ответа на создание обратной связи
         """
         return await self.feedback_manager.delete_feedback(feedback_id)
 
     async def get_feedbacks(
         self,
         pagination: PaginationParams,
-        status: str = None,
+        status: FeedbackStatus = None,
         search: str = None,
-    ) -> tuple[List[FeedbackResponse], int]:
+    ) -> tuple[List[FeedbackSchema], int]:
         """
-        Получает список отзывов с возможностью пагинации, поиска и фильтрации.
+        Получает список обратных связей с возможностью пагинации, поиска и фильтрации.
 
         Args:
             pagination (PaginationParams): Параметры пагинации
-            status (str): Фильтрация по статусу отзыва
-            search (str): Поиск по тексту отзыва
+            status (FeedbackStatus): Фильтрация по статусу обратной связи
+            search (str): Поиск по тексту обратной связи
 
         Returns:
-            tuple[List[FeedbackResponse], int]: Список отзывов и общее количество
+            tuple[List[FeedbackSchema], int]: Список обратных связей и общее количество
         """
         return await self.feedback_manager.get_feedbacks(
             pagination=pagination,

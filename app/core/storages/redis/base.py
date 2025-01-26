@@ -1,6 +1,9 @@
 from typing import Optional
+
 from redis import Redis
+
 from app.core.dependencies.redis import RedisClient
+
 
 class BaseRedisStorage:
     def __init__(self):

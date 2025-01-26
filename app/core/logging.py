@@ -18,8 +18,8 @@ def setup_logging():
 
     # Убираем параметры хендлера из базового конфига
     handler_params = {
-        'maxBytes': log_config.pop('maxBytes', None),
-        'backupCount': log_config.pop('backupCount', None)
+        "maxBytes": log_config.pop("maxBytes", None),
+        "backupCount": log_config.pop("backupCount", None),
     }
 
     # Настраиваем базовое логирование
@@ -31,17 +31,17 @@ def setup_logging():
     logging.getLogger().addHandler(console_handler)
 
     # Добавляем ротирующий файловый хендлер если нужно
-    if handler_params['maxBytes']:
+    if handler_params["maxBytes"]:
         file_handler = RotatingFileHandler(
-            filename=log_config.get('filename'),
-            maxBytes=handler_params['maxBytes'],
-            backupCount=handler_params['backupCount']
+            filename=log_config.get("filename"),
+            maxBytes=handler_params["maxBytes"],
+            backupCount=handler_params["backupCount"],
         )
         file_handler.setFormatter(logging.Formatter(config.LOGGING.FORMAT))
         logging.getLogger().addHandler(file_handler)
 
     # Настройка логгера для OAuth
-    oauth_logger = logging.getLogger('BaseOAuthProvider')
+    oauth_logger = logging.getLogger("BaseOAuthProvider")
     oauth_logger.setLevel(logging.INFO)
     oauth_logger.addHandler(console_handler)
     oauth_logger.addHandler(file_handler)

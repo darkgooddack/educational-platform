@@ -3,16 +3,16 @@
 В данном модуле реализованы функции для работы с пользователями.
 """
 
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import InvalidCredentialsError
 from app.core.security import HashingMixin, TokenMixin
 from app.core.storages.redis.auth import AuthRedisStorage
-from app.schemas import AuthSchema, TokenSchema, UserSchema
-from app.services import BaseService
+from app.schemas import AuthSchema, TokenSchema, UserCredentialsSchema
+from app.services.v1.base import BaseService
 
 from .data_manager import AuthDataManager
+
 
 class AuthService(HashingMixin, TokenMixin, BaseService):
     """
@@ -36,9 +36,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         self._data_manager = AuthDataManager(session)
         self._redis_storage = AuthRedisStorage()
 
-    async def authenticate(
-        self, credentials: AuthSchema
-    ) -> TokenSchema:
+    async def authenticate(self, credentials: AuthSchema) -> TokenSchema:
         """
         Аутентифицирует пользователя по логину и паролю.
 
@@ -62,11 +60,11 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         ):
             raise InvalidCredentialsError()
 
-        user_schema = UserSchema.model_validate(user_model)
+        user_schema = UserCredentialsSchema.model_validate(user_model)
 
         return await self.create_token(user_schema)
 
-    async def create_token(self, user_schema: UserSchema) -> TokenSchema:
+    async def create_token(self, user_schema: UserCredentialsSchema) -> TokenSchema:
         """
         Создание JWT токена
 

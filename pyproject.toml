@@ -36,6 +36,7 @@ dev = [
 ]
 
 [project.scripts]
+echo = "scripts.commands:echo"
 dev = "scripts.commands:dev"
 prod = "scripts.commands:prod"
 migrate = "scripts.commands:migrate"

@@ -12,12 +12,13 @@
 Класс `BaseInputSchema` - если в использоовании общих атрибутов
 из BaseSchema нет необходимости или они будут другие
 """
-from typing import TypeVar, Optional, Generic, List
+
 from datetime import datetime
+from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class CommonBaseSchema(BaseModel):
@@ -63,57 +64,71 @@ class BaseInputSchema(CommonBaseSchema):
     Базовая схема для входных данных.
     Этот класс наследуется от `CommonBaseSchema`
     и предоставляет общую конфигурацию для всех схем входных данных.
+
+    Так как нету необходимости для ввода исходных данных id и даты создания и обновления.
     """
 
     pass
 
-T = TypeVar("T", bound=BaseSchema)
 
-class Page(BaseModel, Generic[T]):
+class BaseResponseSchema(CommonBaseSchema):
     """
-    Схема для представления страницы результатов запроса.
+    Базовая схема для ответов API.
+
+    Этот класс наследуется от `CommonBaseSchema` и предоставляет общую
+    конфигурацию для всех схем ответов, включая возможность добавления
+    метаданных и сообщений об ошибках.
 
     Attributes:
-        items (List[T]): Список элементов на странице.
-        total (int): Общее количество элементов.
-        page (int): Номер текущей страницы.
-        size (int): Размер страницы.
+        success (bool): Указывает, успешен ли запрос.
+        message (Optional[str]): Сообщение, связанное с ответом.
     """
+
+    success: bool
+    message: Optional[str] = None
+
+
+class ErrorResponseSchema(BaseResponseSchema):
+    """
+    Схема для ответов об ошибках API.
+
+    Attributes:
+        error_code (str): Код ошибки.
+        error_details (Optional[dict]): Дополнительные детали об ошибке.
+    """
+
+    error_code: str
+    error_details: Optional[dict] = None
+
+
+class ItemResponseSchema(BaseResponseSchema):
+    """
+    Схема для ответов, содержащих один элемент.
+
+    Attributes:
+        item (T): Элемент, возвращаемый в ответе.
+    """
+
+    item: T
+
+
+class ListResponseSchema(BaseResponseSchema, Generic[T]):
+    """
+    Схема для ответов, содержащих список элементов.
+
+    Attributes:
+        items (List[T]): Список элементов, возвращаемых в ответе.
+    """
+
     items: List[T]
-    total: int
-    page: int
-    size: int
 
 
-class PaginationParams:
+class MetaResponseSchema(BaseResponseSchema):
     """
-    Параметры для пагинации.
+    Схема для ответов с метаданными.
 
     Attributes:
-        skip (int): Количество пропускаемых элементов.
-        limit (int): Максимальное количество элементов на странице.
-        sort_by (str): Поле для сортировки.
-        sort_desc (bool): Флаг сортировки по убыванию.
+        meta (dict): Метаданные, связанные с ответом.
     """
-    def __init__(
-        self,
-        skip: int = 0,
-        limit: int = 10,
-        sort_by: str = "created_at",
-        sort_desc: bool = True
-    ):
-        self.skip = skip
-        self.limit = limit
-        self.sort_by = sort_by
-        self.sort_desc = sort_desc
 
-    @property
-    def page(self) -> int:
-        """
-        Получает номер текущей страницы.
-
-        Returns:
-            int: Номер текущей страницы.
-
-        """
-        return self.skip // self.limit + 1
+    meta: dict

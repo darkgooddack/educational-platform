@@ -13,11 +13,13 @@
 Этот модуль предназначен для использования в сочетании с SQLAlchemy ORM
 для выполнения операций с базой данных, связанных с пользователями.
 """
+
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import BaseModel
-from app.schemas import UserRole
 from app.models.v1.feedbacks import FeedbackModel
+from app.schemas import UserRole
+
 
 class UserModel(BaseModel):
     """
@@ -51,13 +53,11 @@ class UserModel(BaseModel):
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     role: Mapped[UserRole] = mapped_column(default=UserRole.USER)
     avatar: Mapped[str] = mapped_column(nullable=True)
-    is_active: Mapped[bool] = mapped_column(default=True)
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     vk_id: Mapped[int] = mapped_column(unique=True, nullable=True)
     google_id: Mapped[str] = mapped_column(unique=True, nullable=True)
     yandex_id: Mapped[int] = mapped_column(unique=True, nullable=True)
 
     feedbacks: Mapped[list["FeedbackModel"]] = relationship(
-        "FeedbackModel",
-        back_populates="manager",
-        lazy="joined"
-        )
+        "FeedbackModel", back_populates="manager", lazy="joined"
+    )

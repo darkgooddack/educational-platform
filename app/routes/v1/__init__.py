@@ -13,11 +13,13 @@ API_MODULES - с префиксом api/v1:
 """
 
 from fastapi import APIRouter
+
 from app.core.config import config
-from .auth import auth_router, oauth_router, register_router
-from .feedbacks import feedbacks_router
 
 from . import main
+from .auth import auth_router, oauth_router, register_router
+from .feedbacks import feedbacks_router
+from .users import users_router
 
 router_main = APIRouter(**config.SERVICES["main"].to_dict())
 main.setup_routes(router_main)
@@ -27,10 +29,11 @@ BASE_MODULES = {
     "main": router_main,
 }
 
-VERSIONS_MODULES = {
+VERSIONS_MODULES = { # Здесь же порядок отображения в Swagger
     "auth": auth_router,
     "oauth": oauth_router,
     "register": register_router,
+    "users": users_router,
     "feedbacks": feedbacks_router,
 }
 

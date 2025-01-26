@@ -1,11 +1,15 @@
-from base64 import urlsafe_b64encode
 import hashlib
 import secrets
+from base64 import urlsafe_b64encode
 from urllib.parse import urlencode
+
 from fastapi.responses import RedirectResponse
-from app.services.v1.oauth.base import BaseOAuthProvider
-from app.schemas import OAuthProvider, VKUserData, VKOAuthParams, OAuthProviderResponse
+
 from app.core.exceptions import OAuthTokenError, OAuthUserDataError
+from app.schemas import (OAuthProvider, OAuthProviderResponse, VKOAuthParams,
+                         VKUserData)
+from app.services.v1.oauth.base import BaseOAuthProvider
+
 
 class VKOAuthProvider(BaseOAuthProvider):
     """
@@ -18,10 +22,7 @@ class VKOAuthProvider(BaseOAuthProvider):
     """
 
     def __init__(self, session):
-        super().__init__(
-            provider=OAuthProvider.VK.value,
-            session=session
-        )
+        super().__init__(provider=OAuthProvider.VK.value, session=session)
 
     async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
         """Стандартное получение токена"""
@@ -45,19 +46,18 @@ class VKOAuthProvider(BaseOAuthProvider):
 
     def _generate_code_challenge(self, verifier: str) -> str:
         """Генерация code_challenge для PKCE"""
-        return urlsafe_b64encode(
-            hashlib.sha256(verifier.encode()).digest()
-        ).decode().rstrip('=')
+        return (
+            urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
+            .decode()
+            .rstrip("=")
+        )
 
     async def get_auth_url(self) -> RedirectResponse:
         """URL авторизации с PKCE"""
         code_verifier = secrets.token_urlsafe(64)
         state = secrets.token_urlsafe()
 
-        await self._redis_storage.set(
-            f"vk_verifier_{state}",
-            code_verifier
-        )
+        await self._redis_storage.set(f"vk_verifier_{state}", code_verifier)
 
         params = VKOAuthParams(
             client_id=self.config.client_id,
@@ -65,7 +65,7 @@ class VKOAuthProvider(BaseOAuthProvider):
             scope=self.config.scope,
             state=state,
             code_challenge=self._generate_code_challenge(code_verifier),
-            code_challenge_method='S256'
+            code_challenge_method="S256",
         )
 
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"

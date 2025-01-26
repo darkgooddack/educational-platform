@@ -1,13 +1,15 @@
 import logging
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.v1.oauth.oauth import OAuthProvider, OAuthResponse
-from app.services.v1.oauth.providers import (
-    YandexOAuthProvider,
-    GoogleOAuthProvider,
-    VKOAuthProvider
-)
+from app.services.v1.oauth.providers import (GoogleOAuthProvider,
+                                             VKOAuthProvider,
+                                             YandexOAuthProvider)
+
 logging.basicConfig(level=logging.DEBUG)
+
+
 class OAuthService:
     """
     Сервис для работы с OAuth провайдерами.
@@ -21,7 +23,7 @@ class OAuthService:
     PROVIDERS = {
         OAuthProvider.YANDEX: YandexOAuthProvider,
         OAuthProvider.GOOGLE: GoogleOAuthProvider,
-        OAuthProvider.VK: VKOAuthProvider
+        OAuthProvider.VK: VKOAuthProvider,
     }
 
     def __init__(self, session: AsyncSession):

@@ -4,12 +4,15 @@
 Этот модуль содержит роутеры:
 - Аутентификации пользователей через OAuth2.
 """
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.dependencies import get_db_session
 from app.schemas import OAuthResponse
 from app.services import OAuthService
+
 
 def setup_routes(router: APIRouter):
     """
@@ -24,6 +27,7 @@ def setup_routes(router: APIRouter):
         GET /{provider}/callback:
             Обработка callback запроса от провайдера.
     """
+
     @router.get("/{provider}", response_class=RedirectResponse)
     async def oauth(
         provider: str,

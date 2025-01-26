@@ -1,7 +1,7 @@
 import logging
-from typing import Any, Generic, List, Type, TypeVar, Optional
+from typing import Any, Generic, List, Optional, Type, TypeVar
 
-from sqlalchemy import delete, select, func, desc, asc
+from sqlalchemy import asc, delete, desc, func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import Executable
@@ -32,8 +32,10 @@ class BaseService(SessionMixin):
     """
     Базовый класс для сервисов приложения.
     """
+
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
+
 
 class BaseDataManager(SessionMixin, Generic[T]):
     """
@@ -125,6 +127,22 @@ class BaseDataManager(SessionMixin, Generic[T]):
             self.logger.error("❌ Ошибка при получении записей: %s", e)
             return []
 
+    async def exists(self, select_statement: Executable) -> bool:
+        """
+        Проверяет, существует ли хотя бы одна запись на основе предоставленного     SQL-запроса.
+
+        Args:
+            select_statement (Executable): SQL-запрос для выборки.
+
+        Returns:
+            bool: True, если запись существует, иначе False.
+        """
+        try:
+            result = await self.session.execute(select_statement)
+            return result.scalar() is not None
+        except SQLAlchemyError as e:
+            self.logger.error("❌ Ошибка при проверке существования: %s", e)
+            return False
 
     async def get_paginated(
         self,
@@ -146,7 +164,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
         """
         try:
             total = await self.session.scalar(
-                select(func.count()).select_from(select_statement.subselect_statement())
+                select(func.count()).select_from(select_statement)
             )
 
             sort_column = getattr(self.model, pagination.sort_by)
@@ -155,7 +173,9 @@ class BaseDataManager(SessionMixin, Generic[T]):
                 desc(sort_column) if pagination.sort_desc else asc(sort_column)
             )
 
-            select_statement = select_statement.offset(pagination.skip).limit(pagination.limit)
+            select_statement = select_statement.offset(pagination.skip).limit(
+                pagination.limit
+            )
 
             items = await self.get_all(select_statement)
 
@@ -163,7 +183,6 @@ class BaseDataManager(SessionMixin, Generic[T]):
         except SQLAlchemyError as e:
             logging.error("❌ Ошибка при получении пагинированных записей: %s", e)
             return [], 0
-
 
     async def delete(self, delete_statement: Executable) -> bool:
         """
@@ -285,7 +304,7 @@ class BaseEntityManager(BaseDataManager[T]):
             schemas.append(model)
         return schemas
 
-    async def get_by_field(self, field: str, value: Any) -> Optional[T]:
+    async def get_user_by_field(self, field: str, value: Any) -> Optional[T]:
         """
         Получает запись по значению поля
 
@@ -299,7 +318,7 @@ class BaseEntityManager(BaseDataManager[T]):
         statement = select(self.model).where(getattr(self.model, field) == value)
         return await self.get_one(statement)
 
-    async def get_by_email(self, email: str) -> Any | None:
+    async def get_user_by_email(self, email: str) -> Any | None:
         """
         Получает элемент по email.
 

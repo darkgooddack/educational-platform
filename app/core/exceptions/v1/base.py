@@ -51,6 +51,21 @@ class BaseAPIException(HTTPException):
         logger.error(detail, extra=context)
         super().__init__(status_code=status_code, detail=detail)
 
+
+class DatabaseError(BaseAPIException):
+    """
+    Ошибка при работе с базой данных.
+    """
+
+    def __init__(self, message: str, extra: dict = None):
+        super().__init__(
+            status_code=500,
+            detail=f"Ошибка базы данных: {message}",
+            error_type="database_error",
+            extra=extra,
+        )
+
+
 class ValueNotFoundError(BaseAPIException):
     """
     Значение поля не найдно.

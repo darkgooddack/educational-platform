@@ -6,9 +6,11 @@
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.dependencies import get_db_session
-from app.schemas import RegistrationSchema, RegistrationResponseSchema
+from app.schemas import RegistrationResponseSchema, RegistrationSchema
 from app.services import UserService
+
 
 def setup_routes(router: APIRouter):
     """
@@ -20,6 +22,7 @@ def setup_routes(router: APIRouter):
     Routes:
         POST /register: Регистрация нового пользователя
     """
+
     @router.post("/")
     async def registration_user(
         user: RegistrationSchema,
@@ -36,5 +39,6 @@ def setup_routes(router: APIRouter):
         """
 
         return await UserService(db_session).create_user(user)
+
 
 __all__ = ["setup_routes"]
