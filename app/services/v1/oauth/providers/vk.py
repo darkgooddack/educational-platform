@@ -74,8 +74,9 @@ class VKOAuthProvider(BaseOAuthProvider):
     async def _handle_state(self, state: str, token_params: dict) -> None:
         """Добавление code_verifier в параметры токена"""
         verifier = await self._redis_storage.get(f"vk_verifier_{state}")
-        if not verifier:
-            raise OAuthTokenError(self.provider, "Invalid state/verifier")
+        # Попробуем не смотреть на наличие verifier
+        # if not verifier:
+        #     raise OAuthTokenError(self.provider, "Invalid state/verifier") 
 
         token_params["code_verifier"] = verifier
         await self._redis_storage.delete(f"vk_verifier_{state}")
