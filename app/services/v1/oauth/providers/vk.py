@@ -56,18 +56,26 @@ class VKOAuthProvider(BaseOAuthProvider):
         """URL авторизации с PKCE"""
         code_verifier = secrets.token_urlsafe(64)
         state = secrets.token_urlsafe()
-
+        self.logger.debug(f"state, был: {state}")
         await self._redis_storage.set(f"vk_verifier_{state}", code_verifier)
 
+        verifier = await self._redis_storage.get(f"vk_verifier_{state}")
+        self.logger.debug(f"state, который был и сохранили: {verifier}")
         params = VKOAuthParams(
             client_id=self.config.client_id,
             redirect_uri=await self._get_callback_url(),
             scope=self.config.scope,
-            state=state,
+            # state=state,
             code_challenge=self._generate_code_challenge(code_verifier),
             code_challenge_method="S256",
         )
-
+        
+        self.logger.debug(f"state, стал: {params.state}")
+        await self._redis_storage.set(f"vk_verifier_{params.state}", code_verifier)
+        verifier = await self._redis_storage.get(f"vk_verifier_{state}")
+        self.logger.debug(f"state, который стал и сохранили: {verifier}")
+        
+        
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"
         return RedirectResponse(url=auth_url)
 
