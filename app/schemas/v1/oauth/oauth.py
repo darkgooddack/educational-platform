@@ -41,7 +41,7 @@ class OAuthConfig(CommonBaseSchema):
         callback_url: URL для перенаправления после авторизации (для провайдера)
     """
 
-    client_id: str
+    client_id: str | int # VK: client_id = id приложения >_<
     client_secret: str
     auth_url: str
     token_url: str
@@ -61,7 +61,7 @@ class OAuthParams(BaseModel):
         response_type: Тип ответа (code)
     """
 
-    client_id: str
+    client_id: str | int # VK: client_id = id приложения >_<
     redirect_uri: str
     scope: str = ""
     response_type: str = "code"

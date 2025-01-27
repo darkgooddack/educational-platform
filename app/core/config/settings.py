@@ -113,7 +113,7 @@ class Settings(BaseSettings):
                 "callback_url": "http://localhost:8000/api/v1/oauth/yandex/callback",
             },
             "vk": {
-                "client_id": "",
+                "client_id": 0, # VK: client_id = id приложения >_<
                 "client_secret": "",
                 "auth_url": "https://id.vk.com/authorize",
                 "token_url": "https://id.vk.com/oauth2/auth",
