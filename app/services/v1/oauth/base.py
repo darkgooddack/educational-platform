@@ -26,28 +26,32 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
     Базовый класс для OAuth провайдеров.
 
     Flow аутентификации:
-    1. Получение auth_url для редиректа пользователя
-    2. Получение токена по коду авторизации
-    3. Получение данных пользователя по токену
-    4. Поиск/создание пользователя
-    5. Генерация токенов
+    1. Получение auth_url для редиректа пользователя на провайдера
+    2. Получение от провайдера токена по коду аутентификации
+    3. Получение от провайдера данных пользователя по токену
+    4. Поиск/создание пользователя в базе данных
+    5. Генерация токенов для аутентификации пользователя
 
     Usage:
-        # В контроллере
-        @router.get("/oauth/{provider}")
+        # В роутерах:
+        @router.get("/oauth/{provider}") # 1
         async def oauth_login(provider: OAuthProvider):
-            return await oauth_provider.get_auth_url()
+            return await OAuthService(db_session).get_oauth_url(provider) 
 
-        @router.get("/oauth/{provider}/callback")
+        @router.get("/oauth/{provider}/callback") # 2, 3, 4, 5
         async def oauth_callback(provider: OAuthProvider, code: str):
-            # Получение токена провайдера
-            token = await provider.get_token(code)
+            return await OAuthService(db_session).authenticate(provider, code)
+        
+        # В сервисе:
+        async def get_oauth_url(self, provider: OAuthProvider) -> str:
+            oauth_provider = self.get_provider(provider)
+            return await oauth_provider.get_auth_url() # 1
 
-            # Получение данных пользователя
-            user_data = await provider.get_user_info(token.access_token)
-
-            # Аутентификация и выдача токенов
-            return await provider.authenticate(user_data)
+        async def authenticate(self, provider: OAuthProvider, code: str) -> OAuthResponse:
+            oauth_provider = self.get_provider(provider)
+            token = await oauth_provider.get_token(code) # 2
+            user_data = await oauth_provider.get_user_info(token["access_token"]) # 3
+            return await oauth_provider.authenticate(user_data) # 4, 5
     """
 
     def __init__(self, provider: OAuthProvider, session: AsyncSession):
@@ -355,6 +359,9 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         )
 
         if hasattr(self, "_handle_state"):
+            self.logger.debug("Начало работы с handle_state:")
+            self.logger.debug(f"state: {state}")
+            self.logger.debug(f"token_params: {token_params.model_dump()}")
             await self._handle_state(state, token_params.model_dump())
 
         token_data = await self.http_client.get_token(

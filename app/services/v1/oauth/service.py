@@ -74,7 +74,7 @@ class OAuthService:
         """
         oauth_provider = self.get_provider(provider)
 
-        token = await oauth_provider.get_token(code)
+        token = await oauth_provider.get_token(code) #! state не передается, он равен None
 
         user_data = await oauth_provider.get_user_info(token["access_token"])
 

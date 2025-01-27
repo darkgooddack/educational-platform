@@ -23,7 +23,7 @@ class GoogleOAuthProvider(BaseOAuthProvider):
 
     async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
         """Стандартное получение токена"""
-        return await super().get_token(code)
+        return await super().get_token(code, state)
 
     async def _get_callback_url(self) -> str:
         """Стандартный callback URL"""

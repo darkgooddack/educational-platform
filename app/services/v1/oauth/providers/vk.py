@@ -26,7 +26,7 @@ class VKOAuthProvider(BaseOAuthProvider):
 
     async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
         """Стандартное получение токена"""
-        return await super().get_token(code)
+        return await super().get_token(code, state)
 
     async def _get_callback_url(self) -> str:
         """Стандартный callback URL"""
@@ -74,9 +74,9 @@ class VKOAuthProvider(BaseOAuthProvider):
     async def _handle_state(self, state: str, token_params: dict) -> None:
         """Добавление code_verifier в параметры токена"""
         verifier = await self._redis_storage.get(f"vk_verifier_{state}")
-        # Попробуем не смотреть на наличие verifier
-        # if not verifier:
-        #     raise OAuthTokenError(self.provider, "Invalid state/verifier") 
+        self.logger.debug(f"verifier: {verifier}")
+        if not verifier:
+            raise OAuthTokenError(self.provider, "Invalid state/verifier") 
 
         token_params["code_verifier"] = verifier
         await self._redis_storage.delete(f"vk_verifier_{state}")
