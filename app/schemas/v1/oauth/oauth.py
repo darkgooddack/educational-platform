@@ -169,7 +169,7 @@ class OAuthTokenParams(BaseModel):
         redirect_uri: Путь для перенаправления после авторизации (для провайдера)
     """
 
-    client_id: str
+    client_id: str | int
     client_secret: str
     code: str
     redirect_uri: str

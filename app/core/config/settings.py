@@ -101,7 +101,7 @@ class Settings(BaseSettings):
         default="http://localhost:8000/api/v1/oauth/{provider}/callback",
         description="Base URL for OAuth callbacks",
     )
-    oauth_providers: Dict[str, Dict[str, str]] = Field(
+    oauth_providers: Dict[str, Dict[str, str | int]] = Field(
         default={
             "yandex": {
                 "client_id": "",
