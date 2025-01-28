@@ -140,8 +140,7 @@ class UserService(HashingMixin, BaseService):
         """
         # Преобразуем в OAuthUserSchema если есть OAuth идентификаторы
         user_dict = user.model_dump()
-        if any(key in user_dict for key in ['vk_id', 'google_id', 'yandex_id', 'avatar']):
-            user = OAuthUserSchema(**user_dict)
+        user = OAuthUserSchema(**user_dict)
         self.logger.debug(
                     "user теперь имеет тип '%s'", type(user)
                 )
