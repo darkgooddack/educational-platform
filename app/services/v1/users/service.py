@@ -162,7 +162,9 @@ class UserService(HashingMixin, BaseService):
         vk_id = user_data.get("vk_id")
         google_id = user_data.get("google_id")
         yandex_id = user_data.get("yandex_id")
-
+        self.logger.debug(
+                    "user имеет тип '%s'", type(user)
+                )
         # Устанавливаем идентификаторы провайдеров, если они есть
         user_model = UserModel(
             first_name=user.first_name,
