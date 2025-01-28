@@ -119,7 +119,7 @@ class UserService(HashingMixin, BaseService):
 
         return created_user
 
-    async def _create_user_internal(self, user: OAuthUserSchema | RegistrationSchema) -> UserCredentialsSchema:
+    async def _create_user_internal(self, user: OAuthUserSchema) -> UserCredentialsSchema:
         """
         Внутренний метод создания пользователя в базе данных.
 
