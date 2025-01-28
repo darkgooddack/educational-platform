@@ -1,11 +1,47 @@
+"""
+Модуль для работы с данными обратной связи.
+
+TODO:
+
+# Проверяем время последнего запроса
+last_feedback = await self.get_one(
+    select(self.model)
+    .where(self.model.email == feedback.email)
+    .order_by(self.model.created_at.desc())
+)
+
+if last_feedback:
+    time_diff = datetime.now(timezone.utc) - last_feedback.created_at
+    if time_diff.total_seconds() < 3600:  # 1 час
+        raise BaseAPIException(
+            status_code=400,
+            detail="Слишком частые запросы. Попробуйте позже",
+            error_type="rate_limit"
+        )
+
+# Добавить в FeedbackCreateSchema
+email: EmailStr = Field(
+    ...,
+    description="Email пользователя",
+    regex=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+)
+phone: str = Field(
+    None,
+    pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$"
+)
+
+Добавить rate limiting на уровне API через middleware.
+
+Использовать CAPTCHA для веб-форм.
+"""
 from typing import List, TypeVar
 
 from pydantic import ValidationError
-from sqlalchemy import select
+from sqlalchemy import select, delete, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (BaseAPIException, DatabaseError,
-                                 FeedbackAddError)
+                                 FeedbackAddError, FeedbackDeleteError, FeedbackGetError, FeedbackUpdateError)
 from app.models import BaseModel, FeedbackModel
 from app.schemas import (BaseSchema, FeedbackCreateSchema, FeedbackResponse,
                          FeedbackSchema, FeedbackStatus, PaginationParams)
@@ -56,7 +92,21 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             FeedbackResponse: Схема ответа на создание обратной связи.
         """
         try:
-
+            # Проверяем существование фидбека с таким email и статусом PENDING
+            existing_feedback = await self.get_one(
+                select(self.model).where(
+                    and_(
+                        self.model.email == feedback.email,
+                        self.model.status == FeedbackStatus.PENDING
+                    )
+                )
+            )
+            if existing_feedback:
+                raise BaseAPIException(
+                    status_code=400,
+                    detail="У вас уже есть активная заявка на обратную связь",
+                    error_type="duplicate_feedback"
+                )
             # Проверяем, существует ли менеджер, к которому адресуется обратная связь, если нет, то адресуем всем менеджерам (None)
             if feedback.manager_id == 0:
                 feedback.manager_id = None
@@ -112,8 +162,26 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
         Returns:
             FeedbackSchema: Схема обратной связи
         """
-        statement = select(self.model).where(self.model.id == feedback_id)
-        return await self.get_one(statement)
+        try:
+            statement = select(self.model).where(self.model.id == feedback_id)
+            result = await self.get_one(statement)
+            if not result:
+                raise FeedbackGetError(
+                    message=f"Обратная связь с id {feedback_id} не найдена",
+                    extra={"feedback_id": feedback_id}
+                )
+            return self.schema.model_validate(result)
+        except Exception as e:
+            raise BaseAPIException(
+                status_code=500,
+                detail="Произошла непредвиденная ошибка.",
+                error_type="unknown_error",
+                extra={
+                    "context": "Неизвестная ошибка при получении обратной связи.",
+                    "error": str(e),
+                },
+            ) from e
+
 
     async def get_feedbacks(
         self,
@@ -132,17 +200,28 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
         Returns:
             tuple[List[FeedbackSchema], int]: Список обратных связией и их общее количество
         """
-        statement = select(self.model).distinct()
+        try:
+            statement = select(self.model).distinct()
 
-        # Поиск по тексту
-        if search:
-            statement = statement.filter(self.model.text.ilike(f"%{search}%"))
+            # Поиск по тексту
+            if search:
+                statement = statement.filter(self.model.text.ilike(f"%{search}%"))
 
-        # Фильтр по статусу
-        if status:
-            statement = statement.filter(self.model.status == status)
+            # Фильтр по статусу
+            if status:
+                statement = statement.filter(self.model.status == status)
 
-        return await self.get_paginated(statement, pagination)
+            return await self.get_paginated(statement, pagination)
+        except Exception as e:
+            raise BaseAPIException(
+                status_code=500,
+                detail="Произошла непредвиденная ошибка.",
+                error_type="unknown_error",
+                extra={
+                    "context": "Неизвестная ошибка при получении списка обратной связи.",
+                    "error": str(e),
+                },
+            ) from e
 
     async def exists_feedback(self, feedback_id: int) -> bool:
         """
@@ -154,8 +233,19 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
          Returns:
              bool: True, если обратная связь существует, иначе False
         """
-        statement = select(self.model).where(self.model.id == feedback_id)
-        return await self.exists(statement)
+        try:
+            statement = select(self.model).where(self.model.id == feedback_id)
+            return await self.exists(statement)
+        except Exception as e:
+            raise BaseAPIException(
+                status_code=500,
+                detail="Произошла непредвиденная ошибка.",
+                error_type="unknown_error",
+                extra={
+                    "context": "Неизвестная ошибка при поиске существующей обратной связи.",
+                    "error": str(e),
+                },
+            ) from e
 
     async def update_feedback_status(
         self, feedback_id: int, status: FeedbackStatus
@@ -170,15 +260,39 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
         Returns:
             FeedbackSchema: Схема обратной связи с обновленным статусом, либо None если обратная связь не найдена
         """
+        try:
+            statement = select(self.model).where(self.model.id == feedback_id)
+            found_feedback_model = await self.get_one(statement)
 
-        found_feedback_model = await self.get_feedback(feedback_id)
+            if not found_feedback_model:
+                raise FeedbackGetError(
+                    message=f"Обратная связь с id {feedback_id} не найдена",
+                    extra={"feedback_id": feedback_id}
+                )
 
-        if not found_feedback_model:
-            return None
+            found_feedback_model.status = status
 
-        updated_feedback = found_feedback_model
-        updated_feedback.status = status
-        return await self.update_one(found_feedback_model, updated_feedback)
+            return await self.update_one(
+                model_to_update=found_feedback_model,
+                updated_model=found_feedback_model
+            )
+        except DatabaseError as db_error:
+            raise FeedbackUpdateError(
+                message=str(db_error),
+                extra={
+                    "context": "Ошибка при обновлении обратной связи в базе данных."
+                },
+            ) from db_error
+        except Exception as e:
+            raise BaseAPIException(
+                status_code=500,
+                detail="Произошла непредвиденная ошибка.",
+                error_type="unknown_error",
+                extra={
+                    "context": "Неизвестная ошибка при обновлении обратной связи.",
+                    "error": str(e),
+                },
+            ) from e
 
     async def delete_feedback(self, feedback_id: int) -> FeedbackResponse:
         """
@@ -191,22 +305,31 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             FeedbackResponse: Сообщение об удалении обратной связи
 
         """
+        try:
+            statement = select(self.model).where(self.model.id == feedback_id)
+            found_feedback = await self.get_one(statement)
 
-        found_feedback_model = await self.get_feedback(feedback_id)
+            if not found_feedback:
+                raise FeedbackDeleteError(
+                    message=f"Обратная связь с id {feedback_id} не найдена"
+                )
 
-        if not found_feedback_model:
-            return None
+            statement = delete(self.model).where(self.model.id == feedback_id)
+            if not await self.delete(statement):
+                raise FeedbackDeleteError(message="Не удалось удалить обратную  связь")
 
-        last_id = found_feedback_model.id
-        last_manager_id = found_feedback_model.manager_id
-
-        statement = select(self.model).where(self.model.id == feedback_id)
-
-        if not await self.delete(statement):
-            return None
-
-        return FeedbackResponse(
-            id=last_id,
-            manager_id=last_manager_id,
-            message="Обратная связь успешно удалена полностью!",
-        )
+            return FeedbackResponse(
+                id=found_feedback.id,
+                manager_id=found_feedback.manager_id,
+                message="Обратная связь успешно удалена!"
+            )
+        except Exception as e:
+            raise BaseAPIException(
+                status_code=500,
+                detail="Произошла непредвиденная ошибка.",
+                error_type="unknown_error",
+                extra={
+                    "context": "Неизвестная ошибка при удалении обратной связи.",
+                    "error": str(e),
+                },
+            ) from e

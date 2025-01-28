@@ -21,7 +21,7 @@ from .v1.auth.security import (TokenExpiredError, TokenInvalidError,
 from .v1.auth.users import (UserCreationError, UserExistsError,
                             UserNotFoundError)
 from .v1.base import BaseAPIException, DatabaseError, ValueNotFoundError
-from .v1.feedback.feedback import FeedbackAddError
+from .v1.feedback.feedback import FeedbackAddError, FeedbackDeleteError, FeedbackGetError, FeedbackUpdateError
 
 __all__ = [
     "BaseAPIException",
@@ -48,4 +48,7 @@ __all__ = [
     "UserNotFoundError",
     "UserCreationError",
     "FeedbackAddError",
+    "FeedbackDeleteError",
+    "FeedbackGetError",
+    "FeedbackUpdateError"
 ]

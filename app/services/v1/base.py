@@ -181,7 +181,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
 
             return items, total
         except SQLAlchemyError as e:
-            logging.error("❌ Ошибка при получении пагинированных записей: %s", e)
+            self.logger.error("❌ Ошибка при получении пагинированных записей: %s", e)
             return [], 0
 
     async def delete(self, delete_statement: Executable) -> bool:
@@ -198,9 +198,12 @@ class BaseDataManager(SessionMixin, Generic[T]):
             SQLAlchemyError: Если произошла ошибка при удалении.
         """
         try:
-            result = await self.session.execute(delete_statement)
+            self.logger.debug("SQL запрос на удаление: %s", delete_statement)
+            await self.session.execute(delete_statement)
+            await self.session.flush()
             await self.session.commit()
-            return result.rowcount > 0
+            self.logger.info("Запись успешно удалена")
+            return True
         except SQLAlchemyError as e:
             await self.session.rollback()
             self.logger.error("❌ Ошибка при удалении: %s", e)
