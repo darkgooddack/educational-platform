@@ -27,7 +27,7 @@ from app.models import UserModel
 from app.schemas import (ManagerSelectSchema, Page, PaginationParams,
                          RegistrationResponseSchema, RegistrationSchema,
                          UserCredentialsSchema, UserRole, UserSchema,
-                         UserUpdateSchema)
+                         UserUpdateSchema, OAuthUserSchema)
 from app.services import BaseService
 
 from .data_manager import UserDataManager
