@@ -119,7 +119,7 @@ class UserService(HashingMixin, BaseService):
 
         return created_user
 
-    async def _create_user_internal(self, user: OAuthUserSchema) -> UserCredentialsSchema:
+    async def _create_user_internal(self, user: OAuthUserSchema | RegistrationSchema) -> UserCredentialsSchema:
         """
         Внутренний метод создания пользователя в базе данных.
 
@@ -138,7 +138,10 @@ class UserService(HashingMixin, BaseService):
             - Проверяет уникальность email и телефона
             - Сохраняет идентификаторы OAuth провайдеров
         """
-
+        # Преобразуем в OAuthUserSchema если есть OAuth идентификаторы
+        user_dict = user.model_dump()
+        if any(key in user_dict for key in ['vk_id', 'google_id', 'yandex_id', 'avatar']):
+            user = OAuthUserSchema(**user_dict)
         data_manager = UserDataManager(self.session)
 
         # Проверка email
