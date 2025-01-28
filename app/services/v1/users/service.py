@@ -103,7 +103,7 @@ class UserService(HashingMixin, BaseService):
             message="Регистрация успешно завершена",
         )
 
-    async def create_oauth_user(self, user: RegistrationSchema) -> UserCredentialsSchema:
+    async def create_oauth_user(self, user: OAuthUserSchema) -> UserCredentialsSchema:
         """
         Создает нового пользователя через OAuth аутентификацию.
 
@@ -119,7 +119,7 @@ class UserService(HashingMixin, BaseService):
 
         return created_user
 
-    async def _create_user_internal(self, user: RegistrationSchema) -> UserCredentialsSchema:
+    async def _create_user_internal(self, user: OAuthUserSchema | RegistrationSchema) -> UserCredentialsSchema:
         """
         Внутренний метод создания пользователя в базе данных.
 
