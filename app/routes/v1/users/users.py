@@ -11,7 +11,7 @@ from app.services import UserService
 def setup_routes(router: APIRouter):
 
     @router.get("/", response_model=Page[UserSchema])
-    async def get_feedbacks(
+    async def get_users(
         pagination: PaginationParams = Depends(),
         role: UserRole = None,
         search: str = None,
