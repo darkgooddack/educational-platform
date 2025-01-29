@@ -102,11 +102,11 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                 )
             )
             if existing_feedback:
-            return FeedbackResponse(
-                id=existing_feedback.id,
-                manager_id=existing_feedback.manager_id,
-                message="У вас уже есть активная заявка на обратную связь.",
-            )
+                return FeedbackResponse(
+                    id=existing_feedback.id,
+                    manager_id=existing_feedback.manager_id,
+                    message="У вас уже есть активная заявка на обратную связь.",
+                )
             # Проверяем, существует ли менеджер, к которому адресуется обратная связь, если нет, то адресуем всем менеджерам (None)
             if feedback.manager_id == 0:
                 feedback.manager_id = None
