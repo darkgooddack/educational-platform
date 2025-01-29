@@ -31,16 +31,18 @@ class FeedbackSchema(BaseSchema):
     Является маппированным объектом для работы с базой данных
 
     Attributes:
-        id (int): Идентификатор обратной связи
         manager_id (int | None): ID менеджера, который обрабатывает обратную связь
         name (str): Имя пользователя
         phone (str | None): Телефон пользователя
         email (EmailStr): Электронная почта пользователя
         status (FeedbackStatus): Статус обратной связи
+    
+    Наследует:
+        id: Optional[int] = None
+        created_at: Optional[datetime] = None
+        updated_at: Optional[datetime] = None
     """
-
-    id: int
-    manager_id: int | None
+    manager_id: Optional[int] = None
     name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
     phone: str | None = Field(
         None,
@@ -63,7 +65,7 @@ class FeedbackCreateSchema(BaseInputSchema):
         email (EmailStr): Электронная почта пользователя
     """
 
-    manager_id: int | None
+    manager_id: Optional[int] = None
     name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
     phone: str | None = Field(
         None,
@@ -86,7 +88,7 @@ class FeedbackUpdateSchema(BaseInputSchema):
         status (FeedbackStatus): Статус обратной связи
     """
 
-    manager_id: int | None
+    manager_id: Optional[int] = None
     name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
     phone: str | None = Field(
         None,
@@ -103,12 +105,12 @@ class FeedbackResponse(BaseInputSchema):
     Схема ответа на создание обратной связи.
 
     Attributes:
-        id (int): Идентификатор обратной связи.
+        id (int | None): Идентификатор обратной связи.
         manager_id (int | None): ID менеджера, которому адресована обратная связь.
         message (str): Сообщение об успешном создании обратной связи.
     """
 
-    id: int
+    id: Optional[int] = None
     manager_id: int | None
     message: str = Field(
         default="Обратная связь успешно отправлена!",
