@@ -128,6 +128,11 @@ def start_infrastructure(port: Optional[int] = 8000):
         print("❌ PostgreSQL не доступен!")
         return False
 
+    # Запускаем миграции после успешного поднятия PostgreSQL
+    print("📦 Запускаем миграции...")
+    migrate()
+    print("✅ Миграции выполнены!")
+
     print("\n🔗 Доступные адреса:")
     print(f"📊 FastAPI Swagger:    http://localhost:{port}/docs")
     print(f"🐰 RabbitMQ UI:       http://localhost:15672")
