@@ -1,17 +1,19 @@
-from datetime import datetime, timedelta
 import json
+from datetime import datetime
 from typing import Optional
-
-from app.core.storages.redis.base import BaseRedisStorage
+from app.core.exceptions import UserInactiveError
 from app.core.security import TokenMixin
-from app.schemas import UserSchema
+from app.core.storages.redis.base import BaseRedisStorage
+from app.schemas import UserCredentialsSchema
+
 
 class AuthRedisStorage(BaseRedisStorage, TokenMixin):
     """
     Redis хранилище для авторизации.
 
     """
-    async def save_token(self, user: UserSchema, token: str) -> None:
+
+    async def save_token(self, user: UserCredentialsSchema, token: str) -> None:
         """
         Сохраняет токен пользователя в Redis.
 
@@ -27,11 +29,11 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         await self.set(
             key=f"token:{token}",
             value=json.dumps(user_data),
-            expires=TokenMixin.get_token_expiration()
+            expires=TokenMixin.get_token_expiration(),
         )
         await self.sadd(f"sessions:{user.email}", token)
 
-    async def get_user_by_token(self, token: str) -> Optional[UserSchema]:
+    async def get_user_by_token(self, token: str) -> Optional[UserCredentialsSchema]:
         """
         Получает пользователя по токену.
 
@@ -42,7 +44,9 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
             Данные пользователя или None, если пользователь не найден.
         """
         user_data = await self.get(f"token:{token}")
-        return UserSchema.model_validate_json(user_data) if user_data else None
+        return (
+            UserCredentialsSchema.model_validate_json(user_data) if user_data else None
+        )
 
     async def remove_token(self, token: str) -> None:
         """
@@ -56,12 +60,12 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         """
         user_data = await self.get(f"token:{token}")
         if user_data:
-            user = UserSchema.model_validate_json(user_data)
+            user = UserCredentialsSchema.model_validate_json(user_data)
             await self.srem(f"sessions:{user.email}", token)
         await self.delete(f"token:{token}")
 
     @staticmethod
-    def _prepare_user_data(user: UserSchema) -> dict:
+    def _prepare_user_data(user: UserCredentialsSchema) -> dict:
         """
         Подготовка данных пользователя для сохранения
 
@@ -80,7 +84,9 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
                 user_data[key] = value.isoformat()
         return user_data
 
-    async def get_user_from_redis(self, token: str, email: str) -> UserSchema:
+    async def get_user_from_redis(
+        self, token: str, email: str
+    ) -> UserCredentialsSchema:
         """
         Получает пользователя из Redis или создает базовый объект
 
@@ -95,11 +101,11 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
 
         if stored_token:
             user_data = json.loads(stored_token)
-            return UserSchema.model_validate(user_data)
+            return UserCredentialsSchema.model_validate(user_data)
 
-        return UserSchema(email=email)
+        return UserCredentialsSchema(email=email)
 
-    async def verify_and_get_user(self, token: str) -> UserSchema:
+    async def verify_and_get_user(self, token: str) -> UserCredentialsSchema:
         """
         Основной метод проверки токена и получения пользователя
 
@@ -111,4 +117,12 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         """
         payload = self.verify_token(token)
         email = self.validate_payload(payload)
-        return await self.get_user_from_redis(token, email)
+        user = await self.get_user_from_redis(token, email)
+
+        if not user.is_active:
+            raise UserInactiveError(
+                message="Аккаунт деактивирован",
+                extra={"user_id": user.id}
+            )
+
+        return user

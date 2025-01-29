@@ -14,22 +14,24 @@
 Пример использования:
     service = UserService(session)
     user = await service.create_user(user_data)
-    user_by_email = await service.get_by_email("test@test.com")
+    user_by_email = await service.get_user_by_email("test@test.com")
 """
-from typing import Any
+
+from typing import Any, List
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import (
-    UserExistsError,
-    UserCreationError
-)
+from app.core.exceptions import UserCreationError, UserExistsError
 from app.core.security import HashingMixin
 from app.models import UserModel
-from app.schemas import (RegistrationResponseSchema, RegistrationSchema,
-                         UserSchema, UserRole)
+from app.schemas import (ManagerSelectSchema, Page, PaginationParams,
+                         RegistrationResponseSchema, RegistrationSchema,
+                         UserCredentialsSchema, UserRole, UserSchema,
+                         UserUpdateSchema, OAuthUserSchema)
 from app.services import BaseService
 
 from .data_manager import UserDataManager
+
 
 class UserService(HashingMixin, BaseService):
     """
@@ -44,16 +46,57 @@ class UserService(HashingMixin, BaseService):
 
     Methods:
         create_user: Создание нового пользователя
-        get_by_email: Получение пользователя по email
-        get_by_phone: Получение пользователя по телефону
+        create_oauth_user: Создание пользователя через OAuth
+        _create_user_internal: Внутренний метод создания пользователя (для объединения create_user и create_oauth_user)
+        get_user_by_field: Получение пользователя по заданному полю
+        get_user_by_email: Получение пользователя по email
+        get_user_by_phone: Получение пользователя по телефону
         update_user: Обновление данных пользователя
         delete_user: Удаление пользователя
+        exists_user: Проверка наличия пользователя по id
+        exists_manager: Проверка наличия пользователя с ролью менеджера
     """
 
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.session = session
         self._data_manager = UserDataManager(session)
+
+    async def toggle_active(self, user_id: int, is_active: bool) -> UserUpdateSchema:
+        """
+        Изменяет статус активности пользователя.
+
+        Args:
+            user_id (int): Идентификатор пользователя
+            is_active (bool): Статус активности
+
+        Returns:
+            UserUpdateSchema: Обновленный пользователь
+        """
+        return await self._data_manager.toggle_active(user_id, is_active)
+
+
+    async def assign_role(self, user_id: int, role: UserRole) -> UserUpdateSchema:
+        """
+        Назначает роль пользователю.
+
+        Args:
+            user_id (int): Идентификатор пользователя
+            role (UserRole): Роль пользователя
+
+        Returns:
+            UserUpdateSchema: Обновленный пользователь
+        """
+        return await self._data_manager.assign_role(user_id, role)
+
+    async def get_managers(self) -> List[ManagerSelectSchema]:
+        """
+        Получает список менеджеров.
+
+        Returns:
+            List[UserUpdateSchema]: Список менеджеров
+        """
+        return await self.get_users_by_field("role", UserRole.MANAGER.value)
 
     async def create_user(self, user: RegistrationSchema) -> RegistrationResponseSchema:
         """
@@ -71,10 +114,10 @@ class UserService(HashingMixin, BaseService):
         return RegistrationResponseSchema(
             user_id=created_user.id,
             email=created_user.email,
-            message="Регистрация успешно завершена"
+            message="Регистрация успешно завершена",
         )
 
-    async def create_oauth_user(self, user: RegistrationSchema) -> UserModel:
+    async def create_oauth_user(self, user: OAuthUserSchema) -> UserCredentialsSchema:
         """
         Создает нового пользователя через OAuth аутентификацию.
 
@@ -82,11 +125,15 @@ class UserService(HashingMixin, BaseService):
             user: Данные пользователя от OAuth провайдера
 
         Returns:
-            UserModel: Полная модель созданного пользователя
+            UserCredentialsSchema: Учетные данные пользователя
         """
-        return await self._create_user_internal(user)
+        created_user = await self._create_user_internal(user)
 
-    async def _create_user_internal(self, user: RegistrationSchema) -> UserModel:
+        self.logger.debug("Созданный пользователь (created_user): %s", vars(created_user))
+
+        return created_user
+
+    async def _create_user_internal(self, user: OAuthUserSchema | RegistrationSchema) -> UserCredentialsSchema:
         """
         Внутренний метод создания пользователя в базе данных.
 
@@ -94,7 +141,7 @@ class UserService(HashingMixin, BaseService):
             user: Данные нового пользователя
 
         Returns:
-            UserModel: Созданная модель пользователя
+            UserModel: Созданный пользователь
 
         Raises:
             UserExistsError: Если пользователь с таким email или телефоном уже существует
@@ -105,7 +152,12 @@ class UserService(HashingMixin, BaseService):
             - Проверяет уникальность email и телефона
             - Сохраняет идентификаторы OAuth провайдеров
         """
-
+        # Преобразуем в OAuthUserSchema если есть OAuth идентификаторы
+        user_dict = user.model_dump()
+        user = OAuthUserSchema(**user_dict)
+        self.logger.debug(
+                    "user теперь имеет тип '%s'", type(user)
+                )
         data_manager = UserDataManager(self.session)
 
         # Проверка email
@@ -118,7 +170,9 @@ class UserService(HashingMixin, BaseService):
         if isinstance(user, RegistrationSchema) and user.phone:
             existing_user = await data_manager.get_user_by_phone(user.phone)
             if existing_user:
-                self.logger.error("Пользователь с телефоном '%s' уже существует", user.phone)
+                self.logger.error(
+                    "Пользователь с телефоном '%s' уже существует", user.phone
+                )
                 raise UserExistsError("phone", user.phone)
 
         # Создаем модель пользователя
@@ -127,7 +181,9 @@ class UserService(HashingMixin, BaseService):
         vk_id = user_data.get("vk_id")
         google_id = user_data.get("google_id")
         yandex_id = user_data.get("yandex_id")
-
+        self.logger.debug(
+                    "user имеет тип '%s'", type(user)
+                )
         # Устанавливаем идентификаторы провайдеров, если они есть
         user_model = UserModel(
             first_name=user.first_name,
@@ -144,13 +200,51 @@ class UserService(HashingMixin, BaseService):
         )
 
         try:
-            return await data_manager.add_user(user_model)
+            created_user = await data_manager.add_user(user_model)
+
+            user_credentials = UserCredentialsSchema(
+                id=created_user.id,
+                email=created_user.email,
+                name=created_user.first_name,
+                hashed_password=user_model.hashed_password, #! Костыль
+            )
+            return user_credentials
+
         except Exception as e:
             self.logger.error("Ошибка при создании пользователя: %s", e)
-            raise UserCreationError("Не удалось создать пользователя. Пожалуйста, попробуйте позже.") from e
+            raise UserCreationError(
+                "Не удалось создать пользователя. Пожалуйста, попробуйте позже."
+            ) from e
 
+    async def exists_user(self, user_id: int) -> bool:
+        """
+        Проверяет существует ли пользователь с указанным id.
 
-    async def get_by_field(self, field: str, value: Any) -> UserSchema | None:
+        Args:
+            user_id: Идентификатор пользователя
+
+        Returns:
+            bool: True, если пользователь существует, False - иначе
+        """
+        return await self._data_manager.exists_user(user_id)
+
+    async def exists_manager(self, manager_id: int) -> bool:
+        """
+        Проверяет существует ли менеджер с указанным id.
+
+        Args:
+            user_id: Идентификатор менеджера
+
+        Returns:
+            bool: True, если менеджер существует, False - иначе
+        """
+        return await self._data_manager.exists_user_with_role(
+            manager_id, UserRole.MANAGER.value
+        )
+
+    async def get_user_by_field(
+        self, field: str, value: Any
+    ) -> UserCredentialsSchema | None:
         """
         Получает пользователя по заданному полю.
 
@@ -158,11 +252,11 @@ class UserService(HashingMixin, BaseService):
             field: Поле для поиска.
             value: Значение поля для поиска.
         Returns:
-            UserSchema | None: Данные пользователя или None.
+            UserCredentialsSchema | None: Данные пользователя или None.
         """
-        return await self._data_manager.get_by_field(field, value)
+        return await self._data_manager.get_user_by_field(field, value)
 
-    async def get_by_email(self, email: str) -> UserSchema | None:
+    async def get_user_by_email(self, email: str) -> UserCredentialsSchema | None:
         """
         Получает пользователя по email.
 
@@ -170,11 +264,11 @@ class UserService(HashingMixin, BaseService):
             email: Email пользователя.
 
         Returns:
-            UserSchema | None: Данные пользователя или None.
+            UserCredentialsSchema | None: Данные пользователя или None.
         """
         return await self._data_manager.get_user_by_email(email)
 
-    async def get_by_phone(self, phone: str) -> UserSchema | None:
+    async def get_user_by_phone(self, phone: str) -> UserCredentialsSchema | None:
         """
         Получает пользователя по phone.
 
@@ -182,11 +276,47 @@ class UserService(HashingMixin, BaseService):
             phone: Phone пользователя.
 
         Returns:
-            UserSchema | None: Данные пользователя или None.
+            UserCredentialsSchema | None: Данные пользователя или None.
         """
         return await self._data_manager.get_user_by_phone(phone)
 
-    async def update_user(self, user_id: int, data: dict) -> UserSchema:
+    async def get_users_by_field(self, field: str, value: Any) -> List[UserSchema]:
+        """
+        Получает пользователей по заданному полю.
+
+        Args:
+            field: Поле для поиска.
+            value: Значение поля для поиска.
+
+        Returns:
+            List[UserSchema]: Данные пользователя или [].
+        """
+        return await self._data_manager.get_users_by_field(field, value)
+
+    async def get_users(
+        self,
+        pagination: PaginationParams,
+        role: UserRole = None,
+        search: str = None,
+    ) -> tuple[List[UserSchema], int]:
+        """
+        Получает список пользователей с возможностью пагинации, поиска и фильтрации.
+
+        Args:
+            pagination (PaginationParams): Параметры пагинации
+            role (UserRole): Фильтрация по роли пользователя
+            search (str): Поиск по тексту пользователя
+
+        Returns:
+            tuple[List[FeedbackSchema], int]: Список пользователей и общее количество пользователей.
+        """
+        return await self._data_manager.get_users(
+            pagination=pagination,
+            role=role,
+            search=search,
+        )
+
+    async def update_user(self, user_id: int, data: dict) -> UserCredentialsSchema:
         """
         Обновляет данные пользователя.
 
@@ -195,7 +325,7 @@ class UserService(HashingMixin, BaseService):
             data: Данные для обновления.
 
         Returns:
-            UserSchema: Обновленные данные пользователя.
+            UserCredentialsSchema: Обновленные данные пользователя.
         """
         return await self._data_manager.update_user(user_id, data)
 

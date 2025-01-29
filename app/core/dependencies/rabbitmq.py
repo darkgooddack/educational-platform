@@ -1,6 +1,7 @@
 """
 Модуль для подключения к RabbitMQ.
 """
+
 from aio_pika import Connection, connect_robust
 
 from app.core.config import config
@@ -48,6 +49,7 @@ class RabbitMQClient:
     @classmethod
     def is_connected(cls) -> bool:
         return cls._is_connected
+
 
 async def get_rabbitmq():
     """

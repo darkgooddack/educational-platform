@@ -13,6 +13,7 @@ from app.core.dependencies import get_db_session, oauth2_schema
 from app.schemas import AuthSchema, TokenSchema
 from app.services import AuthService
 
+
 def setup_routes(router: APIRouter):
     """
     Настройка маршрутов для аутентификации.
@@ -26,6 +27,7 @@ def setup_routes(router: APIRouter):
         - POST /logout:
             Выход из системы
     """
+
     @router.post("")
     async def authenticate(
         credentials: AuthSchema,
@@ -45,8 +47,6 @@ def setup_routes(router: APIRouter):
         """
         return await AuthService(db_session).authenticate(credentials)
 
-
-
     @router.post("/logout")
     async def logout(
         token: str = Depends(oauth2_schema),
@@ -63,5 +63,6 @@ def setup_routes(router: APIRouter):
         - **dict**: {"message": "Выход выполнен успешно!"}
         """
         return await AuthService(db_session).logout(token)
+
 
 __all__ = ["setup_routes"]

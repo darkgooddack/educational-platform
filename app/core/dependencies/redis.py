@@ -2,8 +2,11 @@
 Модуль для работы с Redis.
 
 """
+
 from redis import Redis, from_url
+
 from app.core.config import config
+
 
 class RedisClient:
     """

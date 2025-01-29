@@ -130,9 +130,7 @@ class AppConfig:
     """
 
     TITLE: str = "Educational Platform"
-    DESCRIPTION: str = (
-        "Educational Platform  - это платформа для обучения и развития."
-    )
+    DESCRIPTION: str = "Educational Platform  - это платформа для обучения и развития."
     VERSION: str = "0.1.0"
     HOST: str = "0.0.0.0"
     PORT: int = 8000
@@ -144,6 +142,7 @@ class AppConfig:
         "auth": ServiceConfig("auth", ["Authentication"]),
         "oauth": ServiceConfig("oauth", ["OAuth"]),
         "register": ServiceConfig("register", ["Registration"]),
+        "users": ServiceConfig("users", ["Users"]),
         "feedbacks": ServiceConfig("feedbacks", ["Feedbacks"]),
     }
 

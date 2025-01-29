@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.dependencies import get_db_session
-from app.schemas import PaginationParams, Page, FeedbackCreateSchema, FeedbackResponse
+from app.schemas import (FeedbackCreateSchema, FeedbackResponse,
+                         FeedbackSchema, Page, PaginationParams, FeedbackStatus)
 from app.services import FeedbackService
+
 
 def setup_routes(router: APIRouter):
     @router.post("/", response_model=FeedbackResponse)
@@ -24,31 +27,24 @@ def setup_routes(router: APIRouter):
         """
         return await FeedbackService(db_session).create_feedback(feedback)
 
-
-    @router.get("/", response_model=list[FeedbackResponse])
+    @router.get("/", response_model=Page[FeedbackSchema])
     async def get_feedbacks(
         pagination: PaginationParams = Depends(),
-        status: str = None,
+        status: FeedbackStatus = None,
         search: str = None,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> list[FeedbackResponse]:
+    ) -> Page[FeedbackSchema]:
         """
-        Получение всех отзывов с пагинацией, фильтрацией и поиском.
-
-        Args:
-            pagination (PaginationParams): Параметры пагинации.
-            status (str): Статус отзыва для фильтрации.
-            search (str): Строка поиска по тексту отзыва.
-            db_session (AsyncSession): Асинхронная сессия базы данных.
-
-        Returns:
-            Page[FeedbackResponse]: Страница с отзывами.
+        **Получение всех отзывов с пагинацией, фильтрацией и поиском.**
 
         **Args**:
-            db_session (AsyncSession): Сессия базы данных.
+            - pagination (PaginationParams): Параметры пагинации.
+            - status (FeedbackStatus): Статус отзыва для фильтрации.
+            - search (str): Строка поиска по тексту отзыва.
+            - db_session (AsyncSession): Сессия базы данных.
 
         **Returns**:
-            list[FeedbackResponse]: Список отзывов.
+            - Page[FeedbackSchema]: Страница с отзывами.
 
 
         """
@@ -58,18 +54,14 @@ def setup_routes(router: APIRouter):
             search=search,
         )
         return Page(
-            items=feedbacks,
-            total=total,
-            page=pagination.page,
-            size=pagination.limit
+            items=feedbacks, total=total, page=pagination.page, size=pagination.limit
         )
 
-
-    @router.get("/{feedback_id}", response_model=FeedbackResponse)
+    @router.get("/{feedback_id}", response_model=FeedbackSchema)
     async def get_feedback(
         feedback_id: int,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> FeedbackResponse:
+    ) -> FeedbackSchema:
         """
         Получение отзыва по идентификатору.
         Для открытия отзыва чтобы посмотреть его в полном объеме.
@@ -85,16 +77,15 @@ def setup_routes(router: APIRouter):
             db_session (AsyncSession): Сессия базы данных.
 
         **Returns**:
-            FeedbackResponse: Отзыв.
+            FeedbackSchema: Отзыв.
         """
         return await FeedbackService(db_session).get_feedback(feedback_id)
 
-
-    @router.put("/{feedback_id}/process", response_model=FeedbackResponse)
+    @router.put("/{feedback_id}/process", response_model=FeedbackSchema)
     async def process_feedback(
         feedback_id: int,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> FeedbackResponse:
+    ) -> FeedbackSchema:
         """
         Обработка отзыва. Изменение статуса отзыва на "Обработан".
 
@@ -109,12 +100,11 @@ def setup_routes(router: APIRouter):
         """
         return await FeedbackService(db_session).proccess_feedback(feedback_id)
 
-
-    @router.put("/{feedback_id}/delete", response_model=FeedbackResponse)
+    @router.put("/{feedback_id}/delete", response_model=FeedbackSchema)
     async def soft_delete_feedback(
         feedback_id: int,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> FeedbackResponse:
+    ) -> FeedbackSchema:
         """
         Мягкое удаление отзыва (изменение статуса на "Удален").
 
@@ -128,7 +118,6 @@ def setup_routes(router: APIRouter):
             FeedbackResponse: Удаленный отзыв.
         """
         return await FeedbackService(db_session).soft_delete_feedback(feedback_id)
-
 
     @router.delete("/{feedback_id}", response_model=FeedbackResponse)
     async def delete_feedback(
@@ -146,7 +135,6 @@ def setup_routes(router: APIRouter):
             FeedbackResponse: Удаленный отзыв.
         """
         return await FeedbackService(db_session).delete_feedback(feedback_id)
-
 
 
 __all__ = ["setup_routes"]

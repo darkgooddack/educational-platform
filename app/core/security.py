@@ -13,16 +13,19 @@ Example:
     >>>         hashed = self.hash_password(password)
 
 """
-from datetime import datetime, timedelta, timezone
+
 import logging
+from datetime import datetime, timezone
+
 import passlib
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
+
 from app.core.config import config
 from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
-                                 TokenMissingError, TokenInvalidError)
-from app.schemas import UserSchema
+                                 TokenInvalidError, TokenMissingError)
+from app.schemas import UserCredentialsSchema
 
 pwd_context = CryptContext(
     schemes=["argon2"],
@@ -33,6 +36,8 @@ pwd_context = CryptContext(
 )
 
 logger = logging.getLogger(__name__)
+
+
 class HashingMixin:
     """
     Миксин для хеширования паролей.
@@ -93,9 +98,7 @@ class TokenMixin:
             JWT токен
         """
         return jwt.encode(
-            payload,
-            key=TokenMixin.get_token_key(),
-            algorithm=config.token_algorithm
+            payload, key=TokenMixin.get_token_key(), algorithm=config.token_algorithm
         )
 
     @staticmethod
@@ -124,7 +127,7 @@ class TokenMixin:
             raise TokenInvalidError() from e
 
     @staticmethod
-    def create_payload(user: UserSchema) -> dict:
+    def create_payload(user: UserCredentialsSchema) -> dict:
         """
         Создает payload для токена.
 
@@ -134,10 +137,7 @@ class TokenMixin:
         Returns:
             Payload для JWT
         """
-        return {
-            "sub": user.email,
-            "expires_at": TokenMixin.get_token_expiration()
-        }
+        return {"sub": user.email, "expires_at": TokenMixin.get_token_expiration()}
 
     @staticmethod
     def get_token_key() -> str:

@@ -196,13 +196,23 @@ def rollback():
     """
     Откат миграций.
     """
-    subprocess.run(["alembic", "downgrade", "head"], check=True)
+    subprocess.run(["alembic", "downgrade", "-1"], check=True)
 
 def create_migration(name: str):
     """
     Создание новой миграции.
     """
     subprocess.run(["alembic", "revision", "--autogenerate", "-m", name], check=True)
+
+def echo(message: str):
+    """
+    Вывод сообщения (тест команды).
+    """
+    import sys
+    if len(sys.argv) > 1:
+        message = " ".join(sys.argv[1:])
+        echo(message)
+    subprocess.run(["echo", message], check=True)
 
 def lint():
     """

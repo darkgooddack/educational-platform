@@ -10,7 +10,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import config
-from app.schemas import UserSchema
+from app.schemas import UserCredentialsSchema
 from app.services.v1.auth.service import AuthDataManager
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ oauth2_schema = OAuth2PasswordBearer(tokenUrl=config.auth_url, auto_error=False)
 async def get_current_user(
     token: str = Depends(oauth2_schema),
     data_manager: AuthDataManager = Depends(),
-) -> UserSchema | None:
+) -> UserCredentialsSchema | None:
     """
     Получает данные текущего пользователя.
 

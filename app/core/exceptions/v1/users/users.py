@@ -9,8 +9,23 @@
 - UserExistsError: Исключение, которое вызывается, когда пользователь с таким именем или email уже существует.
 """
 
-from ..base import BaseAPIException
+from app.core.exceptions.v1.base import BaseAPIException
 
+class UserInactiveError(BaseAPIException):
+    """
+    Пользователь не активен.
+
+    Attributes:
+        message (str): Сообщение об ошибке.
+        extra (dict): Дополнительные данные об ошибке.
+    """
+    def __init__(self, message: str, extra: dict = None):
+        super().__init__(
+            status_code=403,
+            detail=message,
+            error_type="user_inactive",
+            extra=extra
+        )
 
 class UserNotFoundError(BaseAPIException):
     """
@@ -69,6 +84,7 @@ class UserExistsError(BaseAPIException):
             extra={"user_" + field: value},
         )
 
+
 class UserCreationError(BaseAPIException):
     """
     Ошибка при создании пользователя.
@@ -79,8 +95,5 @@ class UserCreationError(BaseAPIException):
 
     def __init__(self, detail: str):
         super().__init__(
-            status_code=500,
-            detail=detail,
-            error_type="user_creation_error",
-            extra={}
+            status_code=500, detail=detail, error_type="user_creation_error", extra={}
         )

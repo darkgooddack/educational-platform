@@ -42,9 +42,10 @@ def get_config() -> Config:
 
     return config_instance
 
+
 # def clear_config_cache():
-    # get_config.cache_clear()
-    # return get_config()
+# get_config.cache_clear()
+# return get_config()
 
 # config = clear_config_cache()
 

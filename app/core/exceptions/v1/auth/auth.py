@@ -15,30 +15,25 @@
 - TokenExpiredError - истекший токен
 """
 
-from ..base import BaseAPIException
+from app.core.exceptions.v1.base import BaseAPIException
+
 
 class AuthenticationError(BaseAPIException):
     """Ошибка аутентификации"""
+
     def __init__(
-        self,
-        detail: str,
-        error_type: str = "authentication_error",
-        extra: dict = None
+        self, detail: str, error_type: str = "authentication_error", extra: dict = None
     ):
         super().__init__(
-            status_code=401,
-            detail=detail,
-            error_type=error_type,
-            extra=extra or {}
+            status_code=401, detail=detail, error_type=error_type, extra=extra or {}
         )
+
 
 class InvalidCredentialsError(AuthenticationError):
     """Неверные учетные данные"""
 
     def __init__(self):
-        super().__init__(
-            detail="🔐 Неверный email или пароль"
-        )
+        super().__init__(detail="🔐 Неверный email или пароль")
 
 
 class InvalidEmailFormatError(BaseAPIException):
@@ -71,6 +66,7 @@ class InvalidPasswordError(BaseAPIException):
             extra={},
         )
 
+
 class WeakPasswordError(BaseAPIException):
     """
     Исключение, которое вызывается, когда пароль является слабым.
@@ -87,32 +83,27 @@ class WeakPasswordError(BaseAPIException):
             extra={},
         )
 
+
 class TokenError(AuthenticationError):
     """Базовая ошибка токена"""
+
     def __init__(
-        self,
-        detail: str,
-        error_type: str = "token_error",
-        extra: dict = None
+        self, detail: str, error_type: str = "token_error", extra: dict = None
     ):
         super().__init__(
-            detail=detail,
-            error_type=error_type,
-            extra=extra or {"token_error": True}
+            detail=detail, error_type=error_type, extra=extra or {"token_error": True}
         )
+
 
 class TokenMissingError(TokenError):
     """Токен отсутствует"""
+
     def __init__(self):
-        super().__init__(
-            detail="Токен отсутствует",
-            error_type="token_missing"
-        )
+        super().__init__(detail="Токен отсутствует", error_type="token_missing")
+
 
 class TokenExpiredError(TokenError):
     """Токен просрочен"""
+
     def __init__(self):
-        super().__init__(
-            detail="Токен просрочен",
-            error_type="token_expired"
-        )
+        super().__init__(detail="Токен просрочен", error_type="token_expired")

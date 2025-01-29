@@ -1,7 +1,9 @@
 from fastapi.responses import RedirectResponse
-from app.services.v1.oauth.base import BaseOAuthProvider
-from app.schemas import OAuthProvider, YandexUserData, OAuthProviderResponse
+
 from app.core.exceptions import OAuthUserDataError
+from app.schemas import OAuthProvider, OAuthProviderResponse, YandexUserData
+from app.services.v1.oauth.base import BaseOAuthProvider
+
 
 class YandexOAuthProvider(BaseOAuthProvider):
     """
@@ -14,10 +16,7 @@ class YandexOAuthProvider(BaseOAuthProvider):
     """
 
     def __init__(self, session):
-        super().__init__(
-            provider=OAuthProvider.YANDEX.value,
-            session=session
-        )
+        super().__init__(provider=OAuthProvider.YANDEX.value, session=session)
 
     def _get_email(self, user_data: YandexUserData) -> str:
         """Получение email из default_email
@@ -33,7 +32,7 @@ class YandexOAuthProvider(BaseOAuthProvider):
 
     async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
         """Стандартное получение токена"""
-        return await super().get_token(code)
+        return await super().get_token(code, state)
 
     async def get_user_info(self, token: str) -> YandexUserData:
         """Стандартное получение данных пользователя"""

@@ -1,8 +1,12 @@
 import secrets
 from urllib.parse import urlencode
+
 from fastapi.responses import RedirectResponse
+
+from app.schemas import (GoogleUserData, OAuthParams, OAuthProvider,
+                         OAuthProviderResponse)
 from app.services.v1.oauth.base import BaseOAuthProvider
-from app.schemas import OAuthProvider, GoogleUserData, OAuthParams, OAuthProviderResponse
+
 
 class GoogleOAuthProvider(BaseOAuthProvider):
     """
@@ -15,14 +19,11 @@ class GoogleOAuthProvider(BaseOAuthProvider):
     """
 
     def __init__(self, session):
-        super().__init__(
-            provider=OAuthProvider.GOOGLE.value,
-            session=session
-        )
+        super().__init__(provider=OAuthProvider.GOOGLE.value, session=session)
 
     async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
         """Стандартное получение токена"""
-        return await super().get_token(code)
+        return await super().get_token(code, state)
 
     async def _get_callback_url(self) -> str:
         """Стандартный callback URL"""
@@ -31,7 +32,6 @@ class GoogleOAuthProvider(BaseOAuthProvider):
     async def get_user_info(self, token: str) -> GoogleUserData:
         """Стандартное получение данных пользователя"""
         return await super().get_user_info(token)
-
 
     def _get_provider_id(self, user_data: GoogleUserData) -> str:
         """Google использует строковый формат ID"""
@@ -46,7 +46,7 @@ class GoogleOAuthProvider(BaseOAuthProvider):
             client_id=self.config.client_id,
             redirect_uri=await self._get_callback_url(),
             scope=self.config.scope,
-            state=state
+            state=state,
         )
 
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"
