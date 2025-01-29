@@ -9,7 +9,7 @@ from pydantic import EmailStr, Field
 
 from app.schemas.v1.auth.register import RegistrationSchema
 
-from ..base import BaseInputSchema, CommonBaseSchema
+from ..base import BaseSchema, BaseInputSchema, CommonBaseSchema
 
 
 class UserRole(str, Enum):
@@ -31,12 +31,11 @@ class UserRole(str, Enum):
     TUTOR = "tutor"
 
 
-class UserSchema(CommonBaseSchema):
+class UserSchema(BaseSchema):
     """
     Схема пользователя.
 
     Attributes:
-        id (int): ID пользователя.
         first_name (str): Имя пользователя.
         last_name (str): Фамилия пользователя.
         middle_name (str): Отчество пользователя.
@@ -46,13 +45,11 @@ class UserSchema(CommonBaseSchema):
         is_active (bool): Флаг активности пользователя.
         role (UserRole): Роль пользователя.
     """
-
-    id: int
     first_name: str
     last_name: str
-    middle_name: str | None
+    middle_name: Optional[str] = None
     email: EmailStr
-    phone: str | None
+    phone: Optional[str] = None
     avatar: Optional[str] = None
     is_active: bool
     role: UserRole
