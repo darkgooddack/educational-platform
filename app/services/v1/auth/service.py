@@ -5,7 +5,7 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import InvalidCredentialsError
+from app.core.exceptions import InvalidCredentialsError, UserInactiveError
 from app.core.security import HashingMixin, TokenMixin
 from app.core.storages.redis.auth import AuthRedisStorage
 from app.schemas import AuthSchema, TokenSchema, UserCredentialsSchema
@@ -55,6 +55,13 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
 
         """
         user_model = await self._data_manager.get_user_by_credentials(credentials.email)
+
+        if not user_model.is_active:
+            raise UserInactiveError(
+                message="Аккаунт деактивирован",
+                extra={"email": credentials.email}
+            )
+
         if not user_model or not self.verify(
             user_model.hashed_password, credentials.password
         ):

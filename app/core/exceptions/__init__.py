@@ -18,8 +18,8 @@ from .v1.auth.oauth import (InvalidCallbackError, InvalidProviderError,
                             OAuthUserDataError)
 from .v1.auth.security import (TokenExpiredError, TokenInvalidError,
                                TokenMissingError)
-from .v1.auth.users import (UserCreationError, UserExistsError,
-                            UserNotFoundError)
+from .v1.users.users import (UserCreationError, UserExistsError,
+                            UserNotFoundError, UserInactiveError)
 from .v1.base import BaseAPIException, DatabaseError, ValueNotFoundError
 from .v1.feedback.feedback import FeedbackAddError, FeedbackDeleteError, FeedbackGetError, FeedbackUpdateError
 
@@ -45,6 +45,7 @@ __all__ = [
     "InvalidReturnURLError",
     "InvalidCallbackError",
     "UserExistsError",
+    "UserInactiveError",
     "UserNotFoundError",
     "UserCreationError",
     "FeedbackAddError",

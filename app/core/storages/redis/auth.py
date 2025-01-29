@@ -1,7 +1,7 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
-
+from app.core.exceptions import UserInactiveError
 from app.core.security import TokenMixin
 from app.core.storages.redis.base import BaseRedisStorage
 from app.schemas import UserCredentialsSchema
@@ -117,4 +117,12 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         """
         payload = self.verify_token(token)
         email = self.validate_payload(payload)
-        return await self.get_user_from_redis(token, email)
+        user = await self.get_user_from_redis(token, email)
+
+        if not user.is_active:
+            raise UserInactiveError(
+                message="Аккаунт деактивирован",
+                extra={"user_id": user.id}
+            )
+
+        return user
