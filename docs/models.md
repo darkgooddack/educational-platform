@@ -25,6 +25,8 @@ erDiagram
         FeedbackStatus status
         int manager_id
     }
+    UserRole ||--o{ UserModel : has_role
+    FeedbackStatus ||--o{ FeedbackModel : has_status
     UserRole {
         string ADMIN
         string MODERATOR
@@ -37,6 +39,7 @@ erDiagram
         string PROCESSED
         string DELETED
     }
+
 
 ```
 
