@@ -62,6 +62,20 @@ class UserService(HashingMixin, BaseService):
         self.session = session
         self._data_manager = UserDataManager(session)
 
+    async def toggle_active(self, user_id: int, is_active: bool) -> UserUpdateSchema:
+        """
+        Изменяет статус активности пользователя.
+
+        Args:
+            user_id (int): Идентификатор пользователя
+            is_active (bool): Статус активности
+
+        Returns:
+            UserUpdateSchema: Обновленный пользователь
+        """
+        return await self._data_manager.toggle_active(user_id, is_active)
+
+
     async def assign_role(self, user_id: int, role: UserRole) -> UserUpdateSchema:
         """
         Назначает роль пользователю.

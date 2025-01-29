@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import UserExistsError
+from app.core.exceptions import UserExistsError, UserNotFoundError
 from app.models import UserModel
 from app.schemas import (PaginationParams, UserCredentialsSchema, UserRole,
                          UserSchema, UserUpdateSchema)
@@ -39,6 +39,29 @@ class UserDataManager(BaseEntityManager[UserSchema]):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session, schema=UserSchema, model=UserModel)
 
+    async def toggle_active(self, user_id: int, is_active: bool) -> UserUpdateSchema:
+        """
+        Изменяет статус активности пользователя.
+
+        Args:
+            user_id (int): Идентификатор пользователя
+            is_active (bool): Статус активности
+
+        Returns:
+            UserUpdateSchema: Данные пользователя с обновленным статусом
+        """
+        found_user_model = await self.get_user(user_id)
+
+        if not found_user_model:
+            raise UserNotFoundError(
+                message=f"Пользователь с id {user_id} не найден",
+                extra={"user_id": user_id}
+            )
+
+        updated_user = found_user_model
+        updated_user.is_active = is_active
+        return await self.update_one(found_user_model, updated_user)
+
     async def assign_role(self, user_id: int, role: UserRole) -> UserUpdateSchema:
         """
         Назначает роль пользователю.
@@ -53,8 +76,11 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         found_user_model = await self.get_user(user_id)
 
         if not found_user_model:
-            return None
-        self.logger.debug("################role: %s", role)
+            raise UserNotFoundError(
+                message=f"Пользователь с id {user_id} не найден",
+                extra={"user_id": user_id}
+            )
+
         updated_user = found_user_model
         updated_user.role = role
         return await self.update_one(found_user_model, updated_user)
@@ -236,7 +262,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
 
         return await self.update_one(user, updated_user)
 
-    async def delete_user(self, user_id: int) -> None:
+    async def delete_user(self, user_id: int) -> bool:
         """
         Удаляет пользователя из базы данных.
 
@@ -244,7 +270,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
             user_id: Идентификатор пользователя.
 
         Returns:
-            None
+            bool
 
         Note:
             #! Можно рассмотреть реализацию мягкого удаления.

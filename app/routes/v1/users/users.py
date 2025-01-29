@@ -40,6 +40,24 @@ def setup_routes(router: APIRouter):
             items=users, total=total, page=pagination.page, size=pagination.limit
         )
 
+    @router.post("/toggle_active", response_model=UserUpdateSchema)
+    async def toggle_active(
+        user_id: int,
+        is_active: bool,
+        db_session: AsyncSession = Depends(get_db_session),
+    ) -> UserUpdateSchema:
+        """
+        Активация/деактивация пользователя.
+
+        Args:
+            user_id (int): Идентификатор пользователя
+            is_active (bool): Статус активности
+            db_session (AsyncSession): Сессия базы данных
+
+        Returns:
+            UserUpdateSchema: Обновленные данные пользователя
+        """
+        return await UserService(db_session).toggle_active(user_id, is_active)
     @router.post("/assign_role", response_model=UserUpdateSchema)
     async def create_user(
         user_id: int,

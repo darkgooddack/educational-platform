@@ -32,7 +32,6 @@ erDiagram
         string MODERATOR
         string USER
         string MANAGER
-        string TUTOR
     }
     FeedbackStatus {
         string PENDING

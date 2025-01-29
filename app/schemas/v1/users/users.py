@@ -21,14 +21,12 @@ class UserRole(str, Enum):
         MODERATOR (str): Роль модератора.
         USER (str): Роль пользователя.
         MANAGER (str): Роль менеджера.
-        TUTOR (str): Роль наставника.
     """
 
     ADMIN = "admin"
     MODERATOR = "moderator"
     USER = "user"
     MANAGER = "manager"
-    TUTOR = "tutor"
 
 
 class UserSchema(BaseSchema):
