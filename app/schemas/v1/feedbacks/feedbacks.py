@@ -3,7 +3,7 @@
 """
 
 from enum import Enum
-
+from typing import Optional
 from pydantic import EmailStr, Field
 
 from app.schemas.v1.base import BaseInputSchema, BaseSchema
@@ -44,7 +44,7 @@ class FeedbackSchema(BaseSchema):
     """
     manager_id: Optional[int] = None
     name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
-    phone: str | None = Field(
+    phone: Optional[str] = Field(
         None,
         pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$",
         description="Телефон в формате +7 (XXX) XXX-XX-XX",
@@ -67,7 +67,7 @@ class FeedbackCreateSchema(BaseInputSchema):
 
     manager_id: Optional[int] = None
     name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
-    phone: str | None = Field(
+    phone: Optional[str] = Field(
         None,
         pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$",
         description="Телефон в формате +7 (XXX) XXX-XX-XX",
@@ -90,7 +90,7 @@ class FeedbackUpdateSchema(BaseInputSchema):
 
     manager_id: Optional[int] = None
     name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
-    phone: str | None = Field(
+    phone: Optional[str] = Field(
         None,
         pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$",
         description="Телефон в формате +7 (XXX) XXX-XX-XX",
@@ -111,7 +111,7 @@ class FeedbackResponse(BaseInputSchema):
     """
 
     id: Optional[int] = None
-    manager_id: int | None
+    manager_id: Optional[int] = None
     message: str = Field(
         default="Обратная связь успешно отправлена!",
         description="Сообщение, отправляемое после совершенной работы с обратной связью (создание, обновление, удаление)",
