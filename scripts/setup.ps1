@@ -1,3 +1,9 @@
+# Устанавливаем uv если его нет
+if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+    Write-Host "📥 Устанавливаю uv..." -ForegroundColor Cyan
+    pip install uv
+    Write-Host "✅ uv установлен!" -ForegroundColor Green
+}
 # Проверяем существование .venv
 if (-not (Test-Path ".venv")) {
     Write-Host "🚀 Создаю виртуальное окружение..." -ForegroundColor Cyan

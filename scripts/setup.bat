@@ -1,6 +1,13 @@
 @echo off
 chcp 65001 > nul
 
+where uv >nul 2>nul
+IF %ERRORLEVEL% NEQ 0 (
+    echo 📥 Устанавливаю uv...
+    pip install uv
+    echo ✅ uv установлен!
+)
+
 IF NOT EXIST ".venv" (
     echo 🚀 Создаю виртуальное окружение...
     uv venv
