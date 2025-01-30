@@ -1,7 +1,6 @@
-from typing import Any, List
+from typing import List
 
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import VideoLectureModel
@@ -9,7 +8,7 @@ from app.schemas import PaginationParams, VideoLectureSchema
 from app.services import BaseEntityManager
 
 
-class UserDataManager(BaseEntityManager[VideoLectureSchema]):
+class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
     """
     Менеджер данных для работы с видео лекциями в БД.
 
@@ -57,4 +56,3 @@ class UserDataManager(BaseEntityManager[VideoLectureSchema]):
             statement = statement.filter(self.model.theme == theme)
 
         return await self.get_paginated(statement, pagination)
-

@@ -144,6 +144,7 @@ class AppConfig:
         "register": ServiceConfig("register", ["Registration"]),
         "users": ServiceConfig("users", ["Users"]),
         "feedbacks": ServiceConfig("feedbacks", ["Feedbacks"]),
+        "videos": ServiceConfig("videos", ["Video Lectures"]),
     }
 
     PATHS = PathConfig()

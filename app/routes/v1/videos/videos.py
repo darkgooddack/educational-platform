@@ -1,14 +1,43 @@
-from typing import List
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Form, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db_session
-from app.schemas import VideoLectureSchema, Page, PaginationParams
+from app.core.dependencies import get_db_session, get_current_user, get_s3_session
+from app.core.dependencies.s3 import S3Session
+from app.schemas import VideoLectureSchema, VideoLectureCreateSchema, UserSchema, Page, PaginationParams
 from app.services import VideoLectureService
 
 
 def setup_routes(router: APIRouter):
+
+    @router.post("/", response_model=VideoLectureSchema)
+    async def create_video_lecture(
+        title: str = Form(...),
+        description: str = Form(...),
+        file: UploadFile = Form(...),
+        _current_user: UserSchema = Depends(get_current_user),
+        db_session: AsyncSession = Depends(get_db_session),
+        s3_session: S3Session = Depends(get_s3_session),
+    ) -> VideoLectureSchema:
+        """
+        **Добавление видео лекции.**
+
+        **Args**:
+            video_lecture (VideoLectureCreateSchema): Данные видеолекции для создания.
+            db_session (AsyncSession): Сессия базы данных.
+
+        **Returns**:
+            VideoLectureSchema: Созданный отзыв.
+        """
+        service = VideoLectureService(db_session, s3_session)
+        result = await service.add_video(
+            VideoLectureCreateSchema(
+                title=title,
+                description=description,
+                video_file=file
+            ),
+            author_id=_current_user.id
+        )
+        return result
 
     @router.get("/", response_model=Page[VideoLectureSchema])
     async def get_videos(
@@ -26,11 +55,12 @@ def setup_routes(router: APIRouter):
             - search (str): Поиск по названию и описанию
             - db_session (AsyncSession): Сессия базы данных.
             - sort_by: Доступные значения (views, updated_at)
-            
+
         **Returns**:
             - Page[VideoLectureSchema]: Страница с видео лекциями.
         """
-        videos, total = await VideoLectureService(db_session).get_videos(
+        service = VideoLectureService(db_session)
+        videos, total = await service.get_videos(
             pagination=pagination,
             theme=theme,
             search=search,

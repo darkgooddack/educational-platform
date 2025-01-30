@@ -9,6 +9,7 @@ import uvicorn
 ROOT_DIR = Path(__file__).parents[1]
 COMPOSE_FILE_FULL = "docker-compose.dev.full.yml"
 COMPOSE_FILE_WITHOUT_BACKEND = "docker-compose.dev.yml"
+
 def run_compose_command(command: str | list, compose_file: str = COMPOSE_FILE_FULL) -> None:
     """Запускает docker-compose команду в корне проекта"""
     if isinstance(command, str):

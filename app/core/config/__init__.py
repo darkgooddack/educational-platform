@@ -22,7 +22,8 @@ from functools import lru_cache
 
 from .app import AppConfig
 from .settings import Settings
-
+import logging
+logger = logging.getLogger(__name__)
 
 class Config(Settings, AppConfig):
     """
@@ -51,4 +52,5 @@ def get_config() -> Config:
 
 config = get_config()
 
+logger.info(f"Config loaded: {config}")
 __all__ = ["config"]

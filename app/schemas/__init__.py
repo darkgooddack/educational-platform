@@ -21,7 +21,7 @@ from .v1.pagination import Page, PaginationParams
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
                              UserUpdateSchema)
-from .v1.videos.videos import VideoLectureSchema
+from .v1.videos.videos import VideoLectureSchema, VideoLectureCreateSchema
 
 __all__ = [
     "BaseSchema",
@@ -60,5 +60,6 @@ __all__ = [
     "FeedbackCreateSchema",
     "FeedbackUpdateSchema",
     "FeedbackResponse",
-    "VideoLectureSchema"
+    "VideoLectureSchema",
+    "VideoLectureCreateSchema"
 ]

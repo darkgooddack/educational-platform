@@ -9,6 +9,7 @@ from .v1.base import BaseDataManager, BaseEntityManager, BaseService
 from .v1.feedbacks import FeedbackDataManager, FeedbackService
 from .v1.oauth import OAuthService
 from .v1.users import UserDataManager, UserService
+from .v1.videos import VideoLectureDataManager, VideoLectureService
 
 __all__ = [
     "BaseService",
@@ -20,4 +21,6 @@ __all__ = [
     "OAuthService",
     "FeedbackService",
     "FeedbackDataManager",
+    "VideoLectureService",
+    "VideoLectureDataManager",
 ]

@@ -58,22 +58,27 @@ class Settings(BaseSettings):
     )
 
     aws_region: str = Field(
+        default="ru-central1",
         description="Регион AWS"
     )
 
     aws_endpoint: str = Field(
+        default="https://storage.yandexcloud.net",
         description="Эндпоинт AWS"
     )
 
     aws_bucket_name: str = Field(
+        default="education-platform",
         description="Имя бакета AWS"
     )
 
-    aws_access_key_id: str = Field(
+    aws_access_key_id: str | None = Field(
+        default=None,
         description="Ключ доступа AWS"
     )
 
-    aws_secret_access_key: str = Field(
+    aws_secret_access_key: str | None = Field(
+        default=None,
         description="Секретный ключ AWS"
     )
 

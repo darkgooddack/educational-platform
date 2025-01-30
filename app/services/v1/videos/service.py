@@ -1,7 +1,9 @@
-from sqlalchemy import select, func, asc, desc
+from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import VideoLectureModel
+from app.core.dependencies.s3 import S3Session
+from app.core.storages.s3.base import S3DataManager
 from app.services import BaseService
+from app.schemas import VideoLectureSchema, VideoLectureCreateSchema, PaginationParams
 from .data_manager import VideoLectureDataManager
 
 class VideoLectureService(BaseService):
@@ -17,12 +19,44 @@ class VideoLectureService(BaseService):
 
     Methods:
         get_videos: Получает список видео лекций с возможностью пагинации, поиска и фильтрации.
-        
+
     """
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, s3_session: S3Session | None = None):
         super().__init__()
         self.session = session
-        self._data_manager = VideoLectureDataManager(session, self.model)
+        self._data_manager = VideoLectureDataManager(session)
+        self._s3_manager = S3DataManager(s3_session)
+
+    async def add_video(
+        self,
+        video_lecture: VideoLectureCreateSchema,
+        author_id: int
+    ) -> VideoLectureSchema:
+        """
+        Добавляет новую инструкцию.
+
+        Args:
+            video_lecture (VideoLectureCreateSchema): Видео лекция для добавления.
+            author_id (int): Идентификатор автора.
+
+        Returns:
+            VideoLectureSchema: Добавленная видеолекция с полученным URL-адресом файла.
+        """
+        video_url = await self._s3_manager.upload_file_from_content(
+            file=video_lecture.video_file,
+            file_key="videos_lectures"
+        )
+
+        new_video_lecture = VideoLectureSchema(
+            title=video_lecture.title,
+            description=video_lecture.description,
+            video_url=video_url,
+            theme="default_theme",
+            views=0,
+            duration=0,
+            author_id=author_id
+        )
+        return await self._data_manager.add_item(new_video_lecture)
 
     async def get_videos(
         self,
@@ -44,6 +78,6 @@ class VideoLectureService(BaseService):
         """
         return await self._data_manager.get_videos(
             pagination=pagination,
-            role=role,
+            theme=theme,
             search=search,
         )
