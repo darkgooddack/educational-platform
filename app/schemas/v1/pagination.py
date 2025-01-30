@@ -39,7 +39,7 @@ class PaginationParams:
         self,
         skip: int = 0,
         limit: int = 10,
-        sort_by: str = "created_at",
+        sort_by: str = "updated_at",
         sort_desc: bool = True,
     ):
         self.skip = skip

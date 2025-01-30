@@ -52,6 +52,30 @@ class Settings(BaseSettings):
             'allow_headers': ['*']
         }
     """
+    aws_service_name: str = Field(
+        default="s3",
+        description="Сервис AWS"
+    )
+
+    aws_region: str = Field(
+        description="Регион AWS"
+    )
+
+    aws_endpoint: str = Field(
+        description="Эндпоинт AWS"
+    )
+
+    aws_bucket_name: str = Field(
+        description="Имя бакета AWS"
+    )
+
+    aws_access_key_id: str = Field(
+        description="Ключ доступа AWS"
+    )
+
+    aws_secret_access_key: str = Field(
+        description="Секретный ключ AWS"
+    )
 
     docs_access: bool = Field(
         default=True, description="Разрешение доступа к документации API"
