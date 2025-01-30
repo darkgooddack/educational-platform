@@ -4,39 +4,39 @@ erDiagram
     UserModel ||--o{ FeedbackModel : manages
     UserModel {
         int id
-        string first_name
-        string last_name
-        string middle_name
-        string email
-        string phone
-        string hashed_password
+        str first_name
+        str last_name
+        str middle_name
+        str email
+        str phone
+        str hashed_password
         UserRole role
-        string avatar
-        boolean is_active
+        str avatar
+        bool is_active
         int vk_id
-        string google_id
+        str google_id
         int yandex_id
     }
     FeedbackModel {
         int id
-        string name
-        string phone
-        string email
+        str name
+        str phone
+        str email
         FeedbackStatus status
         int manager_id
     }
     UserRole ||--o{ UserModel : has_role
     FeedbackStatus ||--o{ FeedbackModel : has_status
     UserRole {
-        string ADMIN
-        string MODERATOR
-        string USER
-        string MANAGER
+        str ADMIN
+        str MODERATOR
+        str USER
+        str MANAGER
     }
     FeedbackStatus {
-        string PENDING
-        string PROCESSED
-        string DELETED
+        str PENDING
+        str PROCESSED
+        str DELETED
     }
 
 
