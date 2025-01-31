@@ -58,6 +58,7 @@ def setup_routes(router: APIRouter):
             UserUpdateSchema: Обновленные данные пользователя
         """
         return await UserService(db_session).toggle_active(user_id, is_active)
+
     @router.post("/assign_role", response_model=UserUpdateSchema)
     async def create_user(
         user_id: int,

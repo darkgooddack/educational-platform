@@ -1,7 +1,7 @@
 from fastapi import UploadFile
-from ..base import CommonBaseSchema, BaseInputSchema
+from ..base import BaseSchema, BaseInputSchema
 from pydantic import Field
-class VideoLectureSchema(CommonBaseSchema):
+class VideoLectureSchema(BaseSchema):
     """
     Схема для представления видео лекции.
 
@@ -64,3 +64,17 @@ class VideoLectureCreateSchema(BaseInputSchema):
         description="Описание видео лекции"
     )
     video_file: UploadFile
+
+class VideoLectureResponseSchema(BaseInputSchema):
+    """
+    Схема ответа при успешной дообавлении видео лекции.
+
+    Attributes:
+        user_id (int): ID пользователя
+        video_url (str): Ссылка на видео.
+        message (str): Сообщение об успешной регистрации
+    """
+
+    user_id: int
+    video_url: str
+    message: str = "Видео успешно добавлено"

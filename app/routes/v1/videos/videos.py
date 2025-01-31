@@ -3,13 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session, get_current_user, get_s3_session
 from app.core.dependencies.s3 import S3Session
-from app.schemas import VideoLectureSchema, VideoLectureCreateSchema, UserSchema, Page, PaginationParams
+from app.schemas import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema, UserSchema, Page, PaginationParams
 from app.services import VideoLectureService
 
 
 def setup_routes(router: APIRouter):
 
-    @router.post("/", response_model=VideoLectureSchema)
+    @router.post("/")
     async def create_video_lecture(
         title: str = Form(...),
         description: str = Form(...),
@@ -17,7 +17,7 @@ def setup_routes(router: APIRouter):
         _current_user: UserSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
         s3_session: S3Session = Depends(get_s3_session),
-    ) -> VideoLectureSchema:
+    ) -> VideoLectureResponseSchema:
         """
         **Добавление видео лекции.**
 
