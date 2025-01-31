@@ -22,7 +22,7 @@ oauth2_schema = OAuth2PasswordBearer(tokenUrl=config.auth_url, auto_error=False)
 
 async def get_current_user(
     token: str = Depends(oauth2_schema),
-    auth_storage: AuthRedisStorage = Depends(get_redis)
+    redis_session: AuthRedisStorage = Depends(get_redis)
 ) -> UserCredentialsSchema:
     """
     Получает данные текущего пользователя.
@@ -34,7 +34,7 @@ async def get_current_user(
         Данные текущего пользователя.
     """
     logger.debug("Получен токен: %s", token)
-    auth_storage = AuthRedisStorage(get_redis)
+    auth_storage = AuthRedisStorage(redis_session)
     user = await auth_storage.verify_and_get_user(token)
     if user is None:
         raise TokenInvalidError()
