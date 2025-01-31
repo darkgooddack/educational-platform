@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, UploadFile
+from fastapi import APIRouter, Depends, Form, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session, get_current_user, get_s3_session
@@ -11,7 +11,9 @@ def setup_routes(router: APIRouter):
 
     @router.post("/", response_model=VideoLectureResponseSchema)
     async def create_video_lecture(
-        video_lecture: VideoLectureCreateSchema,
+        title: str = Form(...),
+        description: str = Form(...),
+        file: UploadFile = File(...),
         _current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
         s3_session: S3Session = Depends(get_s3_session),
@@ -20,7 +22,9 @@ def setup_routes(router: APIRouter):
         **Добавление видео лекции.**
 
         **Args**:
-            video_lecture (VideoLectureCreateSchema): Данные видеолекции для создания.
+            title (str): Заголовок видео лекции.
+            description (str): Описание видео лекции.
+            file (UploadFile): Файл видео лекции.
             _current_user (UserCredentialsSchema): Данные текущего пользователя.
             db_session (AsyncSession): Сессия базы данных.
             s3_session (S3Session): Сессия S3.
@@ -30,7 +34,11 @@ def setup_routes(router: APIRouter):
         """
         service = VideoLectureService(db_session, s3_session)
         return await service.add_video(
-            video_lecture=video_lecture,
+            VideoLectureCreateSchema(
+                title=title,
+                description=description,
+                video_file=file,
+            ),
             author_id=_current_user.id
         )
 
