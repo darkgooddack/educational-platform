@@ -104,7 +104,8 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
             return UserCredentialsSchema.model_validate(user_data)
 
         return UserCredentialsSchema(email=email)
-
+    
+    @staticmethod
     async def verify_and_get_user(self, token: str) -> UserCredentialsSchema:
         """
         Основной метод проверки токена и получения пользователя

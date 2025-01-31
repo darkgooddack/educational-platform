@@ -32,7 +32,7 @@ async def get_current_user(
         Данные текущего пользователя.
     """
     logger.debug("Получен токен: %s", token)
-
+    
     user = await AuthRedisStorage.verify_and_get_user(token)
     if user is None:
         raise TokenInvalidError()
