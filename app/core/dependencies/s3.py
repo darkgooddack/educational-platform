@@ -17,19 +17,6 @@ from typing import Any, AsyncGenerator
 from aioboto3 import Session
 from botocore.exceptions import ClientError
 from app.core.config import config
-from aiobotocore.config import AioConfig
-
-aio_config = AioConfig(
-    signature_version='s3v4',
-    s3={
-        "addressing_style": "path",
-        "use_aws_checksum": False
-    },
-    retries={
-        'max_attempts': 3
-    }
-)
-
 
 class S3Session:
     """
@@ -81,7 +68,7 @@ class S3Session:
         try:
             self.logger.info("Создание клиента S3...")
             session = Session()
-            async with session.client("s3", config=aio_config, **self.__get_s3_params()) as client:
+            async with session.client("s3", **self.__get_s3_params()) as client:
                 self.logger.info("Клиент S3 успешно создан")
                 return client
         except ClientError as e:
