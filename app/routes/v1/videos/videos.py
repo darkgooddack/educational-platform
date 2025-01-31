@@ -32,6 +32,10 @@ def setup_routes(router: APIRouter):
         **Returns**:
             VideoLectureResponseSchema: Созданный отзыв.
         """
+        logger.debug("Запрос на добавление видео лекции")
+        logger.debug("Получены данные: title=%s, description=%s, file=%s", title, description, file)
+        logger.debug("Получены данные: _current_user=%s, db_session=%s, s3_session=%s", _current_user, db_session, s3_session)
+        
         service = VideoLectureService(db_session, s3_session)
         return await service.add_video(
             VideoLectureCreateSchema(
