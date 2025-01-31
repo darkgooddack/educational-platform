@@ -1,3 +1,4 @@
+import logging
 import json
 from datetime import datetime
 from typing import Optional
@@ -6,6 +7,7 @@ from app.core.security import TokenMixin
 from app.core.storages.redis.base import BaseRedisStorage
 from app.schemas import UserCredentialsSchema
 
+logger = logging.getLogger(__name__)
 
 class AuthRedisStorage(BaseRedisStorage, TokenMixin):
     """
@@ -117,9 +119,12 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
             Данные пользователя.
         """
         payload = self.verify_token(token)
+        logger.debug("Получен payload: %s", payload)
         email = self.validate_payload(payload)
+        logger.debug("Получен email: %s", email)
         user = await self.get_user_from_redis(token, email)
-
+        logger.debug("Получен пользователь: %s", user)
+        logger.debug("Проверка активации пользователя: %s", user.is_active)
         if not user.is_active:
             raise UserInactiveError(
                 message="Аккаунт деактивирован",
