@@ -179,10 +179,11 @@ class S3DataManager(SessionMixin):
                     Bucket=bucket_name,
                     Key=file_key,
                     Body=file_content,
+                    ContentLength=len(file_content),
                     ContentType=file.content_type,
-                    ACL='public-read',
-                    CacheControl='max-age=31536000',
-                    ServerSideEncryption='AES256'
+                    # ACL='public-read',
+                    # CacheControl='max-age=31536000',
+                    # ServerSideEncryption='AES256'
                 )
             return self.get_link_file(file_key, bucket_name)
         except ClientError as e:
