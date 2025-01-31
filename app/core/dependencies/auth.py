@@ -36,10 +36,21 @@ async def get_current_user(
     Returns:
         Данные текущего пользователя.
     """
+    logger.debug("Начало получения текущего пользователя")
     logger.debug("Получен токен: %s", token)
-    auth_storage = AuthRedisStorage()
-    user = await auth_storage.verify_and_get_user(token)
-    if user is None:
+
+    if not token:
+        logger.debug("Токен отсутствует в запросе")
         raise TokenInvalidError()
+
+    auth_storage = AuthRedisStorage()
+    logger.debug("Создан экземпляр AuthRedisStorage")
     
-    return user
+    try:
+        user = await auth_storage.verify_and_get_user(token)
+        logger.debug("Пользователь успешно получен: %s", user)
+        return user
+        
+    except Exception as e:
+        logger.debug("Ошибка при получении пользователя: %s", str(e))
+        raise TokenInvalidError()
