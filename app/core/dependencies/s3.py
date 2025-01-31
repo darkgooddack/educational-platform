@@ -20,10 +20,16 @@ from app.core.config import config
 from aiobotocore.config import AioConfig
 
 aio_config = AioConfig(
+    signature_version='s3v4',
     s3={
-        "use_aws_checksum": False  # Отключает автоматические заголовки checksum
+        "addressing_style": "path",
+        "use_aws_checksum": False
+    },
+    retries={
+        'max_attempts': 3
     }
 )
+
 
 class S3Session:
     """
@@ -56,6 +62,7 @@ class S3Session:
             "endpoint_url": self.endpoint_url,
             "aws_access_key_id": self.access_key_id,
             "aws_secret_access_key": self.secret_access_key,
+            "verify": True
         }
 
         self.logger.debug("S3 параметры подключения: %s", params)
