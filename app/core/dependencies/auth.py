@@ -11,6 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import config
 from app.schemas import UserCredentialsSchema
+from app.core.dependencies.redis import get_redis
 from app.core.storages.redis.auth import AuthRedisStorage
 from app.core.exceptions.v1.auth.security import TokenInvalidError
 
@@ -21,6 +22,7 @@ oauth2_schema = OAuth2PasswordBearer(tokenUrl=config.auth_url, auto_error=False)
 
 async def get_current_user(
     token: str = Depends(oauth2_schema),
+    auth_storage: AuthRedisStorage = Depends(get_redis)
 ) -> UserCredentialsSchema:
     """
     Получает данные текущего пользователя.
@@ -32,8 +34,8 @@ async def get_current_user(
         Данные текущего пользователя.
     """
     logger.debug("Получен токен: %s", token)
-    
-    user = await AuthRedisStorage.verify_and_get_user(token)
+    auth_storage = AuthRedisStorage(get_redis)
+    user = await auth_storage.verify_and_get_user(token)
     if user is None:
         raise TokenInvalidError()
     
