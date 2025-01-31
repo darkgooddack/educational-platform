@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import config
 from app.schemas import UserCredentialsSchema
-from app.core.storages.redis import AuthRedisStorage
+from app.core.storages.redis.auth import AuthRedisStorage
 from app.core.exceptions.v1.auth.security import TokenInvalidError
 
 logger = logging.getLogger(__name__)
