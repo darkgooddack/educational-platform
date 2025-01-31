@@ -3,18 +3,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session, get_current_user, get_s3_session
 from app.core.dependencies.s3 import S3Session
-from app.schemas import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema, UserSchema, Page, PaginationParams
+from app.schemas import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema, UserCredentialsSchema, Page, PaginationParams
 from app.services import VideoLectureService
 
 
 def setup_routes(router: APIRouter):
 
-    @router.post("/")
+    @router.post("/", response_model=VideoLectureResponseSchema)
     async def create_video_lecture(
-        title: str = Form(...),
-        description: str = Form(...),
-        file: UploadFile = Form(...),
-        _current_user: UserSchema = Depends(get_current_user),
+        video_lecture: VideoLectureCreateSchema,
+        _current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
         s3_session: S3Session = Depends(get_s3_session),
     ) -> VideoLectureResponseSchema:
@@ -23,21 +21,18 @@ def setup_routes(router: APIRouter):
 
         **Args**:
             video_lecture (VideoLectureCreateSchema): Данные видеолекции для создания.
+            _current_user (UserCredentialsSchema): Данные текущего пользователя.
             db_session (AsyncSession): Сессия базы данных.
+            s3_session (S3Session): Сессия S3.
 
         **Returns**:
-            VideoLectureSchema: Созданный отзыв.
+            VideoLectureResponseSchema: Созданный отзыв.
         """
         service = VideoLectureService(db_session, s3_session)
-        result = await service.add_video(
-            VideoLectureCreateSchema(
-                title=title,
-                description=description,
-                video_file=file
-            ),
+        return await service.add_video(
+            video_lecture=video_lecture,
             author_id=_current_user.id
         )
-        return result
 
     @router.get("/", response_model=Page[VideoLectureSchema])
     async def get_videos(
