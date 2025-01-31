@@ -17,7 +17,11 @@ from app.core.exceptions.v1.auth.security import TokenInvalidError
 
 logger = logging.getLogger(__name__)
 
-oauth2_schema = OAuth2PasswordBearer(tokenUrl=config.auth_url, auto_error=False)
+oauth2_schema = OAuth2PasswordBearer(
+    tokenUrl=config.auth_url, 
+    auto_error=False,
+    scheme_name="OAuth2PasswordBearer"
+)
 
 
 async def get_current_user(
