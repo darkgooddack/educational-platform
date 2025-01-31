@@ -94,10 +94,7 @@ class Settings(BaseSettings):
         default="admin", description="Паспорт для доступа к docs/redoc"
     )
 
-    token_key: SecretStr = Field(
-        default=SecretStr(secrets.token_hex(32)),
-        description="Секретный ключ для токена",
-    )
+    token_key: SecretStr = secrets.token_hex(32)
 
     redis_url: RedisDsn = Field(
         default="redis://default:default@localhost:6380",

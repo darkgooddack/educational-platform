@@ -179,7 +179,7 @@ class S3DataManager(SessionMixin):
                     Bucket=bucket_name,
                     Key=file_key,
                     Body=file_content,
-                    ContentLength=len(file_content),
+                    # ContentLength=len(file_content),
                     ContentType=file.content_type,
                     # ACL='public-read',
                     # CacheControl='max-age=31536000',
