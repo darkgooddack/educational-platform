@@ -45,12 +45,15 @@ class S3Session:
         Returns:
             dict: Словарь с параметрами для клиента S3.
         """
-        return {
+        params = {
             "region_name": self.region_name,
             "endpoint_url": self.endpoint_url,
             "aws_access_key_id": self.access_key_id,
             "aws_secret_access_key": self.secret_access_key,
         }
+
+        self.logger.debug("S3 параметры подключения: %s", params)
+        return params
 
     async def create_async_session_factory(self) -> Any:
         """
@@ -63,11 +66,13 @@ class S3Session:
             ClientError: Если возникла ошибка при создании клиента.
         """
         try:
+            self.logger.info("Создание клиента S3...")
             session = Session()
             async with session.client("s3", **self.__get_s3_params()) as client:
+                self.logger.info("Клиент S3 успешно создан")
                 return client
         except ClientError as e:
-            self.logger.error("Ошибка при создании клиента S3: %s", e)
+            self.logger.error("❌ Ошибка при создании клиента S3: %s", e)
             raise
 
 class SessionContextManager:
