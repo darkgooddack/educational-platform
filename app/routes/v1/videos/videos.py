@@ -16,7 +16,7 @@ def setup_routes(router: APIRouter):
         title: str = Form(...),
         description: str = Form(...),
         file: UploadFile = File(...),
-        _current_user: UserCredentialsSchema = Depends(get_current_user),
+        # _current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
         s3_session: S3Session = Depends(get_s3_session),
     ) -> VideoLectureResponseSchema:
@@ -38,8 +38,8 @@ def setup_routes(router: APIRouter):
         logger.debug("📝 Параметры запроса: title='%s', description='%s'", title, description)
         logger.debug("📁 Файл: filename='%s', content_type='%s', size=%d bytes", 
                 file.filename, file.content_type, file.size)
-        logger.debug("👤 Пользователь: id=%d, email='%s'", 
-                _current_user.id, _current_user.email)
+        # logger.debug("👤 Пользователь: id=%d, email='%s'", 
+        #         _current_user.id, _current_user.email)
         
         try:
             service = VideoLectureService(db_session, s3_session)
@@ -49,7 +49,8 @@ def setup_routes(router: APIRouter):
                     description=description,
                     video_file=file,
                 ),
-                author_id=_current_user.id
+                author_id=1
+                # author_id=_current_user.id
             )
             logger.debug("✅ Видео успешно загружено: %s", result)
             return result

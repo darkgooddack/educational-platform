@@ -56,6 +56,9 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         """
         user_model = await self._data_manager.get_user_by_credentials(credentials.email)
 
+        if not user_model:
+            raise InvalidCredentialsError()
+            
         if not user_model.is_active:
             raise UserInactiveError(
                 message="Аккаунт деактивирован",
