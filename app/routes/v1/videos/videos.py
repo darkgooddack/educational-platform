@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, Form, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,6 +7,7 @@ from app.core.dependencies.s3 import S3Session
 from app.schemas import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema, UserCredentialsSchema, Page, PaginationParams
 from app.services import VideoLectureService
 
+logger = logging.getLogger(__name__)
 
 def setup_routes(router: APIRouter):
 
