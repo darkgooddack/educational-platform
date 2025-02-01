@@ -74,8 +74,8 @@ class S3Session:
         )
         s3_config = Config(
             s3={
-                # 'use_accelerate_endpoint': False,
-                'addressing_style': 'path',
+                'use_accelerate_endpoint': False,
+                'addressing_style': 'virtual',
                 # 'disable_chunked': True, # Отключаем chunked
                 # 'disable_buffering': True, # Отключаем буферизацию
                 # 'payload_signing_enabled': True,
@@ -86,14 +86,14 @@ class S3Session:
                 # 'use_threads': True
             },
             signature_version='s3v4',
-            #retries={'max_attempts': 3},
-            #connect_timeout=5,
-            #read_timeout=5
+            retries={'max_attempts': 3},
+            connect_timeout=5,
+            read_timeout=5
         )
         try:
             session = Session()
             async with session.client(
-                "s3"#, config=s3_config,
+                "s3", config=s3_config,
                 **self.__get_s3_params()
             ) as client:
                 self.logger.info("Клиент S3 успешно создан")
