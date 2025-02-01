@@ -18,7 +18,7 @@ def setup_routes(router: APIRouter):
         file: UploadFile = File(
             ...,
             description="Видео лекции",
-            content_type=["video/mp4", "video/webm", "video/avi"],
+            content_type=["video/mov", "video/mp4", "video/webm", "video/avi"],
             max_size=500_000_000,  # 500MB
         ),
         _current_user: UserCredentialsSchema = Depends(get_current_user),
