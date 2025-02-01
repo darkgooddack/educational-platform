@@ -93,7 +93,7 @@ class S3Session:
         try:
             session = Session()
             async with session.client(
-                "s3", config=s3_config,
+                "s3"#, config=s3_config,
                 **self.__get_s3_params()
             ) as client:
                 self.logger.info("Клиент S3 успешно создан")
