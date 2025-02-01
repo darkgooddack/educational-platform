@@ -75,7 +75,7 @@ class S3Session:
         s3_config = Config(
             s3={
                 # 'use_accelerate_endpoint': False,
-                # 'addressing_style': 'path',
+                'addressing_style': 'path',
                 # 'disable_chunked': True, # Отключаем chunked
                 # 'disable_buffering': True, # Отключаем буферизацию
                 # 'payload_signing_enabled': True,
