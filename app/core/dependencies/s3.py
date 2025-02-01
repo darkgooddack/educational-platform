@@ -33,7 +33,7 @@ class S3Session:
                 По умолчанию используется глобальный объект config.
         """
         self.region_name = settings.aws_region
-        self.endpoint_url = settings.aws_endpoint
+        self.endpoint_url = "https://" + settings.aws_bucket_name + "." + settings.aws_endpoint
         self.access_key_id = settings.aws_access_key_id
         self.secret_access_key = settings.aws_secret_access_key
         self.logger = logging.getLogger("S3SessionLogger")
