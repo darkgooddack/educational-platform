@@ -85,7 +85,7 @@ class S3Session:
                 # 'max_concurrency': 10,
                 # 'use_threads': True
             },
-            #signature_version='s3v4',
+            signature_version='s3v4',
             #retries={'max_attempts': 3},
             #connect_timeout=5,
             #read_timeout=5
