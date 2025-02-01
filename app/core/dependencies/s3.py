@@ -50,7 +50,7 @@ class S3Session:
             "endpoint_url": self.endpoint_url,
             "aws_access_key_id": self.access_key_id,
             "aws_secret_access_key": self.secret_access_key,
-            "verify": True
+            #"verify": True
         }
 
         self.logger.debug("S3 параметры подключения: %s", params)
