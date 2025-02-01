@@ -3,12 +3,13 @@
 Этот модуль предоставляет класс S3DataManager, который используется для управления данными в S3.
 Он содержит методы для создания бакета, проверки существования бакета, загрузки файлов и другие операции.
 """
-
+import logging
 import os
 import uuid
 from typing import List
 import aiofiles
 from fastapi import UploadFile
+
 from botocore.exceptions import ClientError
 from app.core.config import config
 from app.core.dependencies.s3 import S3Session
@@ -51,6 +52,7 @@ class S3DataManager(SessionMixin):
         super().__init__(session)
         self.endpoint = config.aws_endpoint
         self.bucket_name = config.aws_bucket_name
+        self.logger = logging.getLogger("S3DataManagerLogger")
 
     async def create_bucket(self, bucket_name: str = None) -> None:
         """
@@ -166,13 +168,22 @@ class S3DataManager(SessionMixin):
         """
         if bucket_name is None:
             bucket_name = self.bucket_name
-
+        self.logger.debug(
+            "Загрузка файла: name=%s, type=%s, size=%d, bucket=%s, key=%s",
+            file.filename,
+            file.content_type,
+            len(await file.read()),  # прочитаем размер
+            bucket_name,
+            file_key
+        )
+        await file.seek(0)  # вернем указатель в начало
         try:
             file_content = await file.read()
             unique_filename = f"{uuid.uuid4()}_{file.filename}"
             file_key = (
                 f"{file_key}/{unique_filename}" if file_key else f"{unique_filename}"
             )
+            self.logger.debug("Вызов put_object с параметрами: bucket=%s, key=%s", bucket_name, file_key)
 
             async with self.session as s3:
                 await s3.put_object(
@@ -185,6 +196,12 @@ class S3DataManager(SessionMixin):
                 )
             return self.get_link_file(file_key, bucket_name)
         except ClientError as e:
+            self.logger.error(
+                "Ошибка загрузки файла %s: %s\nДетали: %s",
+                file.filename,
+                e,
+                e.response['Error'] if hasattr(e, 'response') else 'Нет деталей'
+            )
             raise ValueError(f"Ошибка при загрузке файла: {e}") from e
 
         except Exception as e:

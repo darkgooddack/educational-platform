@@ -15,7 +15,12 @@ def setup_routes(router: APIRouter):
     async def create_video_lecture(
         title: str = Form(...),
         description: str = Form(...),
-        file: UploadFile = File(...),
+        file: UploadFile = File(
+            ...,
+            description="Видео лекции",
+            content_type=["video/mp4", "video/webm", "video/avi"],
+            max_size=500_000_000,  # 500MB
+        ),
         _current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
         s3_session: S3Session = Depends(get_s3_session),

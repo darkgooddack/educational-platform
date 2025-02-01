@@ -15,6 +15,7 @@
 import logging
 from typing import Any, AsyncGenerator
 from aioboto3 import Session
+from botocore.config import Config
 from botocore.exceptions import ClientError
 from app.core.config import config
 
@@ -65,13 +66,44 @@ class S3Session:
         Raises:
             ClientError: Если возникла ошибка при создании клиента.
         """
+        self.logger.debug(
+            "Создание S3 клиента с параметрами: region=%s, endpoint=%s, key_id=%s",
+            self.region_name,
+            self.endpoint_url,
+            self.access_key_id[:4] + '***'
+        )
+        s3_config = Config(
+            s3={
+                # 'use_accelerate_endpoint': False,
+                # 'addressing_style': 'path',
+                # 'disable_chunked': True, # Отключаем chunked
+                # 'disable_buffering': True, # Отключаем буферизацию
+                # 'payload_signing_enabled': True,
+                # Явно включаем multipart
+                # 'multipart_threshold': 8 * 1024 * 1024,  # 8MB
+                # 'multipart_chunksize': 8 * 1024 * 1024,  # 8MB
+                # 'max_concurrency': 10,
+                # 'use_threads': True
+            },
+            signature_version='s3v4',
+            retries={'max_attempts': 3},
+            connect_timeout=5,
+            read_timeout=5
+        )
         try:
-            self.logger.info("Создание клиента S3...")
             session = Session()
-            async with session.client("s3", **self.__get_s3_params()) as client:
+            async with session.client(
+                "s3", config=s3_config,
+                **self.__get_s3_params()
+            ) as client:
                 self.logger.info("Клиент S3 успешно создан")
                 return client
         except ClientError as e:
+            self.logger.error(
+                "Ошибка создания S3 клиента: %s\nДетали: %s",
+                e,
+                e.response['Error'] if hasattr(e, 'response') else 'Нет деталей'
+            )
             self.logger.error("❌ Ошибка при создании клиента S3: %s", e)
             raise
 
