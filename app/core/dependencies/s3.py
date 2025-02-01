@@ -31,6 +31,7 @@ class S3Session:
         Args:
             settings (Any): Объект конфигурации.
                 По умолчанию используется глобальный объект config.
+
         """
         self.region_name = settings.aws_region
         self.endpoint_url = "https://" + settings.aws_endpoint
@@ -50,7 +51,6 @@ class S3Session:
             "endpoint_url": self.endpoint_url,
             "aws_access_key_id": self.access_key_id,
             "aws_secret_access_key": self.secret_access_key,
-            #"verify": True
         }
 
         self.logger.debug("S3 параметры подключения: %s", params)
@@ -72,29 +72,15 @@ class S3Session:
             self.endpoint_url,
             self.access_key_id[:4] + '***'
         )
-        s3_config = Config(
-            s3={
-                'use_accelerate_endpoint': False,
-                'addressing_style': 'virtual',
-                # 'disable_chunked': True, # Отключаем chunked
-                # 'disable_buffering': True, # Отключаем буферизацию
-                # 'payload_signing_enabled': True,
-                # Явно включаем multipart
-                # 'multipart_threshold': 8 * 1024 * 1024,  # 8MB
-                # 'multipart_chunksize': 8 * 1024 * 1024,  # 8MB
-                # 'max_concurrency': 10,
-                # 'use_threads': True
-            },
-            signature_version='s3v4',
-            retries={'max_attempts': 3},
-            connect_timeout=5,
-            read_timeout=5
-        )
+
         try:
             session = Session()
             async with session.client(
-                "s3", config=s3_config,
-                **self.__get_s3_params()
+                service_name="s3",
+                region_name=self.region_name,
+                endpoint_url=self.endpoint_url,
+                aws_access_key_id=self.access_key_id,
+                aws_secret_access_key=self.secret_access_key,
             ) as client:
                 self.logger.info("Клиент S3 успешно создан")
                 return client
