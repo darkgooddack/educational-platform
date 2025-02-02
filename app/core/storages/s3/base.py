@@ -170,8 +170,8 @@ class S3DataManager(SessionMixin):
             bucket_name = self.bucket_name
         self.logger.info("=== Начало загрузки файла ===")
         self.logger.info("Параметры авторизации:")
-        self.logger.info(f"Access Key ID: {self.session.access_key_id[:4]}***") 
-        self.logger.info(f"Secret Key: {self.session.secret_access_key[:4]}***")
+        self.logger.info(f"Access Key ID: {config.aws_access_key_id[:4]}***") 
+        self.logger.info(f"Secret Key: {config.aws_secret_access_key[:4]}***")
         self.logger.info(f"Регион: {self.session.region_name}")
         self.logger.info(f"Endpoint: {self.endpoint}")
 
