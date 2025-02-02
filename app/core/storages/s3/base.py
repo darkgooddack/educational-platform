@@ -168,18 +168,6 @@ class S3DataManager(SessionMixin):
         """
         if bucket_name is None:
             bucket_name = self.bucket_name
-        self.logger.info("=== Начало загрузки файла ===")
-        self.logger.info("Параметры авторизации:")
-        self.logger.info(f"Access Key ID: {config.aws_access_key_id[:4]}***") 
-        self.logger.info(f"Secret Key: {config.aws_secret_access_key[:4]}***")
-        self.logger.info(f"Endpoint: {self.endpoint}")
-
-        self.logger.info("Параметры файла:")
-        self.logger.info(f"Имя файла: {file.filename}")
-        self.logger.info(f"Content-Type: {file.content_type}") 
-        self.logger.info(f"Размер: {len(await file.read())} байт")
-        self.logger.info(f"Bucket: {bucket_name}")
-        self.logger.info(f"Key: {file_key}")
         self.logger.debug(
             "Загрузка файла: name=%s, type=%s, size=%d, bucket=%s, key=%s",
             file.filename,
@@ -206,17 +194,15 @@ class S3DataManager(SessionMixin):
                     ACL='public-read',
                     CacheControl='max-age=31536000',
                 )
-                self.logger.info("Ответ от S3:")    
-                self.logger.info(f"Status: {response['ResponseMetadata']['HTTPStatusCode']}")
-                self.logger.info(f"RequestId: {response['ResponseMetadata']['RequestId']}")
-                self.logger.info("=== Загрузка успешно завершена ===")
+                self.logger.debug("Ответ S3(put_object): %s", response)
             return self.get_link_file(file_key, bucket_name)
         except ClientError as e:
-            self.logger.error("=== Ошибка загрузки файла ===")
-            self.logger.error(f"Код ошибки: {e.response['Error']['Code']}")
-            self.logger.error(f"Сообщение: {e.response['Error']['Message']}")
-            self.logger.error(f"RequestId: {e.response['ResponseMetadata']['RequestId']}")
-            self.logger.error(f"HTTP Status: {e.response['ResponseMetadata']['HTTPStatusCode']}")
+            self.logger.error(
+                "Ошибка загрузки файла %s: %s\nДетали: %s",
+                file.filename,
+                e,
+                e.response['Error'] if hasattr(e, 'response') else 'Нет деталей'
+            )
             raise ValueError(f"Ошибка при загрузке файла: {e}") from e
 
         except Exception as e:
