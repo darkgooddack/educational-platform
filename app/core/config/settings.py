@@ -52,6 +52,26 @@ class Settings(BaseSettings):
             'allow_headers': ['*']
         }
     """
+    aws_service_name: str = Field(
+        default="s3",
+        description="Сервис AWS"
+    )
+
+    aws_region: str = Field(
+        default="ru-central1",
+        description="Регион AWS"
+    )
+
+    aws_endpoint: str
+
+    aws_bucket_name: str = Field(
+        default="education-platform",
+        description="Имя бакета AWS"
+    )
+
+    aws_access_key_id: str
+
+    aws_secret_access_key: str
 
     docs_access: bool = Field(
         default=True, description="Разрешение доступа к документации API"
@@ -65,10 +85,7 @@ class Settings(BaseSettings):
         default="admin", description="Паспорт для доступа к docs/redoc"
     )
 
-    token_key: SecretStr = Field(
-        default=SecretStr(secrets.token_hex(32)),
-        description="Секретный ключ для токена",
-    )
+    token_key: SecretStr = secrets.token_hex(32)
 
     redis_url: RedisDsn = Field(
         default="redis://default:default@localhost:6380",
@@ -147,6 +164,19 @@ class Settings(BaseSettings):
             "exchange": AppConfig.rabbitmq_exchange,
         }
 
+    @property
+    def s3_config_info(self) -> Dict[str, Any]:
+        """
+        Формирует информацию о конфигурации S3.
+        """
+        return {
+            "aws_service_name": self.aws_service_name,
+            "aws_region": self.aws_region,
+            "aws_endpoint": self.aws_endpoint,
+            "aws_bucket_name": self.aws_bucket_name,
+            "aws_access_key_id": self.aws_access_key_id,
+            "aws_secret_access_key": self.aws_secret_access_key,
+        }
     @property
     def cors_params(self) -> Dict[str, Any]:
         """

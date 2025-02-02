@@ -18,6 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import BaseModel
 from app.models.v1.feedbacks import FeedbackModel
+from app.models.v1.videos import VideoLectureModel
 from app.schemas import UserRole
 
 
@@ -60,4 +61,7 @@ class UserModel(BaseModel):
 
     feedbacks: Mapped[list["FeedbackModel"]] = relationship(
         "FeedbackModel", back_populates="manager", lazy="joined"
+    )
+    video_lectures: Mapped[list["VideoLectureModel"]] = relationship(
+        "VideoLectureModel", back_populates="author", lazy="dynamic"
     )

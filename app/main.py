@@ -12,17 +12,15 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.core.config import config
 from app.core.logging import setup_logging
 from app.core.middlewares.docs_auth import DocsAuthMiddleware
 from app.core.middlewares.logging import LoggingMiddleware
 from app.routes import all_routes
 
-setup_logging()
-
 # Создаем FastAPI приложение с параметрами из конфига
 app = FastAPI(**config.app_params)
+setup_logging()
 
 # Добавляем middleware в порядке выполнения
 app.add_middleware(LoggingMiddleware)  # Логирование запросов

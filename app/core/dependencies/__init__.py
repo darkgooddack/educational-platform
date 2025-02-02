@@ -16,6 +16,7 @@ from .auth import get_current_user, oauth2_schema
 from .database import get_db_session
 from .rabbitmq import get_rabbitmq
 from .redis import get_redis
+from .s3 import get_s3_session
 
 __all__ = [
     "get_db_session",
@@ -23,4 +24,5 @@ __all__ = [
     "get_rabbitmq",
     "oauth2_schema",
     "get_current_user",
+    "get_s3_session"
 ]

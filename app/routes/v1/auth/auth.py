@@ -7,6 +7,7 @@
 """
 
 from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session, oauth2_schema
@@ -30,7 +31,7 @@ def setup_routes(router: APIRouter):
 
     @router.post("")
     async def authenticate(
-        credentials: AuthSchema,
+        form_data: OAuth2PasswordRequestForm = Depends(),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TokenSchema:
         """
@@ -45,7 +46,12 @@ def setup_routes(router: APIRouter):
         **Raises**:
         - **UserNotFoundError**: Если пользователь не найден
         """
-        return await AuthService(db_session).authenticate(credentials)
+        return await AuthService(db_session).authenticate(
+            AuthSchema(
+                email=form_data.username,
+                password=form_data.password
+            )
+        )
 
     @router.post("/logout")
     async def logout(

@@ -11,7 +11,10 @@ class AuthenticationError(BaseAPIException):
         extra: dict = None,
     ):
         super().__init__(
-            status_code=401, detail=detail, error_type=error_type, extra=extra or {}
+            status_code=401, 
+            detail=detail, 
+            error_type=error_type, 
+            extra=extra or {}
         )
 
 
@@ -22,7 +25,9 @@ class TokenError(AuthenticationError):
         self, detail: str, error_type: str = "token_error", extra: dict = None
     ):
         super().__init__(
-            detail=detail, error_type=error_type, extra=extra or {"token": True}
+            detail=detail, 
+            error_type=error_type, 
+            extra=extra or {"token": True}
         )
 
 
@@ -46,4 +51,7 @@ class TokenMissingError(TokenError):
     """Отсутствующий токен"""
 
     def __init__(self):
-        super().__init__(detail="Токен отсутствует", error_type="token_missing")
+        super().__init__(
+            detail="Токен отсутствует", 
+            error_type="token_missing"
+        )

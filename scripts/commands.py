@@ -1,3 +1,4 @@
+import os
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -9,6 +10,7 @@ import uvicorn
 ROOT_DIR = Path(__file__).parents[1]
 COMPOSE_FILE_FULL = "docker-compose.dev.full.yml"
 COMPOSE_FILE_WITHOUT_BACKEND = "docker-compose.dev.yml"
+
 def run_compose_command(command: str | list, compose_file: str = COMPOSE_FILE_FULL) -> None:
     """Запускает docker-compose команду в корне проекта"""
     if isinstance(command, str):
@@ -168,7 +170,9 @@ def dev(port: Optional[int] = None):
         "app.main:app",
         host="0.0.0.0",
         port=port,
-        reload=True
+        reload=True,
+        log_level="debug",
+        access_log=False
     )
 
 def serve(port: Optional[int] = None):
@@ -246,8 +250,14 @@ def test():
     """
     Запуск тестов.
     """
+    env = os.environ.copy()
+    env["ENV_FILE"] = ".env.test"
     try:
-        subprocess.run(["pytest", "tests/", "-v"], check=True)
+        subprocess.run(
+            ["pytest", "tests/", "-v"],
+            env=env,
+            check=True
+        )
     except subprocess.CalledProcessError:
         pass
 
