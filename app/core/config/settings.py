@@ -72,15 +72,9 @@ class Settings(BaseSettings):
         description="Имя бакета AWS"
     )
 
-    aws_access_key_id: str | None = Field(
-        default=None,
-        description="Ключ доступа AWS"
-    )
+    aws_access_key_id: str
 
-    aws_secret_access_key: str | None = Field(
-        default=None,
-        description="Секретный ключ AWS"
-    )
+    aws_secret_access_key: str
 
     docs_access: bool = Field(
         default=True, description="Разрешение доступа к документации API"
