@@ -34,7 +34,7 @@ class S3Session:
 
         """
         self.region_name = settings.aws_region
-        self.endpoint_url = "https://" + settings.aws_endpoint
+        self.endpoint_url = settings.aws_endpoint
         self.access_key_id = settings.aws_access_key_id
         self.secret_access_key = settings.aws_secret_access_key
         self.logger = logging.getLogger("S3SessionLogger")
@@ -46,6 +46,9 @@ class S3Session:
         Returns:
             dict: Словарь с параметрами для клиента S3.
         """
+        if not self.endpoint_url.startswith(("http://", "https://")):
+            self.endpoint_url = f"https://{self.endpoint_url}"
+            
         params = {
             "region_name": self.region_name,
             "endpoint_url": self.endpoint_url,
