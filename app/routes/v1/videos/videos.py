@@ -15,11 +15,17 @@ def setup_routes(router: APIRouter):
     async def create_video_lecture(
         title: str = Form(...),
         description: str = Form(...),
-        file: UploadFile = File(
+        video_file: UploadFile = File(
             ...,
             description="Видео лекции",
             content_type=["video/mov", "video/quicktime", "video/mp4", "video/webm", "video/avi"],
             max_size=500_000_000,  # 500MB
+        ),
+        thumbnail_file: UploadFile = File(
+            ...,
+            description="Обложка видео лекции",
+            content_type=["image/jpeg", "image/png", "image/gif"],
+            max_size=10_000_000,  # 10MB
         ),
         _current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
@@ -31,7 +37,8 @@ def setup_routes(router: APIRouter):
         **Args**:
             title (str): Заголовок видео лекции.
             description (str): Описание видео лекции.
-            file (UploadFile): Файл видео лекции.
+            video_file (UploadFile): Файл видео лекции.
+            thumbnail_file (UploadFile): Файл обложки видео лекции.
             _current_user (UserCredentialsSchema): Данные текущего пользователя.
             db_session (AsyncSession): Сессия базы данных.
             s3_session (S3Session): Сессия S3.
@@ -41,8 +48,9 @@ def setup_routes(router: APIRouter):
         """
         logger.debug("🎥 Начало обработки запроса на добавление видео лекции")
         logger.debug("📝 Параметры запроса: title='%s', description='%s'", title, description)
-        logger.debug("📁 Файл: filename='%s', content_type='%s', size=%d bytes",
-                file.filename, file.content_type, file.size)
+        logger.debug("📁 Видео файл лекции: filename='%s', content_type='%s', size=%d bytes",
+                video_file.filename, video_file.content_type, video_file.size)
+        logger.debug("📷 Обложка: filename='%s', content_type='%s', size=%d bytes")
         logger.debug("👤 Пользователь: id=%d, email='%s'",
                 _current_user.id, _current_user.email)
 
@@ -52,7 +60,8 @@ def setup_routes(router: APIRouter):
                 VideoLectureCreateSchema(
                     title=title,
                     description=description,
-                    video_file=file,
+                    video_file=video_file,
+                    thumbnail_file=thumbnail_file,
                 ),
                 author_id=_current_user.id
             )

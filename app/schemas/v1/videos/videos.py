@@ -43,7 +43,9 @@ class VideoLectureSchema(CommonBaseSchema):
     author_id: int = Field(
         description="ID автора видео лекции"
     )
-
+    thumbnail_url: str = Field(
+        description="Ссылка на миниатюру видео"
+    )
 class VideoLectureCreateSchema(BaseInputSchema):
     """
     Схема для создания видео лекции.
@@ -65,6 +67,7 @@ class VideoLectureCreateSchema(BaseInputSchema):
         description="Описание видео лекции"
     )
     video_file: UploadFile
+    thumbnail_file: UploadFile
 
 class VideoLectureResponseSchema(BaseInputSchema):
     """
@@ -78,4 +81,5 @@ class VideoLectureResponseSchema(BaseInputSchema):
 
     user_id: int
     video_url: str
+    thumbnail_url: str
     message: str = "Видео успешно добавлено"

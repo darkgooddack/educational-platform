@@ -6,7 +6,7 @@ from app.models.v1 import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.v1.users import UserModel
-    
+
 class VideoLectureModel(BaseModel):
     """
     Модель для представления видео лекций.
@@ -19,6 +19,7 @@ class VideoLectureModel(BaseModel):
         video_url (str): Ссылка на видео.
         duration (int): Длительность видео в секундах.
         author_id (int): ID автора видео лекции (внешний ключ).
+        thumbnail_url (str): URL-адрес миниатюры видео.
 
     Relationships:
         author (UserModel): Связь с автором видео лекции.
@@ -33,6 +34,6 @@ class VideoLectureModel(BaseModel):
     video_url: Mapped[str] = mapped_column(nullable=False)
     duration: Mapped[int] = mapped_column(nullable=False)  # Длительность в секундах
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-
+    thumbnail_url: Mapped[str] = mapped_column(nullable=True)
     # Связь с автором (пользователем)
     author: Mapped["UserModel"] = relationship("UserModel", back_populates="video_lectures", lazy="joined")

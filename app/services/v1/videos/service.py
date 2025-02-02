@@ -51,6 +51,11 @@ class VideoLectureService(BaseService):
             file_key="videos_lectures"
         )
 
+        thumbnail_url = await self._s3_manager.upload_file_from_content(
+            file=video_lecture.thumbnail_file,
+            file_key="thumbnails"
+        )
+
         new_video_lecture = VideoLectureSchema(
             title=video_lecture.title,
             description=video_lecture.description,
@@ -58,12 +63,14 @@ class VideoLectureService(BaseService):
             theme="default_theme",
             views=0,
             duration=0,
-            author_id=author_id
+            author_id=author_id,
+            thumbnail_url=thumbnail_url
         )
         await self._data_manager.add_item(new_video_lecture)
         return VideoLectureResponseSchema(
             user_id=author_id,
             video_url=video_url,
+            thumbnail_url=thumbnail_url,
             message="Видео успешно добавлено"
         )
 
