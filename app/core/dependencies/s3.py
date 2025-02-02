@@ -34,7 +34,7 @@ class S3Session:
 
         """
         self.region_name = settings.aws_region
-        self.endpoint_url = "https://"+settings.aws_endpoint
+        self.endpoint_url = settings.aws_endpoint
         self.access_key_id = settings.aws_access_key_id
         self.secret_access_key = settings.aws_secret_access_key
         self.logger = logging.getLogger("S3SessionLogger")
@@ -46,8 +46,6 @@ class S3Session:
         Returns:
             dict: Словарь с параметрами для клиента S3.
         """
-        
-            
         params = {
             "region_name": self.region_name,
             "endpoint_url": self.endpoint_url,
@@ -74,11 +72,14 @@ class S3Session:
             self.endpoint_url,
             self.access_key_id[:4] + '***'
         )
-
+        s3_config = Config(
+            s3={'addressing_style': 'virtual'}
+        )
         try:
             session = Session()
             async with session.client(
                 service_name="s3",
+                config=s3_config,
                 region_name=self.region_name,
                 endpoint_url=self.endpoint_url,
                 aws_access_key_id=self.access_key_id,
