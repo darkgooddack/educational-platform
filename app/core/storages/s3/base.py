@@ -186,7 +186,7 @@ class S3DataManager(SessionMixin):
             self.logger.debug("Вызов put_object с параметрами: bucket=%s, key=%s", bucket_name, file_key)
 
             async with self.session as s3:
-                await s3.put_object(
+                response = await s3.put_object(
                     Bucket=bucket_name,
                     Key=file_key,
                     Body=file_content,
@@ -194,10 +194,11 @@ class S3DataManager(SessionMixin):
                     ACL='public-read',
                     CacheControl='max-age=31536000',
                 )
+                self.logger.debug("Ответ S3(put_object): %s", response)
             return self.get_link_file(file_key, bucket_name)
         except ClientError as e:
             self.logger.error(
-                "PUT_OBJECT: Ошибка загрузки файла %s: %s\nДетали: %s",
+                "Ошибка загрузки файла %s: %s\nДетали: %s",
                 file.filename,
                 e,
                 e.response['Error'] if hasattr(e, 'response') else 'Нет деталей'
