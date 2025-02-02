@@ -44,13 +44,14 @@ def setup_routes(router: APIRouter):
             s3_session (S3Session): Сессия S3.
 
         **Returns**:
-            VideoLectureResponseSchema: Созданный отзыв.
+            VideoLectureResponseSchema: Данные созданной видео лекции.
         """
         logger.debug("🎥 Начало обработки запроса на добавление видео лекции")
         logger.debug("📝 Параметры запроса: title='%s', description='%s'", title, description)
         logger.debug("📁 Видео файл лекции: filename='%s', content_type='%s', size=%d bytes",
                 video_file.filename, video_file.content_type, video_file.size)
-        logger.debug("📷 Обложка: filename='%s', content_type='%s', size=%d bytes")
+        logger.debug("📷 Обложка: filename='%s', content_type='%s', size=%d bytes",
+                thumbnail_file.filename, thumbnail_file.content_type, thumbnail_file.size)
         logger.debug("👤 Пользователь: id=%d, email='%s'",
                 _current_user.id, _current_user.email)
 

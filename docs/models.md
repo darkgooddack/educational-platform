@@ -33,6 +33,7 @@ erDiagram
         str theme
         int views
         str video_url
+        str thumbnail_url
         int duration
         int author_id
     }
@@ -61,11 +62,11 @@ erDiagram
 - `views`: Количество просмотров. По умолчанию 0.
 - `video_url`: Ссылка на видео. Обязательное поле.
 - `duration`: Длительность видео в секундах. Обязательное поле.
-- `author_id`: Внешний ключ, ссылающийся на таблицу пользователей (users.id). 
+- `author_id`: Внешний ключ, ссылающийся на таблицу пользователей (users.id).
 Обязательное поле.
 - `author`: Отношение к модели UserModel для доступа к данным автора.
 
-## Пример использования: 
+## Пример использования:
 1. Создание видео лекции:
 ```python
 new_lecture = VideoLectureModel(

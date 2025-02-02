@@ -3,7 +3,7 @@
 
 Содержит настройки FastAPI приложения, логирования и параметры запуска сервера.
 """
-
+import os
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -56,13 +56,15 @@ class PathConfig:
         ENV_PATH (Path): Полный путь к .env файлу
         APP_PATH (Path): Полный путь к директории приложения
     """
+    def __init__(self):
+        self.ENV_FILE = Path(".env")
+        self.APP_DIR = Path("app")
+        self.ENV_PATH = os.getenv("ENV_FILE", self.ENV_FILE)
 
-    ENV_FILE = Path(".env")
-    APP_DIR = Path("app")
 
-    BASE_PATH = Path(__file__).resolve().parents[2]  #! проверить
-    ENV_PATH = BASE_PATH / ENV_FILE
-    APP_PATH = BASE_PATH / APP_DIR
+    # BASE_PATH = Path(__file__).resolve().parents[2]  #! проверить
+    # ENV_PATH = BASE_PATH / ENV_FILE
+    # APP_PATH = BASE_PATH / APP_DIR
 
 
 class LogConfig:
@@ -81,7 +83,7 @@ class LogConfig:
     """
 
     LEVEL = "DEBUG"
-    FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    FORMAT = '\033[1;36m%(asctime)s\033[0m - \033[1;32m%(name)s\033[0m - \033[1;34m%(levelname)s\033[0m - %(message)s'
     FILE = "app.log"
     MAX_BYTES = 10485760  # 10MB
     BACKUP_COUNT = 5
@@ -207,4 +209,5 @@ class AppConfig:
             "host": self.HOST,
             "port": self.PORT,
             "proxy_headers": True,
+            "log_level": "debug",
         }

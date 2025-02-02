@@ -17,12 +17,12 @@ Example:
     >>> config.PORT
     8001
 """
-
+import logging
 from functools import lru_cache
 
 from .app import AppConfig
 from .settings import Settings
-import logging
+
 logger = logging.getLogger(__name__)
 
 class Config(Settings, AppConfig):

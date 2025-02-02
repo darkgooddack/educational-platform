@@ -12,7 +12,7 @@ from fastapi import UploadFile
 
 from botocore.exceptions import ClientError
 from app.core.config import config
-from app.core.dependencies.s3 import S3Session
+from app.core.dependencies.s3 import S3Session, SessionContextManager
 
 
 class SessionMixin:
@@ -44,7 +44,7 @@ class S3DataManager(SessionMixin):
 
     """
 
-    def __init__(self, session: S3Session | None):
+    def __init__(self, session: SessionContextManager | None):
         if session is None:
             self.endpoint = None
             self.bucket_name = None

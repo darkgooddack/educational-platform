@@ -106,7 +106,7 @@ class SessionContextManager:
         Инициализирует экземпляр SessionContextManager.
         """
         self.s3_session = S3Session()
-        self.session = None
+        self._client = None
         self.logger = logging.getLogger("SessionContextManagerLogger")
 
     async def __aenter__(self):
@@ -116,8 +116,8 @@ class SessionContextManager:
         Returns:
             SessionContextManager: Экземпляр SessionContextManager с активной сессией S3.
         """
-        self.session = await self.s3_session.create_async_session_factory()
-        return self
+        self._client = await self.s3_session.create_async_session_factory()
+        return self._client
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """
@@ -136,8 +136,8 @@ class SessionContextManager:
 
         Обнуляет ссылку на сессию, чтобы освободить ресурсы.
         """
-        if self.session:
-            self.session = None
+        if self._client:
+            self._client = None
 
 
 async def get_s3_session() -> AsyncGenerator[Any, None]:
@@ -151,8 +151,8 @@ async def get_s3_session() -> AsyncGenerator[Any, None]:
         Exception: Если возникла ошибка при получении сессии.
     """
     try:
-        async with SessionContextManager() as session_manager:
-            yield session_manager.session
+        async with SessionContextManager() as client:
+            yield client
     except Exception as e:
         SessionContextManager().logger.error(
             "Ошибка при получении сессии S3: %s", e

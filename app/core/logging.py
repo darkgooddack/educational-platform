@@ -47,5 +47,8 @@ def setup_logging():
     oauth_logger.addHandler(file_handler)
 
     # Филильтрация логов
-    logging.getLogger("aio_pika.robust_connection").setLevel(logging.INFO)
-    logging.getLogger("aiormq.connection").setLevel(logging.INFO)
+    logging.getLogger("python_multipart").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+    logging.getLogger("passlib").setLevel(logging.WARNING)
+    logging.getLogger("aio_pika").setLevel(logging.WARNING)
+    logging.getLogger("aiormq").setLevel(logging.WARNING)

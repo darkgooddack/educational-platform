@@ -62,10 +62,7 @@ class Settings(BaseSettings):
         description="Регион AWS"
     )
 
-    aws_endpoint: str = Field(
-        default="https://storage.yandexcloud.net",
-        description="Эндпоинт AWS"
-    )
+    aws_endpoint: str
 
     aws_bucket_name: str = Field(
         default="education-platform",
@@ -167,6 +164,19 @@ class Settings(BaseSettings):
             "exchange": AppConfig.rabbitmq_exchange,
         }
 
+    @property
+    def s3_config_info(self) -> Dict[str, Any]:
+        """
+        Формирует информацию о конфигурации S3.
+        """
+        return {
+            "aws_service_name": self.aws_service_name,
+            "aws_region": self.aws_region,
+            "aws_endpoint": self.aws_endpoint,
+            "aws_bucket_name": self.aws_bucket_name,
+            "aws_access_key_id": self.aws_access_key_id,
+            "aws_secret_access_key": self.aws_secret_access_key,
+        }
     @property
     def cors_params(self) -> Dict[str, Any]:
         """

@@ -58,6 +58,15 @@ infra-restart = "scripts.commands:infra_restart"
 [tool.setuptools]
 packages = ["app", "scripts"]
 
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::pydantic.PydanticDeprecatedSince20"
+]
+markers = [
+    "integration: marks tests as integration tests"
+]
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"

@@ -1,3 +1,4 @@
+import os
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -169,7 +170,9 @@ def dev(port: Optional[int] = None):
         "app.main:app",
         host="0.0.0.0",
         port=port,
-        reload=True
+        reload=True,
+        log_level="debug",
+        access_log=False
     )
 
 def serve(port: Optional[int] = None):
@@ -247,8 +250,14 @@ def test():
     """
     Запуск тестов.
     """
+    env = os.environ.copy()
+    env["ENV_FILE"] = ".env.test"
     try:
-        subprocess.run(["pytest", "tests/", "-v"], check=True)
+        subprocess.run(
+            ["pytest", "tests/", "-v"],
+            env=env,
+            check=True
+        )
     except subprocess.CalledProcessError:
         pass
 
