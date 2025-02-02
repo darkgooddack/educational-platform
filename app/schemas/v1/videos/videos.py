@@ -1,9 +1,9 @@
 from fastapi import UploadFile
 from pydantic import Field
-from ..base import CommonBaseSchema, BaseInputSchema
+from ..base import BaseSchema, CommonBaseSchema, BaseInputSchema
 
 
-class VideoLectureSchema(CommonBaseSchema):
+class VideoLectureSchema(BaseSchema):
     """
     Схема для представления видео лекции.
 
