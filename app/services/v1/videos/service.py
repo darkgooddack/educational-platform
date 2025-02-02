@@ -48,12 +48,12 @@ class VideoLectureService(BaseService):
         """
         video_url = await self._s3_manager.upload_file_from_content(
             file=video_lecture.video_file,
-            file_key="videos_lectures"
+            file_key="videos_lectures/videos"
         )
 
         thumbnail_url = await self._s3_manager.upload_file_from_content(
             file=video_lecture.thumbnail_file,
-            file_key="thumbnails"
+            file_key="videos_lectures/thumbnails"
         )
 
         new_video_lecture = VideoLectureSchema(
