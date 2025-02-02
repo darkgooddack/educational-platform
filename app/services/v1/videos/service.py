@@ -1,9 +1,11 @@
+import asyncio
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies.s3 import S3Session
 from app.core.storages.s3.base import S3DataManager
 from app.services import BaseService
 from app.schemas import  VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema, PaginationParams
+from app.models import VideoLectureModel
 from .data_manager import VideoLectureDataManager
 
 class VideoLectureService(BaseService):
@@ -46,17 +48,19 @@ class VideoLectureService(BaseService):
         Returns:
             VideoLectureResponseSchema: Добавленная видеолекция с полученным URL-адресом файла.
         """
-        video_url = await self._s3_manager.upload_file_from_content(
+        video_upload = await self._s3_manager.upload_file_from_content(
             file=video_lecture.video_file,
             file_key="videos_lectures/videos"
         )
 
-        thumbnail_url = await self._s3_manager.upload_file_from_content(
+        thumbnail_upload = await self._s3_manager.upload_file_from_content(
             file=video_lecture.thumbnail_file,
             file_key="videos_lectures/thumbnails"
         )
 
-        new_video_lecture = VideoLectureSchema(
+        video_url, thumbnail_url = await asyncio.gather(video_upload, thumbnail_upload)
+
+        new_video_lecture = VideoLectureModel(
             title=video_lecture.title,
             description=video_lecture.description,
             video_url=video_url,
