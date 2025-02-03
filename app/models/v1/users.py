@@ -21,7 +21,10 @@ from app.models import BaseModel
 from app.models.v1.feedbacks import FeedbackModel
 from app.models.v1.videos import VideoLectureModel
 from app.models.v1.tests import TestModel
+from app.models.v1.lectures import LectureModel
+from app.models.v1.posts import PostModel
 from app.schemas import UserRole
+
 
 
 class UserModel(BaseModel):
@@ -48,6 +51,8 @@ class UserModel(BaseModel):
         feedbacks (list[FeedbackModel]): Список обратных связей пользователя (для менеджеров UserRole.MANAGER)
         video_lectures (list[VideoLectureModel]): Список видео лекций, созданных пользователем.
         tests (list[TestModel]): Список тестов, созданных пользователем.
+        lectures (list[LectureModel]): Список лекций, созданных пользователем.
+        posts (list[PostModel]): Список постов, созданных пользователем.
     """
 
     __tablename__ = "users"
@@ -74,3 +79,5 @@ class UserModel(BaseModel):
         "VideoLectureModel", back_populates="author", lazy="dynamic"
     )
     tests: Mapped[list["TestModel"]] = relationship("TestModel", back_populates="author", lazy="dynamic")
+    lectures: Mapped[list["LectureModel"]] = relationship("LectureModel", back_populates="author")
+    posts: Mapped[list["PostModel"]] = relationship("PostModel", back_populates="author")

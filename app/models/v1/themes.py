@@ -7,6 +7,8 @@ from app.models.v1 import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.models.v1.users import UserModel
     from app.models.v1.videos import VideoLectureModel
+    from app.models.v1.tests import TestModel
+    from app.models.v1.lectures import LectureModel
 
 class ThemeModel(BaseModel):
     """
@@ -20,6 +22,7 @@ class ThemeModel(BaseModel):
     Relationships:
         video_lectures (list[VideoLectureModel]): Связь с видео лекциями, относящимися к теме.
         tests (list[TestModel]): Связь с тестами, относящимися к теме.
+        lectures (list[LectureModel]): Связь с лекциями, относящимися к теме.
     """
 
     __tablename__ = "themes"
@@ -30,3 +33,5 @@ class ThemeModel(BaseModel):
     
     video_lectures: Mapped[list["VideoLectureModel"]] = relationship("VideoLectureModel", back_populates="theme", lazy="dynamic")
     tests: Mapped[list["TestModel"]] = relationship("TestModel", back_populates="theme", lazy="dynamic")
+    lectures: Mapped[list["LectureModel"]] = relationship("LectureModel", back_populates="theme", lazy="dynamic")
+

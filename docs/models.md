@@ -4,14 +4,24 @@ erDiagram
     UserModel ||--o{ FeedbackModel : manages
     UserModel ||--o{ VideoLectureModel : creates
     UserModel ||--o{ TestModel : creates
+    UserModel ||--o{ LectureModel : creates
+    UserModel ||--o{ PostModel : creates
 
     ThemeModel ||--o{ VideoLectureModel : contains
     ThemeModel ||--o{ TestModel : contains
+    ThemeModel ||--o{ LectureModel : contains
     ThemeModel ||--o{ ThemeModel : has_parent
 
     VideoLectureModel ||--o{ TestModel : has
     TestModel ||--o{ QuestionModel : contains
     QuestionModel ||--o{ AnswerModel : has
+
+    LectureModel ||--o{ LectureContentBlockModel : contains
+    LectureModel ||--o{ TestModel : has
+
+    PostModel ||--o{ PostContentBlockModel : contains
+    PostModel ||--o{ PostTagModel : has
+    TagModel ||--o{ PostTagModel : has
 
     UserModel {
         int id
@@ -29,6 +39,52 @@ erDiagram
         int vk_id
         str google_id
         int yandex_id
+    }
+
+    LectureModel {
+        int id
+        str title
+        str description
+        int theme_id
+        int author_id
+        int views
+    }
+
+    LectureContentBlockModel {
+        int id
+        int lecture_id
+        ContentType type
+        str content
+        int order
+        str caption
+    }
+
+    PostModel {
+        int id
+        str title
+        str description
+        int author_id
+        PostStatus status
+        int views
+    }
+
+    PostContentBlockModel {
+        int id
+        int post_id
+        ContentType type
+        str content
+        int order
+        str caption
+    }
+
+    TagModel {
+        int id
+        str name
+    }
+
+    PostTagModel {
+        int post_id PK,FK
+        int tag_id PK,FK
     }
 
     FeedbackModel {
@@ -89,20 +145,38 @@ erDiagram
     UserRole ||--o{ UserModel : has_role
     FeedbackStatus ||--o{ FeedbackModel : has_status
     QuestionType ||--o{ QuestionModel : has_type
+    PostStatus ||--o{ PostModel : has_status
+    ContentType ||--o{ LectureContentBlockModel : has_type
+    ContentType ||--o{ PostContentBlockModel : has_type
+
     UserRole {
         str ADMIN
         str MODERATOR
         str USER
         str MANAGER
     }
+
     FeedbackStatus {
         str PENDING
         str PROCESSED
         str DELETED
     }
+
     QuestionType {
         str SINGLE
         str MULTIPLE
     }
 
+    PostStatus {
+        str DRAFT
+        str PUBLISHED
+        str ARCHIVED
+    }
+
+    ContentType {
+        str TEXT
+        str IMAGE
+        str VIDEO
+        str CODE
+    }
 ```

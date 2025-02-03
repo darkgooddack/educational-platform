@@ -18,11 +18,13 @@ from .v1.oauth.oauth import (GoogleUserData, OAuthConfig, OAuthParams,
                              OAuthUserSchema, VKOAuthParams, VKUserData,
                              YandexUserData)
 from .v1.pagination import Page, PaginationParams
+from .v1.content import ContentType
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
                              UserUpdateSchema)
 from .v1.videos.videos import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema
-
+from .v1.tests.tests import QuestionType
+from .v1.posts.posts import PostStatus
 __all__ = [
     "BaseSchema",
     "BaseInputSchema",
@@ -62,5 +64,8 @@ __all__ = [
     "FeedbackResponse",
     "VideoLectureSchema",
     "VideoLectureCreateSchema",
-    "VideoLectureResponseSchema"
+    "VideoLectureResponseSchema",
+    "ContentType",
+    "PostStatus",
+    "QuestionType"
 ]

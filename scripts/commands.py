@@ -115,7 +115,7 @@ def check_postgres():
 def start_infrastructure(port: Optional[int] = 8000):
     """Запускает только Redis и RabbitMQ"""
     print("🚀 Запускаем инфраструктуру...")
-    run_compose_command(["up", "-d", "redis", "rabbitmq", "postgres"], COMPOSE_FILE_WITHOUT_BACKEND)
+    run_compose_command(["up", "-d"], COMPOSE_FILE_WITHOUT_BACKEND)
 
     # Ждем доступности сервисов
     if not check_redis():
@@ -138,8 +138,10 @@ def start_infrastructure(port: Optional[int] = 8000):
     print("\n🔗 Доступные адреса:")
     print(f"📊 FastAPI Swagger:    http://localhost:{port}/docs")
     print(f"🐰 RabbitMQ UI:       http://localhost:15672")
-    print(f"🗄️ PostgreSQL:        localhost:5434")
-    print(f"📦 Redis:             localhost:6380\n")
+    print(f"🗄️ PostgreSQL:        localhost:5432")
+    print(f"📦 Redis:             localhost:6379")
+    print(f"🔍 PgAdmin:           http://localhost:5050")
+    print(f"📊 Redis Commander:    http://localhost:8081\n")
 
     print("✅ Инфраструктура готова!")
     return True
