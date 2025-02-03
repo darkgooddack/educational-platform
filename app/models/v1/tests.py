@@ -43,7 +43,8 @@ class TestModel(BaseModel):
     theme_id: Mapped[int] = mapped_column(ForeignKey("themes.id"), nullable=False)
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     video_lecture_id: Mapped[int] = mapped_column(ForeignKey("video_lectures.id"), nullable=True)
-    
+    lecture_id: Mapped[int] = mapped_column(ForeignKey("lectures.id"), nullable=True)
+    lecture: Mapped["LectureModel"] = relationship("LectureModel", back_populates="tests", lazy="joined")
     questions: Mapped[list["QuestionModel"]] = relationship("QuestionModel", back_populates="test", cascade="all, delete-orphan")
     theme: Mapped["ThemeModel"] = relationship("ThemeModel", back_populates="tests", lazy="joined")
     author: Mapped["UserModel"] = relationship("UserModel", back_populates="tests", lazy="joined")

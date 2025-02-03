@@ -18,6 +18,7 @@ from .v1.oauth.oauth import (GoogleUserData, OAuthConfig, OAuthParams,
                              OAuthUserSchema, VKOAuthParams, VKUserData,
                              YandexUserData)
 from .v1.pagination import Page, PaginationParams
+from .v1.content import ContentType
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
                              UserUpdateSchema)
@@ -62,5 +63,6 @@ __all__ = [
     "FeedbackResponse",
     "VideoLectureSchema",
     "VideoLectureCreateSchema",
-    "VideoLectureResponseSchema"
+    "VideoLectureResponseSchema",
+    "ContentType"
 ]
