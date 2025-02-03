@@ -20,7 +20,8 @@ erDiagram
     LectureModel ||--o{ TestModel : has
 
     PostModel ||--o{ PostContentBlockModel : contains
-    PostModel }o--o{ TagModel : has
+    PostModel ||--o{ PostTagModel : has
+    TagModel ||--o{ PostTagModel : has
 
     UserModel {
         int id
@@ -79,6 +80,11 @@ erDiagram
     TagModel {
         int id
         str name
+    }
+
+    PostTagModel {
+        int post_id PK,FK
+        int tag_id PK,FK
     }
 
     FeedbackModel {

@@ -1,17 +1,15 @@
-from enum import Enum
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.v1.base import BaseModel
 from app.models.v1 import TYPE_CHECKING
-
+from app.schemas import QuestionType
 if TYPE_CHECKING:
     from app.models.v1.users import UserModel
     from app.models.v1.videos import VideoLectureModel
     from app.models.v1.themes import ThemeModel
 
-class QuestionType(str, Enum):
-    SINGLE = "single"  # один правильный ответ
-    MULTIPLE = "multiple"  # несколько правильных ответов
+
 
 class TestModel(BaseModel):
     """
@@ -59,7 +57,7 @@ class QuestionModel(BaseModel):
         text (str): Текст вопроса
         type (QuestionType): Тип вопроса (один правильный ответ или несколько правильных ответов)
         points (int): Количество баллов за правильный ответ
-    
+
     Relationships:
         test (TestModel): Связь с тестом, к которому относится вопрос
         answers (list[AnswerModel]): Связь с вариантами ответов на вопрос
@@ -70,7 +68,7 @@ class QuestionModel(BaseModel):
     text: Mapped[str] = mapped_column(nullable=False)
     type: Mapped[QuestionType] = mapped_column(nullable=False)
     points: Mapped[int] = mapped_column(default=1, nullable=False)
-    
+
     test: Mapped["TestModel"] = relationship("TestModel", back_populates="questions")
     answers: Mapped[list["AnswerModel"]] = relationship("AnswerModel", back_populates="question", cascade="all, delete-orphan")
 
@@ -82,7 +80,7 @@ class AnswerModel(BaseModel):
         question_id (int): ID вопроса, к которому относится ответ
         text (str): Текст ответа
         is_correct (bool): Флаг, указывающий, является ли ответ правильным
-    
+
     Relationships:
         question (QuestionModel): Связь с вопросом, к которому относится ответ
     """
@@ -91,5 +89,5 @@ class AnswerModel(BaseModel):
     question_id: Mapped[int] = mapped_column(ForeignKey("questions.id"), nullable=False)
     text: Mapped[str] = mapped_column(nullable=False)
     is_correct: Mapped[bool] = mapped_column(default=False, nullable=False)
-    
+
     question: Mapped["QuestionModel"] = relationship("QuestionModel", back_populates="answers")

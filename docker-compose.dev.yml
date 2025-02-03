@@ -34,6 +34,44 @@ services:
     networks:
       - dev-network
 
+  pgadmin:
+    image: dpage/pgadmin4:8.12.0
+    env_file:
+      - ./.env.dev
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dev-network
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    env_file:
+      - ./.env.dev
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 512M
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - dev-network
+
   redis:
     image: redis:latest
     healthcheck:
@@ -50,3 +88,6 @@ services:
 networks:
   dev-network:
     driver: bridge
+
+volumes:
+  pgadmin-data:
