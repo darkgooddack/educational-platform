@@ -23,7 +23,7 @@ from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
                              UserUpdateSchema)
 from .v1.videos.videos import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema
-
+from .v1.posts.posts import PostStatus
 __all__ = [
     "BaseSchema",
     "BaseInputSchema",
@@ -64,5 +64,6 @@ __all__ = [
     "VideoLectureSchema",
     "VideoLectureCreateSchema",
     "VideoLectureResponseSchema",
-    "ContentType"
+    "ContentType",
+    "PostStatus"
 ]

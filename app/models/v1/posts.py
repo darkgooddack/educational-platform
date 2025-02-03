@@ -3,15 +3,10 @@ from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.v1.base import BaseModel
 from app.models.v1 import TYPE_CHECKING
-from app.schemas import ContentType
+from app.schemas import ContentType, PostStatus
 
 if TYPE_CHECKING:
     from app.models.v1.users import UserModel
-
-class PostStatus(str, Enum):
-    DRAFT = "draft"
-    PUBLISHED = "published"
-    ARCHIVED = "archived"
 
 class PostModel(BaseModel):
     """
