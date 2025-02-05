@@ -35,19 +35,24 @@ class VKOAuthProvider(BaseOAuthProvider):
             code=code,
             state=state
         )
-    
+
         if state:
             redis_key = f"vk_verifier_{state}"
             verifier = await self._redis_storage.get(redis_key)
             if verifier:
                 token_params.code_verifier = verifier
                 await self._redis_storage.delete(redis_key)
-    
-        return await self.http_client.get_token(
-            self.config.token_url, 
+
+        token_data = await self.http_client.get_token(
+            self.config.token_url,
             token_params.to_dict()
         )
-        # return await super().get_token(code, state)
+
+        return OAuthProviderResponse(
+            access_token=token_data.access_token,
+            token_type=token_data.token_type,
+            expires_in=token_data.expires_in
+        )
 
     async def _get_callback_url(self) -> str:
         """Стандартный callback URL"""
@@ -80,8 +85,8 @@ class VKOAuthProvider(BaseOAuthProvider):
 
         redis_key = f"vk_verifier_{state}"
         await self._redis_storage.set(
-            key=redis_key, 
-            value=code_verifier, 
+            key=redis_key,
+            value=code_verifier,
             expires=300
         )
 
@@ -92,8 +97,8 @@ class VKOAuthProvider(BaseOAuthProvider):
             state=state, # Используем то же значение state
             code_challenge=self._generate_code_challenge(code_verifier),
             code_challenge_method="S256",
-        )       
-        
+        )
+
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"
         return RedirectResponse(url=auth_url)
 
@@ -101,12 +106,12 @@ class VKOAuthProvider(BaseOAuthProvider):
         """Добавление code_verifier в параметры токена"""
         if not state:
             raise OAuthTokenError(self.provider, "Отсутствует параметр state")
-        
+
         redis_key = f"vk_verifier_{state}"
         verifier = await self._redis_storage.get(redis_key)
-        
+
         if not verifier:
-            raise OAuthTokenError(self.provider, "Неверный state или истек срок verifier") 
+            raise OAuthTokenError(self.provider, "Неверный state или истек срок verifier")
 
         token_params["code_verifier"] = verifier
         await self._redis_storage.delete(redis_key)

@@ -1,6 +1,8 @@
+from typing import Callable, Dict, TypeVar
 from app.core.exceptions import OAuthUserDataError
 from app.schemas import GoogleUserData, VKUserData, YandexUserData
 
+T = TypeVar('T', YandexUserData, GoogleUserData, VKUserData)
 
 async def get_yandex_user_info(user_data: dict) -> YandexUserData:
     """
@@ -72,7 +74,7 @@ async def get_vk_user_info(user_data: dict) -> VKUserData:
 
 
 # Маппинг провайдеров к функциям
-PROVIDER_HANDLERS = {
+PROVIDER_HANDLERS: Dict[str, Callable[[dict], T]] = {
     "yandex": get_yandex_user_info,
     "google": get_google_user_info,
     "vk": get_vk_user_info,
