@@ -25,8 +25,26 @@ class VKOAuthProvider(BaseOAuthProvider):
         super().__init__(provider=OAuthProvider.VK.value, session=session)
 
     async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
-        """Стандартное получение токена"""
-        return await super().get_token(code, state)
+        """
+        Получение токена
+        """
+        self.logger.debug(f"Получаем токен с кодом: {code}, state: {state}")
+    
+        token_params = {
+            "client_id": self.config.client_id,
+            "client_secret": self.config.client_secret,
+            "code": code,
+            "redirect_uri": str(await self._get_callback_url())
+        }
+    
+        if state:
+            await self._handle_state(state, token_params)
+    
+        return await self.http_client.get_token(
+            self.config.token_url, 
+            token_params
+        )
+        # return await super().get_token(code, state)
 
     async def _get_callback_url(self) -> str:
         """Стандартный callback URL"""
@@ -56,35 +74,36 @@ class VKOAuthProvider(BaseOAuthProvider):
         """URL авторизации с PKCE"""
         code_verifier = secrets.token_urlsafe(64)
         state = secrets.token_urlsafe()
-        self.logger.debug(f"state, был: {state}")
-        await self._redis_storage.set(f"vk_verifier_{state}", code_verifier)
 
-        verifier = await self._redis_storage.get(f"vk_verifier_{state}")
-        self.logger.debug(f"state, который был и сохранили: {verifier}")
+        redis_key = f"vk_verifier_{state}"
+        await self._redis_storage.set(
+            key=redis_key, 
+            value=code_verifier, 
+            expires=300
+        )
+
         params = VKOAuthParams(
             client_id=self.config.client_id,
             redirect_uri=await self._get_callback_url(),
             scope=self.config.scope,
-            # state=state,
+            state=state, # Используем то же значение state
             code_challenge=self._generate_code_challenge(code_verifier),
             code_challenge_method="S256",
-        )
-        
-        self.logger.debug(f"state, стал: {params.state}")
-        await self._redis_storage.set(f"vk_verifier_{params.state}", code_verifier)
-        verifier = await self._redis_storage.get(f"vk_verifier_{state}")
-        self.logger.debug(f"state, который стал и сохранили: {verifier}")
-        
+        )       
         
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"
         return RedirectResponse(url=auth_url)
 
     async def _handle_state(self, state: str, token_params: dict) -> None:
         """Добавление code_verifier в параметры токена"""
-        verifier = await self._redis_storage.get(f"vk_verifier_{state}")
-        self.logger.debug(f"verifier: {verifier}")
+        if not state:
+            raise OAuthTokenError(self.provider, "Отсутствует параметр state")
+        
+        redis_key = f"vk_verifier_{state}"
+        verifier = await self._redis_storage.get(redis_key)
+        
         if not verifier:
-            raise OAuthTokenError(self.provider, "Invalid state/verifier") 
+            raise OAuthTokenError(self.provider, "Неверный state или истек срок verifier") 
 
         token_params["code_verifier"] = verifier
-        await self._redis_storage.delete(f"vk_verifier_{state}")
+        await self._redis_storage.delete(redis_key)
