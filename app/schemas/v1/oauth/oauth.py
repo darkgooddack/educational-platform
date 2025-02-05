@@ -186,10 +186,10 @@ class VKOAuthTokenParams(OAuthTokenParams):
         redirect_uri: URL для callback
         grant_type: Тип запроса (authorization_code)
         code_verifier: Код подтверждения
-        device_id: ID устройства
+        device_id: ID устройства (для получения токена из callback)
         state: Состояние для CSRF защиты
     """
-    device_id: str | None = None
+    device_id: str
     state: str | None = None
     code_verifier: str | None = None
 

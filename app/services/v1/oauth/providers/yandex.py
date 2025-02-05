@@ -30,9 +30,9 @@ class YandexOAuthProvider(BaseOAuthProvider):
         """Стандартный URL авторизации"""
         return await super().get_auth_url()
 
-    async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
+    async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
         """Стандартное получение токена"""
-        return await super().get_token(code, state)
+        return await super().get_token(code, state, device_id)
 
     async def get_user_info(self, token: str) -> YandexUserData:
         """Стандартное получение данных пользователя"""

@@ -21,9 +21,9 @@ class GoogleOAuthProvider(BaseOAuthProvider):
     def __init__(self, session):
         super().__init__(provider=OAuthProvider.GOOGLE.value, session=session)
 
-    async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
+    async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
         """Стандартное получение токена"""
-        return await super().get_token(code, state)
+        return await super().get_token(code, state, device_id)
 
     async def _get_callback_url(self) -> str:
         """Стандартный callback URL"""

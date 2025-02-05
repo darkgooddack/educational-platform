@@ -24,7 +24,7 @@ class VKOAuthProvider(BaseOAuthProvider):
     def __init__(self, session):
         super().__init__(provider=OAuthProvider.VK.value, session=session)
 
-    async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
+    async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
         """
         Получение токена
         """
@@ -33,7 +33,8 @@ class VKOAuthProvider(BaseOAuthProvider):
             client_secret=self.config.client_secret,
             redirect_uri=str(await self._get_callback_url()),
             code=code,
-            state=state
+            state=state,
+            device_id=device_id,
         )
 
         if state:

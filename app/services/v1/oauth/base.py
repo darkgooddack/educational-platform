@@ -36,12 +36,12 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         # В роутерах:
         @router.get("/oauth/{provider}") # 1
         async def oauth_login(provider: OAuthProvider):
-            return await OAuthService(db_session).get_oauth_url(provider) 
+            return await OAuthService(db_session).get_oauth_url(provider)
 
         @router.get("/oauth/{provider}/callback") # 2, 3, 4, 5
         async def oauth_callback(provider: OAuthProvider, code: str):
             return await OAuthService(db_session).authenticate(provider, code)
-        
+
         # В сервисе:
         async def get_oauth_url(self, provider: OAuthProvider) -> str:
             oauth_provider = self.get_provider(provider)
@@ -323,7 +323,7 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         return RedirectResponse(url=auth_url)
 
     @abstractmethod
-    async def get_token(self, code: str, state: str = None) -> OAuthProviderResponse:
+    async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
         """
         Получение токена доступа от OAuth провайдера.
 
@@ -365,7 +365,7 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             await self._handle_state(state, token_params.model_dump())
 
         token_data = await self.http_client.get_token(
-            self.config.token_url, 
+            self.config.token_url,
             token_params.model_dump()
         )
 

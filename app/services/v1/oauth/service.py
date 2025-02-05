@@ -56,7 +56,13 @@ class OAuthService:
         oauth_provider = self.get_provider(provider)
         return await oauth_provider.get_auth_url()
 
-    async def authenticate(self, provider: OAuthProvider, code: str, state: str = None) -> OAuthResponse:
+    async def authenticate(
+        self,
+        provider: OAuthProvider,
+        code: str,
+        state: str = None,
+        device_id: str = None
+    ) -> OAuthResponse:
         """
         Аутентификация через OAuth
 
@@ -74,7 +80,7 @@ class OAuthService:
         """
         oauth_provider = self.get_provider(provider)
 
-        token = await oauth_provider.get_token(code, state)
+        token = await oauth_provider.get_token(code, state, device_id)
 
         user_data = await oauth_provider.get_user_info(token["access_token"])
 
