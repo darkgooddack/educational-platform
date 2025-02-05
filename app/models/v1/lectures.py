@@ -25,7 +25,7 @@ class LectureModel(BaseModel):
     Relationships:
         theme (ThemeModel): Связь с темой, к которой относится лекция.
         author (UserModel): Связь с автором лекции.
-        content_blocks (list[ContentBlockModel]): Связь с блоками контента лекции.
+        content_blocks (list[LectureContentBlockModel]): Связь с блоками контента лекции.
         tests (list[TestModel]): Связь с тестами, относящимися к лекции.
     """
     __tablename__ = "lectures"
@@ -37,10 +37,10 @@ class LectureModel(BaseModel):
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     views: Mapped[int] = mapped_column(default=0, nullable=False)
     
-    content_blocks: Mapped[list["ContentBlockModel"]] = relationship(
-        "ContentBlockModel", 
+    content_blocks: Mapped[list["LectureContentBlockModel"]] = relationship(
+        "LectureContentBlockModel", 
         back_populates="lecture", 
-        order_by="ContentBlockModel.order",
+        order_by="LectureContentBlockModel.order",
         cascade="all, delete-orphan"
     )
     author: Mapped["UserModel"] = relationship("UserModel", back_populates="lectures")
