@@ -366,7 +366,7 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
 
         token_data = await self.http_client.get_token(
             self.config.token_url, 
-            token_params#.model_dump()
+            token_params.model_dump()
         )
 
         if "error" in token_data:
