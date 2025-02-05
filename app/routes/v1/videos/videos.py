@@ -46,32 +46,19 @@ def setup_routes(router: APIRouter):
         **Returns**:
             VideoLectureResponseSchema: Данные созданной видео лекции.
         """
-        logger.debug("🎥 Начало обработки запроса на добавление видео лекции")
-        logger.debug("📝 Параметры запроса: title='%s', description='%s'", title, description)
-        logger.debug("📁 Видео файл лекции: filename='%s', content_type='%s', size=%d bytes",
-                video_file.filename, video_file.content_type, video_file.size)
-        logger.debug("📷 Обложка: filename='%s', content_type='%s', size=%d bytes",
-                thumbnail_file.filename, thumbnail_file.content_type, thumbnail_file.size)
-        logger.debug("👤 Пользователь: id=%d, email='%s'",
-                _current_user.id, _current_user.email)
-
-        try:
-            service = VideoLectureService(db_session, s3_session)
-            result = await service.add_video(
-                VideoLectureCreateSchema(
-                    title=title,
-                    description=description,
-                    video_file=video_file,
-                    thumbnail_file=thumbnail_file,
-                ),
-                author_id=_current_user.id
-            )
-            logger.debug("✅ Видео успешно загружено: %s", result)
-            return result
-
-        except Exception as e:
-            logger.error("❌ Ошибка при загрузке видео: %s", str(e))
-            raise
+        
+        service = VideoLectureService(db_session, s3_session)
+        result = await service.add_video(
+            VideoLectureCreateSchema(
+                title=title,
+                description=description,
+                video_file=video_file,
+                thumbnail_file=thumbnail_file,
+            ),
+            author_id=_current_user.id
+        )
+        
+        return result
 
     @router.get("/", response_model=Page[VideoLectureSchema])
     async def get_videos(
