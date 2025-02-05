@@ -158,7 +158,7 @@ class VKUserData(OAuthUserData):
     user_id: str | None = None
 
 
-class OAuthTokenParams(BaseModel):
+class OAuthTokenParams(CommonBaseSchema):
     """
     Класс для параметров OAuth авторизации (для получения токена)
 
@@ -175,6 +175,21 @@ class OAuthTokenParams(BaseModel):
     redirect_uri: str
     grant_type: str = "authorization_code"
 
+class VKOAuthTokenParams(OAuthTokenParams):
+    """
+    Параметры для получения токена VK OAuth
+    
+    Attributes:
+        client_id: ID приложения VK
+        client_secret: Секретный ключ приложения
+        code: Код авторизации
+        redirect_uri: URL для callback
+        grant_type: Тип запроса (authorization_code)
+        device_id: ID устройства
+        state: Состояние для CSRF защиты
+    """
+    device_id: str | None = None
+    state: str | None = None
 
 class OAuthProviderResponse(BaseInputSchema):
     """

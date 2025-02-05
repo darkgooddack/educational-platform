@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 
 from app.core.exceptions import OAuthTokenError, OAuthUserDataError
 from app.schemas import (OAuthProvider, OAuthProviderResponse, VKOAuthParams,
-                         VKUserData)
+                         VKUserData, VKOAuthTokenParams)
 from app.services.v1.oauth.base import BaseOAuthProvider
 
 
@@ -28,21 +28,24 @@ class VKOAuthProvider(BaseOAuthProvider):
         """
         Получение токена
         """
-        self.logger.debug(f"Получаем токен с кодом: {code}, state: {state}")
-    
-        token_params = {
-            "client_id": self.config.client_id,
-            "client_secret": self.config.client_secret,
-            "code": code,
-            "redirect_uri": str(await self._get_callback_url())
-        }
+        token_params = VKOAuthTokenParams(
+            client_id=self.config.client_id,
+            client_secret=self.config.client_secret,
+            redirect_uri=str(await self._get_callback_url()),
+            code=code,
+            state=state
+        )
     
         if state:
-            await self._handle_state(state, token_params)
+            redis_key = f"vk_verifier_{state}"
+            verifier = await self._redis_storage.get(redis_key)
+            if verifier:
+                token_params.code_verifier = verifier
+                await self._redis_storage.delete(redis_key)
     
         return await self.http_client.get_token(
             self.config.token_url, 
-            token_params
+            token_params.to_dict()
         )
         # return await super().get_token(code, state)
 

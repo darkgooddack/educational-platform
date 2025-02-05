@@ -16,7 +16,7 @@ from .v1.oauth.oauth import (GoogleUserData, OAuthConfig, OAuthParams,
                              OAuthProvider, OAuthProviderResponse,
                              OAuthResponse, OAuthTokenParams, OAuthUserData,
                              OAuthUserSchema, VKOAuthParams, VKUserData,
-                             YandexUserData)
+                             YandexUserData, VKOAuthTokenParams)
 from .v1.pagination import Page, PaginationParams
 from .v1.content import ContentType
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
@@ -72,5 +72,6 @@ __all__ = [
     "ThemeBase", 
     "ThemeCreateSchema", 
     "ThemeSchema", 
-    "ThemeListResponse"
+    "ThemeListResponse",
+    "VKOAuthTokenParams"
 ]
