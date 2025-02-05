@@ -49,9 +49,9 @@ class VKOAuthProvider(BaseOAuthProvider):
         )
 
         return OAuthProviderResponse(
-            access_token=token_data.access_token,
-            token_type=token_data.token_type,
-            expires_in=token_data.expires_in
+            access_token=token_data["access_token"],
+            token_type=token_data.get("token_type", "bearer"),
+            expires_in=token_data["expires_in"]
         )
 
     async def _get_callback_url(self) -> str:
