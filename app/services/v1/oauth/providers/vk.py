@@ -29,7 +29,7 @@ class VKOAuthProvider(BaseOAuthProvider):
         Получение токена
         """
         token_params = VKOAuthTokenParams(
-            client_id=self.config.client_id,
+            client_id=str(self.config.client_id),
             client_secret=self.config.client_secret,
             redirect_uri=str(await self._get_callback_url()),
             code=code,
