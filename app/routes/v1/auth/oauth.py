@@ -48,6 +48,7 @@ def setup_routes(router: APIRouter):
     async def oauth_callback(
         provider: str,
         code: str,
+        state: str = None,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> OAuthResponse:
         """
@@ -60,7 +61,7 @@ def setup_routes(router: APIRouter):
         **Returns**:
         - **OAuthResponse**: Токен доступа
         """
-        return await OAuthService(db_session).authenticate(provider, code)
+        return await OAuthService(db_session).authenticate(provider, code, state)
 
 
 __all__ = ["setup_routes"]
