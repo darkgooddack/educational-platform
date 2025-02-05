@@ -1,5 +1,6 @@
 import logging
-from fastapi import APIRouter, Depends, Form, UploadFile, File
+from typing import Optional
+from fastapi import APIRouter, Depends, Form, UploadFile, File, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session, get_current_user, get_s3_session
@@ -63,8 +64,8 @@ def setup_routes(router: APIRouter):
     @router.get("/", response_model=Page[VideoLectureSchema])
     async def get_videos(
         pagination: PaginationParams = Depends(),
-        theme: str = None,
-        search: str = None,
+        theme_id: Optional[int] = Query(None, description="Фильтр по тематике"),
+        search: str = Query(None, description="Поиск по названию и описанию"),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> Page[VideoLectureSchema]:
         """
@@ -72,7 +73,7 @@ def setup_routes(router: APIRouter):
 
         **Args**:
             - pagination (PaginationParams): Параметры пагинации.
-            - theme (str): Фильтр по тематике
+            - theme_id (int): Фильтр по тематике
             - search (str): Поиск по названию и описанию
             - db_session (AsyncSession): Сессия базы данных.
             - sort_by: Доступные значения (views, updated_at)
@@ -83,7 +84,7 @@ def setup_routes(router: APIRouter):
         service = VideoLectureService(db_session)
         videos, total = await service.get_videos(
             pagination=pagination,
-            theme=theme,
+            theme_id=theme_id,
             search=search,
         )
         return Page(

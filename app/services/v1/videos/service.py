@@ -83,7 +83,7 @@ class VideoLectureService(BaseService):
                 title=video_lecture.title,
                 description=video_lecture.description,
                 video_url=video_url,
-                theme="default_theme",
+                theme_id=video_lecture.theme_id,
                 views=0,
                 duration=0,
                 author_id=author_id,
@@ -109,7 +109,7 @@ class VideoLectureService(BaseService):
     async def get_videos(
         self,
         pagination: PaginationParams,
-        theme: str = None,
+        theme_id: int = None,
         search: str = None,
     ) -> tuple[List[VideoLectureSchema], int]:
         """
@@ -117,7 +117,7 @@ class VideoLectureService(BaseService):
 
         Args:
             pagination (PaginationParams): Параметры пагинации.
-            theme (str): Фильтр по тематике
+            theme_id (int): Фильтр по тематике
             search (str): Поиск по названию и описанию
             sort_by: Доступные значения (views, updated_at)
 
@@ -126,6 +126,6 @@ class VideoLectureService(BaseService):
         """
         return await self._data_manager.get_videos(
             pagination=pagination,
-            theme=theme,
+            theme_id=theme_id,
             search=search,
         )

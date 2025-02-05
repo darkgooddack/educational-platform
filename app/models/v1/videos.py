@@ -16,7 +16,7 @@ class VideoLectureModel(BaseModel):
     Attributes:
         title (str): Название видео лекции.
         description (str): Описание видео лекции.
-        theme (str): Тематика видео лекции.
+        theme_id (int): Тематика видео лекции.
         views (int): Количество просмотров.
         video_url (str): Ссылка на видео.
         duration (int): Длительность видео в секундах.
@@ -25,7 +25,7 @@ class VideoLectureModel(BaseModel):
 
     Relationships:
         author (UserModel): Связь с автором видео лекции.
-        theme (ThemeModel): Связь с темой видео лекции.
+        theme_id (ThemeModel): Связь с темой видео лекции.
         tests (list[TestModel]): Связь с тестами, относящимися к видео лекции.
     """
 

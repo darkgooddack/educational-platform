@@ -147,6 +147,7 @@ class AppConfig:
         "users": ServiceConfig("users", ["Users"]),
         "feedbacks": ServiceConfig("feedbacks", ["Feedbacks"]),
         "videos": ServiceConfig("videos", ["Video Lectures"]),
+        "themes": ServiceConfig("themes", ["Themes"])
     }
 
     PATHS = PathConfig()

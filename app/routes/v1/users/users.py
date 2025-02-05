@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
@@ -13,8 +13,8 @@ def setup_routes(router: APIRouter):
     @router.get("/", response_model=Page[UserSchema])
     async def get_users(
         pagination: PaginationParams = Depends(),
-        role: UserRole = None,
-        search: str = None,
+        role: UserRole = Query(None, description="Фильтрация по роли пользователя"),
+        search: str = Query(None, description="Поиск по данным пользователя"),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> Page[UserSchema]:
         """
