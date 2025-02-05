@@ -1,5 +1,6 @@
 import logging
-from fastapi import APIRouter, Depends, Form, UploadFile, File
+from typing import Optional
+from fastapi import APIRouter, Depends, Form, UploadFile, File, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session, get_current_user, get_s3_session
@@ -46,38 +47,25 @@ def setup_routes(router: APIRouter):
         **Returns**:
             VideoLectureResponseSchema: Данные созданной видео лекции.
         """
-        logger.debug("🎥 Начало обработки запроса на добавление видео лекции")
-        logger.debug("📝 Параметры запроса: title='%s', description='%s'", title, description)
-        logger.debug("📁 Видео файл лекции: filename='%s', content_type='%s', size=%d bytes",
-                video_file.filename, video_file.content_type, video_file.size)
-        logger.debug("📷 Обложка: filename='%s', content_type='%s', size=%d bytes",
-                thumbnail_file.filename, thumbnail_file.content_type, thumbnail_file.size)
-        logger.debug("👤 Пользователь: id=%d, email='%s'",
-                _current_user.id, _current_user.email)
-
-        try:
-            service = VideoLectureService(db_session, s3_session)
-            result = await service.add_video(
-                VideoLectureCreateSchema(
-                    title=title,
-                    description=description,
-                    video_file=video_file,
-                    thumbnail_file=thumbnail_file,
-                ),
-                author_id=_current_user.id
-            )
-            logger.debug("✅ Видео успешно загружено: %s", result)
-            return result
-
-        except Exception as e:
-            logger.error("❌ Ошибка при загрузке видео: %s", str(e))
-            raise
+        
+        service = VideoLectureService(db_session, s3_session)
+        result = await service.add_video(
+            VideoLectureCreateSchema(
+                title=title,
+                description=description,
+                video_file=video_file,
+                thumbnail_file=thumbnail_file,
+            ),
+            author_id=_current_user.id
+        )
+        
+        return result
 
     @router.get("/", response_model=Page[VideoLectureSchema])
     async def get_videos(
         pagination: PaginationParams = Depends(),
-        theme: str = None,
-        search: str = None,
+        theme_id: Optional[int] = Query(None, description="Фильтр по тематике"),
+        search: str = Query(None, description="Поиск по названию и описанию"),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> Page[VideoLectureSchema]:
         """
@@ -85,7 +73,7 @@ def setup_routes(router: APIRouter):
 
         **Args**:
             - pagination (PaginationParams): Параметры пагинации.
-            - theme (str): Фильтр по тематике
+            - theme_id (int): Фильтр по тематике
             - search (str): Поиск по названию и описанию
             - db_session (AsyncSession): Сессия базы данных.
             - sort_by: Доступные значения (views, updated_at)
@@ -96,7 +84,7 @@ def setup_routes(router: APIRouter):
         service = VideoLectureService(db_session)
         videos, total = await service.get_videos(
             pagination=pagination,
-            theme=theme,
+            theme_id=theme_id,
             search=search,
         )
         return Page(

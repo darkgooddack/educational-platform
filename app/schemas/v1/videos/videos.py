@@ -10,7 +10,7 @@ class VideoLectureSchema(BaseSchema):
     Attributes:
         title (str): Название видео лекции.
         description (str): Описание видео лекции.
-        theme (str): Тематика видео лекции.
+        theme_id (int): Тематика видео лекции.
         views (int): Количество просмотров.
         video_url (str): Ссылка на видео.
         duration (int): Длительность видео в секундах.
@@ -27,9 +27,8 @@ class VideoLectureSchema(BaseSchema):
         max_length=200,
         description="Описание видео лекции"
     )
-    theme: str = Field(
-        min_length=0,
-        max_length=50,
+    theme_id: int = Field(
+        default=0,
         description="Тематика видео лекции"
     )
     views: int = Field(

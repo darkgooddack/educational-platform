@@ -27,7 +27,7 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
     async def get_videos(
         self,
         pagination: PaginationParams,
-        theme: str = None,
+        theme_id: int = None,
         search: str = None,
     ) -> tuple[List[VideoLectureSchema], int]:
         """
@@ -35,7 +35,7 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
 
         Args:
             pagination (PaginationParams): Параметры пагинации
-            theme (str): Фильтрация по роли пользователя
+            theme_id (int): Фильтрация по роли пользователя
             search (str): Поиск по тексту пользователя
 
         Returns:
@@ -52,7 +52,7 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
             statement = statement.filter(search_filter)
 
         # Фильтр по тебе
-        if theme:
-            statement = statement.filter(self.model.theme == theme)
+        if theme_id:
+            statement = statement.filter(self.model.theme_id == theme_id)
 
         return await self.get_paginated(statement, pagination)

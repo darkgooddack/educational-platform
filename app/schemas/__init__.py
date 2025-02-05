@@ -25,6 +25,7 @@ from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
 from .v1.videos.videos import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema
 from .v1.tests.tests import QuestionType
 from .v1.posts.posts import PostStatus
+from .v1.themes.themes import ThemeBase, ThemeCreateSchema, ThemeSchema, ThemeListResponse
 __all__ = [
     "BaseSchema",
     "BaseInputSchema",
@@ -67,5 +68,9 @@ __all__ = [
     "VideoLectureResponseSchema",
     "ContentType",
     "PostStatus",
-    "QuestionType"
+    "QuestionType",
+    "ThemeBase", 
+    "ThemeCreateSchema", 
+    "ThemeSchema", 
+    "ThemeListResponse"
 ]

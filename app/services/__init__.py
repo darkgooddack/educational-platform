@@ -10,6 +10,7 @@ from .v1.feedbacks import FeedbackDataManager, FeedbackService
 from .v1.oauth import OAuthService
 from .v1.users import UserDataManager, UserService
 from .v1.videos import VideoLectureDataManager, VideoLectureService
+from .v1.themes import ThemeService
 
 __all__ = [
     "BaseService",
@@ -23,4 +24,5 @@ __all__ = [
     "FeedbackDataManager",
     "VideoLectureService",
     "VideoLectureDataManager",
+    "ThemeService"
 ]
