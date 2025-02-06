@@ -82,6 +82,6 @@ class OAuthService:
 
         token = await oauth_provider.get_token(code, state, device_id)
 
-        user_data = await oauth_provider.get_user_info(token["access_token"])
+        user_data = await oauth_provider.get_user_info(token.access_token)
 
         return await oauth_provider.authenticate(user_data)
