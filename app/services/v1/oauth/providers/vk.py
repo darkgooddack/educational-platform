@@ -35,11 +35,11 @@ class VKOAuthProvider(BaseOAuthProvider):
             device_id=device_id,
             state=state,
         )
-        self.logger("VK (get_token) state: %s", state)
+        self.logger.debug("VK (get_token) state: %s", state)
         if state:
             redis_key = f"vk_verifier_{state}"
             verifier = await self._redis_storage.get(redis_key)
-            self.logger("VK (get_token) verifier: %s", verifier)
+            self.logger.debug("VK (get_token) verifier: %s", verifier)
             if verifier:
                 token_params.code_verifier = verifier
                 await self._redis_storage.delete(redis_key)
