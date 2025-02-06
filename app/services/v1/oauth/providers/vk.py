@@ -53,7 +53,7 @@ class VKOAuthProvider(BaseOAuthProvider):
         token_params = VKOAuthTokenParams(
             redirect_uri=str(await self._get_callback_url()),
             code=code,
-            client_id=self.config.client_id,
+            client_id=str(self.config.client_id), # да, пиздец, но так надо
             device_id=device_id,
             state=state,
         )
