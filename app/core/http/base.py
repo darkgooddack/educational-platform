@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import aiohttp
@@ -6,7 +7,8 @@ import aiohttp
 class BaseHttpClient:
     def __init__(self):
         self._session: Optional[aiohttp.ClientSession] = None
-
+        self.logger = logging.getLogger(self.__class__.__name__)
+        
     async def _get_session(self) -> aiohttp.ClientSession:
         if not self._session:
             self._session = aiohttp.ClientSession()

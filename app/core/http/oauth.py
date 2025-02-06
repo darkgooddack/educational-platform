@@ -10,7 +10,7 @@ class OAuthHttpClient(BaseHttpClient):
             html_content = await response.text()
             self.logger.error("HTML Response: %s", html_content)
             
-        return await response.json()
+        return response
 
     async def get_user_info(self, url: str, token: str) -> dict:
         headers = {"Authorization": f"Bearer {token}"}
