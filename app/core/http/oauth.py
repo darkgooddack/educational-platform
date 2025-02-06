@@ -8,12 +8,15 @@ class OAuthHttpClient(BaseHttpClient):
             response = await self.post(url, data=params, headers=headers)
             return response
         except ContentTypeError as e:
-      
-            html_content = await e.response.text()
-            self.logger.error("ContentTypeError: %s", str(e))
-            self.logger.error("HTML Response: %s", html_content)
-            
-            raise 
+            # Проверяем наличие response и возможности получить текст
+            if hasattr(e, 'response') and e.response:
+                html_content = await e.response.text()
+                self.logger.error("HTML Response: %s", html_content)
+            self.logger.error("ContentTypeError details: %s", e.__dict__)
+            raise
+        except Exception as e:
+            self.logger.error("Unexpected error: %s", str(e))
+            raise
 
     async def get_user_info(self, url: str, token: str) -> dict:
         headers = {"Authorization": f"Bearer {token}"}
