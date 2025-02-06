@@ -94,7 +94,7 @@ class VKOAuthProvider(BaseOAuthProvider):
 
     async def get_user_info(self, token: str) -> VKUserData:
         """Стандартное получение данных пользователя"""
-        return await super().get_user_info(token)
+        return await super().get_user_info(token, client_id=self.config.client_id)
 
     def _get_email(self, user_data: VKUserData) -> str:
         """

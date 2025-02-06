@@ -398,7 +398,7 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_user_info(self, token: str) -> OAuthUserData:
+    async def get_user_info(self, token: str, client_id: str = None) -> OAuthUserData:
         """
         Получение данных пользователя от OAuth провайдера.
 
@@ -429,7 +429,9 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
                 return data
         """
         user_data = await self.http_client.get_user_info(
-            self.config.user_info_url, token
+            self.config.user_info_url, 
+            token,
+            client_id=client_id
         )
         return await self.user_handler(user_data)
 

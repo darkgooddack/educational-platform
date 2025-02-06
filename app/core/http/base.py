@@ -26,11 +26,11 @@ class BaseHttpClient:
             self._session = aiohttp.ClientSession()
         return self._session
 
-    async def get(self, url: str, headers: dict = None) -> dict:
+    async def get(self, url: str, headers: dict = None, params: dict = None) -> dict:
         try:
             session = await self._get_session()
             self.logger.debug("GET запрос к %s", url)
-            async with session.get(url, headers=headers) as resp:
+            async with session.get(url, headers=headers, params=params) as resp:
                 return await resp.json()
         finally:
             await self.close()

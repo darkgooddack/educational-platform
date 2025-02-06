@@ -40,16 +40,22 @@ class OAuthHttpClient(BaseHttpClient):
             self.logger.error("Неожиданная ошибка при получении токена: %s", str(e))
             raise
 
-    async def get_user_info(self, url: str, token: str) -> dict:
+    async def get_user_info(self, url: str, token: str, client_id: str = None) -> dict:
         headers = {"Authorization": f"Bearer {token}"}
+        params = {}
+    
+        if client_id:
+            params["client_id"] = client_id
 
         self.logger.debug(
-            "Получение информации о пользователе от %s\nЗаголовки:\n%s",
+            "Получение информации о пользователе от %s\nЗаголовки:\n%s\nПараметры:\n%s",
             url,
-            self._format_log_message(headers)
+            self._format_log_message(headers),
+            self._format_log_message(params)
         )
 
-        response = await self.get(url, headers=headers)
+        response = await self.get(url, headers=headers, params=params)
+
         self.logger.info("Информация о пользователе успешно получена от %s", url)
         self.logger.debug(
             "Ответ от сервера:\n%s",
