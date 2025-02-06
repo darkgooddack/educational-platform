@@ -31,7 +31,13 @@ class Config(Settings, AppConfig):
     Наследует все настройки из Settings и AppConfig.
     """
 
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        print("\n⚙️  Параметры конфигурации:")
+        print(f"🔌 DATABASE_DSN: {self.database_dsn}")
+        print(f"🔗 REDIS_URL: {self.redis_url}")
+        print(f"🐰 RABBITMQ_DSN: {self.rabbitmq_dsn}")
+        print(f"📦 AWS S3: {self.aws_endpoint}")
 
 
 @lru_cache

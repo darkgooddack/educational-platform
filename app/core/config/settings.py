@@ -88,17 +88,17 @@ class Settings(BaseSettings):
     token_key: SecretStr = secrets.token_hex(32)
 
     redis_url: RedisDsn = Field(
-        default="redis://default:default@localhost:6380",
+        default="redis://default:default@localhost:6379",
         description="Ссылка для подключения к Redis",
     )
 
     database_dsn: str = Field(
-        default="postgresql+asyncpg://postgres:postgres@localhost:5434/educational_db",
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/educational_db",
         description="Ссылка для подключения к базе данных",
     )
 
     rabbitmq_dsn: AmqpDsn = Field(
-        default="amqp://guest:guest@localhost:15672/",
+        default="amqp://admin:admin@localhost:5672/",
         description="URL подключения к RabbitMQ",
     )
 

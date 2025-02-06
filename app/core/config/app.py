@@ -58,13 +58,22 @@ class PathConfig:
     """
     def __init__(self):
         self.ENV_FILE = Path(".env")
+        self.DEV_ENV_FILE = Path(".env.dev")
         self.APP_DIR = Path("app")
-        self.ENV_PATH = os.getenv("ENV_FILE", self.ENV_FILE)
 
+        # Определяем конфигурацию
+        if os.getenv("ENV_FILE"):
+            self.ENV_PATH = Path(os.getenv("ENV_FILE"))
+            env_type = "TEST" if ".env.test" in str(self.ENV_PATH) else "CUSTOM"
+        elif self.DEV_ENV_FILE.exists():
+            self.ENV_PATH = self.DEV_ENV_FILE
+            env_type = "DEV"
+        else:
+            self.ENV_PATH = self.ENV_FILE
+            env_type = "PROD"
 
-    # BASE_PATH = Path(__file__).resolve().parents[2]  #! проверить
-    # ENV_PATH = BASE_PATH / ENV_FILE
-    # APP_PATH = BASE_PATH / APP_DIR
+        print(f"\n🚀 Запуск в режиме: {env_type}")
+        print(f"📁 Конфигурация: {self.ENV_PATH}")
 
 
 class LogConfig:

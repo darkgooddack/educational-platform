@@ -91,7 +91,7 @@ def check_redis():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     for _ in range(5):
         try:
-            sock.connect(('localhost', 6380))
+            sock.connect(('localhost', 6379))
             sock.close()
             return True
         except:
@@ -102,14 +102,14 @@ def check_redis():
 def check_postgres():
     """Проверяет доступность PostgreSQL"""
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    for _ in range(5):
+    for _ in range(30):
         try:
             sock.connect(('localhost', 5434))
             sock.close()
             return True
         except:
             print("⏳ Ждём PostgreSQL...")
-            time.sleep(2)
+            time.sleep(3)
     return False
 
 def start_infrastructure(port: Optional[int] = 8000):
@@ -134,6 +134,7 @@ def start_infrastructure(port: Optional[int] = 8000):
     print("📦 Запускаем миграции...")
     migrate()
     print("✅ Миграции выполнены!")
+
 
     print("\n🔗 Доступные адреса:")
     print(f"📊 FastAPI Swagger:    http://localhost:{port}/docs")
@@ -166,6 +167,7 @@ def dev(port: Optional[int] = None):
 
     if port is None:
         port = find_free_port()
+
 
     print(f"🚀 Запускаем сервер на порту {port}")
     uvicorn.run(

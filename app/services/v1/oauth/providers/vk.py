@@ -58,25 +58,31 @@ class VKOAuthProvider(BaseOAuthProvider):
             state=state,
         )
         self.logger.debug("VK (get_token) state: %s", state)
-        
+
         if state:
             redis_key = f"vk_verifier_{state}"
             verifier = await self._redis_storage.get(redis_key)
-            
+
             if isinstance(verifier, bytes):
                 verifier = verifier.decode('utf-8')
             self.logger.debug("VK (get_token) verifier: %s", verifier)
-            
+
             if verifier:
                 token_params.code_verifier = verifier
                 await self._redis_storage.delete(redis_key)
-        
+
         self.logger.debug("VK (get_token) token_url: %s", self.config.token_url)
-        
+
         token_data = await self.http_client.get_token(
             self.config.token_url,
             token_params.to_dict()
         )
+
+        if "error" in token_data:
+            raise OAuthTokenError(
+                self.provider,
+                f"Ошибка получения токена: {token_data.get('error_description', token_data['error'])}"
+            )
 
         return VKTokenData(
             access_token=token_data["access_token"],
