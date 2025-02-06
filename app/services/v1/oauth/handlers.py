@@ -1,8 +1,11 @@
+import logging
 from typing import Callable, Dict, TypeVar
 from app.core.exceptions import OAuthUserDataError
 from app.schemas import GoogleUserData, VKUserData, YandexUserData
 
 T = TypeVar('T', YandexUserData, GoogleUserData, VKUserData)
+
+logger = logging.getLogger(__name__)
 
 async def get_yandex_user_info(user_data: dict) -> YandexUserData:
     """
