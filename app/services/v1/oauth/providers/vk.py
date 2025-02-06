@@ -63,6 +63,8 @@ class VKOAuthProvider(BaseOAuthProvider):
             redis_key = f"vk_verifier_{state}"
             verifier = await self._redis_storage.get(redis_key)
             
+            if isinstance(verifier, bytes):
+                verifier = verifier.decode('utf-8')
             self.logger.debug("VK (get_token) verifier: %s", verifier)
             
             if verifier:
