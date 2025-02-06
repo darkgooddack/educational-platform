@@ -1,7 +1,7 @@
 from fastapi.responses import RedirectResponse
 
 from app.core.exceptions import OAuthUserDataError
-from app.schemas import OAuthProvider, OAuthProviderResponse, YandexUserData
+from app.schemas import OAuthProvider, OAuthProviderResponse, YandexUserData, YandexTokenData
 from app.services.v1.oauth.base import BaseOAuthProvider
 
 
@@ -32,7 +32,14 @@ class YandexOAuthProvider(BaseOAuthProvider):
 
     async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
         """Стандартное получение токена"""
-        return await super().get_token(code, state, device_id)
+        token_data = await self._get_token_data(code, state)
+        return YandexTokenData(
+            access_token=token_data["access_token"],
+            token_type=token_data.get("token_type", "bearer"),
+            expires_in=token_data["expires_in"],
+            refresh_token=token_data["refresh_token"],
+            scope=token_data["scope"]
+        )
 
     async def get_user_info(self, token: str) -> YandexUserData:
         """Стандартное получение данных пользователя"""

@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 from fastapi.responses import RedirectResponse
 
 from app.schemas import (GoogleUserData, OAuthParams, OAuthProvider,
-                         OAuthProviderResponse)
+                         OAuthProviderResponse, GoogleTokenData)
 from app.services.v1.oauth.base import BaseOAuthProvider
 
 
@@ -21,9 +21,16 @@ class GoogleOAuthProvider(BaseOAuthProvider):
     def __init__(self, session):
         super().__init__(provider=OAuthProvider.GOOGLE.value, session=session)
 
-    async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
+    async def get_token(self, code: str, state: str = None, device_id: str = None) -> GoogleTokenData:
         """Стандартное получение токена"""
-        return await super().get_token(code, state, device_id)
+        token_data = await self._get_token_data(code, state)
+        return GoogleTokenData(
+            access_token=token_data["access_token"],
+            token_type=token_data.get("token_type", "bearer"),
+            expires_in=token_data["expires_in"],
+            id_token=token_data["id_token"],
+            scope=token_data["scope"]
+        )
 
     async def _get_callback_url(self) -> str:
         """Стандартный callback URL"""

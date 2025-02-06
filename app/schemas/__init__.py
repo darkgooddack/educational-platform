@@ -16,7 +16,7 @@ from .v1.oauth.oauth import (GoogleUserData, OAuthConfig, OAuthParams,
                              OAuthProvider, OAuthProviderResponse,
                              OAuthResponse, OAuthTokenParams, OAuthUserData,
                              OAuthUserSchema, VKOAuthParams, VKUserData,
-                             YandexUserData, VKOAuthTokenParams)
+                             YandexUserData, VKOAuthTokenParams, VKTokenData, GoogleTokenData, YandexTokenData)
 from .v1.pagination import Page, PaginationParams
 from .v1.content import ContentType
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
@@ -26,6 +26,7 @@ from .v1.videos.videos import VideoLectureResponseSchema, VideoLectureSchema, Vi
 from .v1.tests.tests import QuestionType
 from .v1.posts.posts import PostStatus
 from .v1.themes.themes import ThemeBase, ThemeCreateSchema, ThemeSchema, ThemeListResponse
+
 __all__ = [
     "BaseSchema",
     "BaseInputSchema",
@@ -73,5 +74,8 @@ __all__ = [
     "ThemeCreateSchema", 
     "ThemeSchema", 
     "ThemeListResponse",
-    "VKOAuthTokenParams"
+    "VKOAuthTokenParams",
+    "VKTokenData",
+    "GoogleTokenData", 
+    "YandexTokenData"
 ]

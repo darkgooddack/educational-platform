@@ -140,7 +140,10 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             def _get_provider_id(self, user_data: OAuthUserData) -> str:
                 return str(user_data.id)  # Returns: "12345"
         """
-        return int(user_data.id)
+        try:
+            return int(user_data.id)
+        except (ValueError, TypeError):
+            raise ValueError(f"ID провайдера '{user_data.id}' невозможно преобразовать в целое число")
 
     def _get_email(self, user_data: OAuthUserData) -> str:
         """
@@ -269,6 +272,48 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         """
         if not self.config.client_id or not self.config.client_secret:
             raise OAuthConfigError(self.provider, ["client_id", "client_secret"])
+    
+    async def _get_token_data(self, code: str, state: str = None) -> dict:
+        # token_params = OAuthTokenParams(
+        #     client_id=self.config.client_id,
+        #     client_secret=self.config.client_secret,
+        #     code=code,
+        #     redirect_uri=str(await self._get_callback_url()),
+        # )
+
+        # if hasattr(self, "_handle_state"):
+        #     self.logger.debug("Начало работы с handle_state:")
+        #     self.logger.debug(f"state: {state}")
+        #     self.logger.debug(f"token_params: {token_params.model_dump()}")
+        #     await self._handle_state(state, token_params.model_dump())
+
+        # token_data = await self.http_client.get_token(
+        #     self.config.token_url,
+        #     token_params.model_dump()
+        # )
+
+        # if "error" in token_data:
+        #     if token_data["error"] == "invalid_grant":
+        #         raise OAuthInvalidGrantError(self.provider)
+        #     raise OAuthTokenError(self.provider, token_data["error"])
+
+        # return OAuthProviderResponse(
+        #     access_token=token_data["access_token"],
+        #     token_type=token_data.get("token_type", "bearer"),
+        #     expires_in=token_data.get("expires_in")
+        # )
+
+        token_params = OAuthTokenParams(
+            client_id=self.config.client_id,
+            client_secret=self.config.client_secret,
+            code=code,
+            redirect_uri=str(await self._get_callback_url()),
+        )
+        
+        return await self.http_client.get_token(
+            self.config.token_url,
+            token_params.model_dump()
+        )
 
     @abstractmethod
     async def get_auth_url(self) -> RedirectResponse:
@@ -350,31 +395,7 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             token_data = await provider.get_token(code, state)
             user_info = await provider.get_user_info(token_data.access_token)
         """
-
-        token_params = OAuthTokenParams(
-            client_id=self.config.client_id,
-            client_secret=self.config.client_secret,
-            code=code,
-            redirect_uri=str(await self._get_callback_url()),
-        )
-
-        if hasattr(self, "_handle_state"):
-            self.logger.debug("Начало работы с handle_state:")
-            self.logger.debug(f"state: {state}")
-            self.logger.debug(f"token_params: {token_params.model_dump()}")
-            await self._handle_state(state, token_params.model_dump())
-
-        token_data = await self.http_client.get_token(
-            self.config.token_url,
-            token_params.model_dump()
-        )
-
-        if "error" in token_data:
-            if token_data["error"] == "invalid_grant":
-                raise OAuthInvalidGrantError(self.provider)
-            raise OAuthTokenError(self.provider, token_data["error"])
-
-        return token_data
+        raise NotImplementedError
 
     @abstractmethod
     async def get_user_info(self, token: str) -> OAuthUserData:

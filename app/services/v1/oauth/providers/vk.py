@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 
 from app.core.exceptions import OAuthTokenError, OAuthUserDataError
 from app.schemas import (OAuthProvider, OAuthProviderResponse, VKOAuthParams,
-                         VKUserData, VKOAuthTokenParams)
+                         VKUserData, VKOAuthTokenParams, VKTokenData)
 from app.services.v1.oauth.base import BaseOAuthProvider
 
 
@@ -46,7 +46,7 @@ class VKOAuthProvider(BaseOAuthProvider):
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"
         return RedirectResponse(url=auth_url)
 
-    async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
+    async def get_token(self, code: str, state: str = None, device_id: str = None) -> VKTokenData:
         """
         Получение токена
         """
@@ -78,10 +78,14 @@ class VKOAuthProvider(BaseOAuthProvider):
             token_params.to_dict()
         )
 
-        return OAuthProviderResponse(
+        return VKTokenData(
             access_token=token_data["access_token"],
             token_type=token_data.get("token_type", "bearer"),
-            expires_in=token_data["expires_in"]
+            expires_in=token_data["expires_in"],
+            user_id=token_data["user_id"],
+            email=token_data.get("email"),
+            state=state,
+            scope=token_data.get("scope")
         )
 
     async def _get_callback_url(self) -> str:
