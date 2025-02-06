@@ -6,7 +6,7 @@ class OAuthHttpClient(BaseHttpClient):
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         response = await self.post(url, data=params, headers=headers)
         
-        if response.content_type == 'text/html':
+        if response.get('content_type') == 'text/html':
             html_content = await response.text()
             self.logger.error("HTML Response: %s", html_content)
             
