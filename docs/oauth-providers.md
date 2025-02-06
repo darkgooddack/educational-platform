@@ -116,8 +116,8 @@ sequenceDiagram
     Yandex->>App: user_data
     App->>User: JWT + redirect
 ```
-
-```marmaid
+Было:
+```mermaid
 sequenceDiagram
     participant User
     participant App
@@ -148,6 +148,7 @@ sequenceDiagram
     App->>User: JWT + redirect
 
 ```
+Стало:
 ```mermaid
 sequenceDiagram
     participant User
