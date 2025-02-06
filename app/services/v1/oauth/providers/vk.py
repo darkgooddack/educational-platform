@@ -77,7 +77,7 @@ class VKOAuthProvider(BaseOAuthProvider):
             self.config.token_url,
             token_params.to_dict()
         )
-
+        
         return VKTokenData(
             access_token=token_data["access_token"],
             token_type=token_data.get("token_type", "bearer"),

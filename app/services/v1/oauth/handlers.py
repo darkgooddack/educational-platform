@@ -22,13 +22,13 @@ async def get_yandex_user_info(user_data: dict) -> YandexUserData:
 
     return YandexUserData(
         id=str(user_data["id"]),
-        email=email,
+        email=user_data["default_email"],
         first_name=user_data.get("first_name") or None,
         last_name=user_data.get("last_name") or None,
         avatar=user_data.get("avatar") or None,
-        default_email=email,
+        default_email=user_data["default_email"],
         login=user_data.get("login") or None,
-        emails=emails_list,
+        emails=user_data.get("emails", []),
         psuid=user_data.get("psuid") or None,
     )
 
@@ -70,16 +70,31 @@ async def get_vk_user_info(user_data: dict) -> VKUserData:
     Returns:
         dict: Обработанные данные пользователя
     """
+    logger = logging.getLogger(__name__)
+    
     user = user_data.get("user", {})
-    user_id = user.get("user_id", "")
+    if not user:
+        logger.error("VK не вернул данные пользователя: %s", user_data)
+        raise OAuthUserDataError("vk", "Не удалось получить данные пользователя от VK")
+        
+    user_id = user.get("user_id")
+    if not user_id:
+        logger.error("VK не вернул ID пользователя: %s", user)
+        raise OAuthUserDataError("vk", "VK не предоставил ID пользователя")
+
+    email = user.get("email")
+    if not email:
+        logger.warning("VK не предоставил email для пользователя %s", user_id)
+        
+    logger.info("Получены данные пользователя VK: id=%s, email=%s", user_id, email)
 
     return VKUserData(
         id=str(user_id),
-        email=user.get("email") or None,
-        first_name=user.get("first_name") or None,
-        last_name=user.get("last_name") or None,
-        avatar=user.get("avatar") or None,
-        phone=user.get("phone") or None,
+        email=email,
+        first_name=user.get("first_name"),
+        last_name=user.get("last_name"), 
+        avatar=user.get("avatar"),
+        phone=user.get("phone"),
         user_id=str(user_id)
     )
 
