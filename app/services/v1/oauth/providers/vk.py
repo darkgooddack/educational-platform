@@ -29,17 +29,17 @@ class VKOAuthProvider(BaseOAuthProvider):
         Получение токена
         """
         token_params = VKOAuthTokenParams(
-            client_id=str(self.config.client_id),
-            client_secret=self.config.client_secret,
             redirect_uri=str(await self._get_callback_url()),
             code=code,
-            state=state,
+            client_id=str(self.config.client_id),
             device_id=device_id,
+            state=state,
         )
-
+        self.logger("VK (get_token) state: %s", state)
         if state:
             redis_key = f"vk_verifier_{state}"
             verifier = await self._redis_storage.get(redis_key)
+            self.logger("VK (get_token) verifier: %s", verifier)
             if verifier:
                 token_params.code_verifier = verifier
                 await self._redis_storage.delete(redis_key)
@@ -82,22 +82,19 @@ class VKOAuthProvider(BaseOAuthProvider):
     async def get_auth_url(self) -> RedirectResponse:
         """URL авторизации с PKCE"""
         code_verifier = secrets.token_urlsafe(64)
-        state = secrets.token_urlsafe()
-
-        redis_key = f"vk_verifier_{state}"
-        await self._redis_storage.set(
-            key=redis_key,
-            value=code_verifier,
-            expires=300
-        )
 
         params = VKOAuthParams(
             client_id=self.config.client_id,
             redirect_uri=await self._get_callback_url(),
-            scope=self.config.scope,
-            state=state, # Используем то же значение state
             code_challenge=self._generate_code_challenge(code_verifier),
-            code_challenge_method="S256",
+            scope=self.config.scope,
+        )
+
+        redis_key = f"vk_verifier_{params.state}"
+        await self._redis_storage.set(
+            key=redis_key,
+            value=code_verifier,
+            expires=300
         )
 
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"

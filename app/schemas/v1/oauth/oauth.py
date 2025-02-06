@@ -55,23 +55,27 @@ class OAuthParams(BaseModel):
     Базовый класс для OAuth параметров
 
     Attributes:
+        response_type: Тип ответа (code)
         client_id: Идентификатор приложения
         redirect_uri: Путь для перенаправления после авторизации (для пользователя)
         scope: Область доступа
-        response_type: Тип ответа (code)
+        
     """
-
+    response_type: str = "code"
     client_id: str | int # VK: client_id = id приложения >_<
     redirect_uri: str
     scope: str = ""
-    response_type: str = "code"
+    
 
 
 class VKOAuthParams(OAuthParams):
     """
     Класс для дополнительных параметров OAuth авторизации через VK
-    """
 
+    Attributes:
+        state: Строка состояния в виде случайного набора символов
+        code_challenge: Значение code_verifier, преобразованное с помощью code_challenge_method и закодированное в base64
+    """
     state: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
     code_challenge: str
     code_challenge_method: str = "S256"
@@ -163,35 +167,37 @@ class OAuthTokenParams(CommonBaseSchema):
     Класс для параметров OAuth авторизации (для получения токена)
 
     Attributes:
+        grant_type: Тип запроса (authorization_code)
+        redirect_uri: URL для callback (Путь для перенаправления после авторизации (для провайдера)
+        code: Код авторизации
         client_id: Идентификатор приложения
         client_secret: Секретное слово приложения
-        code: Код авторизации
-        redirect_uri: Путь для перенаправления после авторизации (для провайдера)
     """
-
-    client_id: str
-    client_secret: str
-    code: str
-    redirect_uri: str
     grant_type: str = "authorization_code"
+    redirect_uri: str
+    code: str
+    client_id: str
+    client_secret: str | None = None
+    
 
 class VKOAuthTokenParams(OAuthTokenParams):
     """
     Параметры для получения токена VK OAuth
 
     Attributes:
-        client_id: ID приложения VK
-        client_secret: Секретный ключ приложения
-        code: Код авторизации
-        redirect_uri: URL для callback
         grant_type: Тип запроса (authorization_code)
         code_verifier: Код подтверждения
+        redirect_uri: URL для callback
+        code: Код авторизации
+        client_id: ID приложения VK
+        client_secret: Секретный ключ приложения
         device_id: ID устройства (для получения токена из callback)
-        state: Состояние для CSRF защиты
+        state: Состояние для CSRF защиты (произвольная строка состояния)
     """
+    code_verifier: str | None = None
     device_id: str
     state: str | None = None
-    code_verifier: str | None = None
+    
 
 class OAuthProviderResponse(BaseInputSchema):
     """
