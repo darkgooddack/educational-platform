@@ -10,7 +10,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
-from app.schemas import OAuthResponse
+from app.schemas import OAuthResponse, OAuthProvider
 from app.services import OAuthService
 
 
@@ -30,7 +30,7 @@ def setup_routes(router: APIRouter):
 
     @router.get("/{provider}", response_class=RedirectResponse)
     async def oauth(
-        provider: str,
+        provider: OAuthProvider,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> RedirectResponse:
         """
