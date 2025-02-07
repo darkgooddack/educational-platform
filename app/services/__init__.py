@@ -11,7 +11,7 @@ from .v1.oauth import OAuthService
 from .v1.users import UserDataManager, UserService
 from .v1.videos import VideoLectureDataManager, VideoLectureService
 from .v1.themes import ThemeService
-
+from .v1.tests import TestService, TestDataManager
 __all__ = [
     "BaseService",
     "BaseDataManager",
@@ -24,5 +24,7 @@ __all__ = [
     "FeedbackDataManager",
     "VideoLectureService",
     "VideoLectureDataManager",
-    "ThemeService"
+    "ThemeService",
+    "TestService",
+    "TestDataManager",
 ]
