@@ -16,6 +16,7 @@ def setup_routes(router: APIRouter):
     async def create_video_lecture(
         title: str = Form(...),
         description: str = Form(...),
+        theme_id: int = Form(..., description="ID темы"),
         video_file: UploadFile = File(
             ...,
             description="Видео лекции",
@@ -38,6 +39,7 @@ def setup_routes(router: APIRouter):
         **Args**:
             title (str): Заголовок видео лекции.
             description (str): Описание видео лекции.
+            theme_id (int): ID темы видео лекции.
             video_file (UploadFile): Файл видео лекции.
             thumbnail_file (UploadFile): Файл обложки видео лекции.
             _current_user (UserCredentialsSchema): Данные текущего пользователя.
@@ -47,18 +49,19 @@ def setup_routes(router: APIRouter):
         **Returns**:
             VideoLectureResponseSchema: Данные созданной видео лекции.
         """
-        
+
         service = VideoLectureService(db_session, s3_session)
         result = await service.add_video(
             VideoLectureCreateSchema(
                 title=title,
                 description=description,
+                theme_id=theme_id,
                 video_file=video_file,
                 thumbnail_file=thumbnail_file,
             ),
             author_id=_current_user.id
         )
-        
+
         return result
 
     @router.get("/", response_model=Page[VideoLectureSchema])

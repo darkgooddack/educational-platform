@@ -67,7 +67,6 @@ class BaseInputSchema(CommonBaseSchema):
 
     Так как нету необходимости для ввода исходных данных id и даты создания и обновления.
     """
-
     pass
 
 

@@ -101,15 +101,31 @@ class ThemeDataManager(BaseDataManager):
 
     async def get_themes_tree(self) -> List[ThemeSchema]:
         """
-        Получает дерево тем.
-
-        Returns:
-            List[ThemeSchema]: Список корневых тем
-        """
-        query = select(self.model).filter(self.model.parent_id.is_(None))
+    Получает полное дерево тем.
+    """
+        # Сначала получим ВСЕ темы одним запросом
+        query = select(self.model)
         result = await self.session.execute(query)
-        return result.scalars().all()
+        all_themes = result.scalars().all()
 
+        # Создадим словарь {id: тема} для быстрого поиска
+        themes_dict = {theme.id: ThemeSchema.model_validate(theme) for theme in   all_themes}
+
+        # Строим дерево
+        tree = []
+        for theme_id, theme in themes_dict.items():
+            if theme.parent_id is None:
+                # Корневые темы идут в результат
+                tree.append(theme)
+            else:
+                # Дочерние темы добавляем к родителям
+                parent = themes_dict.get(theme.parent_id)
+                if parent:
+                    if not hasattr(parent, 'children'):
+                        parent.children = []
+                    parent.children.append(theme)
+
+        return tree
     async def get_child_themes(self, parent_id: int) -> List[ThemeSchema]:
         """
         Получает дочерние темы.

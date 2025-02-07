@@ -1,9 +1,10 @@
+from typing import List, Optional
 from fastapi import UploadFile
 from pydantic import Field
-from ..base import BaseSchema, CommonBaseSchema, BaseInputSchema
+from ..base import BaseSchema, BaseInputSchema, ListResponseSchema
 
 
-class VideoLectureSchema(BaseSchema):
+class VideoLectureBase(BaseSchema):
     """
     Схема для представления видео лекции.
 
@@ -17,36 +18,15 @@ class VideoLectureSchema(BaseSchema):
         author_id (int): ID автора видео лекции.
         thumbnail_url (str): URL-адрес миниатюры видео.
     """
-    title: str = Field(
-        min_length=0,
-        max_length=50,
-        description="Наименование видео лекции"
-    )
-    description: str = Field(
-        min_length=0,
-        max_length=200,
-        description="Описание видео лекции"
-    )
-    theme_id: int = Field(
-        default=0,
-        description="Тематика видео лекции"
-    )
-    views: int = Field(
-        default=0,
-        description="Количество просмотров"
-    )
-    video_url: str = Field(
-        description="Ссылка на видео"
-    )
-    duration: int = Field(
-        description="Длительность видео в секундах"
-    )
-    author_id: int = Field(
-        description="ID автора видео лекции"
-    )
-    thumbnail_url: str = Field(
-        description="Ссылка на миниатюру видео"
-    )
+    title: str = Field(min_length=0, max_length=50)
+    description: str = Field(min_length=0, max_length=200)
+    theme_id: Optional[int] = None
+    views: int = Field(default=0)
+    video_url: str
+    duration: int
+    author_id: int
+    thumbnail_url: str
+
 class VideoLectureCreateSchema(BaseInputSchema):
     """
     Схема для создания видео лекции.
@@ -54,22 +34,20 @@ class VideoLectureCreateSchema(BaseInputSchema):
     Attributes:
         title (str): Название видео лекции.
         description (str): Описание видео лекции.
+        theme_id (int): Тематика видео лекции.
         video_file (UploadFile): Файл видео лекции.
         thumbnail_file (UploadFile): Файл миниатюры видео лекции.
 
     """
-    title: str = Field(
-        min_length=0,
-        max_length=50,
-        description="Наименование видео лекции"
-    )
-    description: str = Field(
-        min_length=0,
-        max_length=200,
-        description="Описание видео лекции"
-    )
+    title: str = Field(min_length=0, max_length=50)
+    description: str = Field(min_length=0, max_length=200)
+    theme_id: int
     video_file: UploadFile
     thumbnail_file: UploadFile
+
+class VideoLectureSchema(VideoLectureBase):
+    """Полная схема видео-лекции"""
+    pass
 
 class VideoLectureResponseSchema(BaseInputSchema):
     """
@@ -86,3 +64,7 @@ class VideoLectureResponseSchema(BaseInputSchema):
     video_url: str
     thumbnail_url: str
     message: str = "Видео успешно добавлено"
+
+class VideoLectureListResponse(ListResponseSchema[VideoLectureSchema]):
+    """Схема для списка видео-лекций"""
+    items: List[VideoLectureSchema]
