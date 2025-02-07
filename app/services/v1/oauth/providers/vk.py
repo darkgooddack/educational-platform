@@ -13,19 +13,42 @@ from app.services.v1.oauth.base import BaseOAuthProvider
 
 class VKOAuthProvider(BaseOAuthProvider):
     """
-    OAuth провайдер для VK
-
+    OAuth провайдер для VK.
+    
     Особенности:
-    - Использует PKCE (Proof Key for Code Exchange)
-    - Email может отсутствовать в ответе
-    - Требуется code_verifier для получения токена
+    - Использует PKCE (Proof Key for Code Exchange) для безопасности
+    - Email может отсутствовать в ответе от API
+    - Требует code_verifier для получения токена
+    - Использует state для CSRF защиты
+    
+    Flow:
+    1. Генерация code_verifier и code_challenge для PKCE
+    2. Сохранение code_verifier в Redis с привязкой к state
+    3. Редирект на VK с code_challenge и state
+    4. Получение code и state от VK
+    5. Получение code_verifier из Redis по state
+    6. Обмен code + code_verifier на токен
+    7. Получение данных пользователя
     """
 
     def __init__(self, session):
+        """
+        Инициализация VK OAuth провайдера.
+    
+        Args:
+            session: Сессия базы данных
+        """
         super().__init__(provider=OAuthProvider.VK.value, session=session)
 
     async def get_auth_url(self) -> RedirectResponse:
-        """URL авторизации с PKCE"""
+        """
+        Формирование URL для OAuth авторизации через VK с PKCE.
+        
+        Генерирует code_verifier, создает code_challenge и сохраняет verifier в Redis.
+        
+        Returns:
+            RedirectResponse: URL для перенаправления на страницу входа VK
+        """
         code_verifier = secrets.token_urlsafe(64)
 
         params = VKOAuthParams(
@@ -34,8 +57,7 @@ class VKOAuthProvider(BaseOAuthProvider):
             code_challenge=self._generate_code_challenge(code_verifier),
             scope=self.config.scope,
         )
-        self.logger.debug("VK (get_auth_url) state: %s", params.state)
-        self.logger.debug("VK (get_auth_url) code_verifier: %s", code_verifier)
+ 
         redis_key = f"vk_verifier_{params.state}"
         await self._redis_storage.set(
             key=redis_key,
@@ -48,8 +70,22 @@ class VKOAuthProvider(BaseOAuthProvider):
 
     async def get_token(self, code: str, state: str = None, device_id: str = None) -> VKTokenData:
         """
-        Получение токена
+        Получение токена от VK по коду авторизации.
+        
+        Args:
+            code: Код авторизации от VK
+            state: Параметр state для проверки CSRF
+            device_id: ID устройства для VK API
+            
+        Returns:
+            VKTokenData: Токен доступа и связанные данные
+            
+        Raises:
+            OAuthTokenError: При отсутствии кода или ошибке от VK API
         """
+        if not code:
+            raise OAuthTokenError(self.provider, "Не передан код авторизации")
+
         token_params = VKOAuthTokenParams(
             redirect_uri=str(await self._get_callback_url()),
             code=code,
@@ -57,7 +93,6 @@ class VKOAuthProvider(BaseOAuthProvider):
             device_id=device_id,
             state=state,
         )
-        self.logger.debug("VK (get_token) state: %s", state)
 
         if state:
             redis_key = f"vk_verifier_{state}"
@@ -65,13 +100,10 @@ class VKOAuthProvider(BaseOAuthProvider):
 
             if isinstance(verifier, bytes):
                 verifier = verifier.decode('utf-8')
-            self.logger.debug("VK (get_token) verifier: %s", verifier)
 
             if verifier:
                 token_params.code_verifier = verifier
                 await self._redis_storage.delete(redis_key)
-
-        self.logger.debug("VK (get_token) token_url: %s", self.config.token_url)
 
         token_data = await self.http_client.get_token(
             self.config.token_url,
@@ -94,40 +126,45 @@ class VKOAuthProvider(BaseOAuthProvider):
             scope=token_data.get("scope")
         )
 
-    async def _get_callback_url(self) -> str:
-        """Стандартный callback URL"""
-        return await super()._get_callback_url()
-
     async def get_user_info(self, token: str) -> VKUserData:
-        """Стандартное получение данных пользователя"""
+        """
+        Получение данных пользователя через VK API.
+        
+        Использует стандартный эндпоинт VK для получения 
+        информации о пользователе. Возвращает данные в формате VKUserData.
+        
+        Args:
+            token: Токен доступа от VK
+            
+        Returns:
+            VKUserData: Данные пользователя в унифицированном формате
+        """
         return await super().get_user_info(token, client_id=self.config.client_id)
-
+    
     def _get_email(self, user_data: VKUserData) -> str:
         """
-        VK может не предоставить email если пользователь не разрешил доступ
+        Получение email пользователя.
+        VK может не предоставить email если пользователь не разрешил доступ.
+        
+        Raises:
+            OAuthUserDataError: Если email отсутствует
         """
         if not user_data.email:
             raise OAuthUserDataError(self.provider, "VK не предоставил email")
         return user_data.email
 
     def _generate_code_challenge(self, verifier: str) -> str:
-        """Генерация code_challenge для PKCE"""
+        """
+        Генерация code_challenge для PKCE.
+        
+        Args:
+            verifier: Сгенерированный code_verifier
+            
+        Returns:
+            str: code_challenge в формате base64url(sha256(verifier))
+        """
         return (
             urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
             .decode()
             .rstrip("=")
         )
-
-    async def _handle_state(self, state: str, token_params: dict) -> None:
-        """Добавление code_verifier в параметры токена"""
-        if not state:
-            raise OAuthTokenError(self.provider, "Отсутствует параметр state")
-
-        redis_key = f"vk_verifier_{state}"
-        verifier = await self._redis_storage.get(redis_key)
-
-        if not verifier:
-            raise OAuthTokenError(self.provider, "Неверный state или истек срок verifier")
-
-        token_params["code_verifier"] = verifier
-        await self._redis_storage.delete(redis_key)

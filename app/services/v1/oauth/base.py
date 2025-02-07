@@ -28,9 +28,18 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
     Flow аутентификации:
     1. Получение auth_url для редиректа пользователя на провайдера
     2. Получение от провайдера токена по коду аутентификации
-    3. Получение от провайдера данных пользователя по токену
+    3. Получение от провайдера данных пользователя по токену через специализированный handler
     4. Поиск/создание пользователя в базе данных
     5. Генерация токенов для аутентификации пользователя
+
+    Attributes:
+        provider: Тип OAuth провайдера (yandex, google, vk)
+        config: Конфигурация провайдера из настроек
+        user_handler: Специализированный обработчик данных пользователя
+        http_client: HTTP клиент для запросов к API провайдера
+        _auth_service: Сервис аутентификации
+        _user_service: Сервис работы с пользователями
+        _redis_storage: Хранилище для временных данных OAuth
 
     Usage:
         # В роутерах:
@@ -67,24 +76,18 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
     async def authenticate(self, user_data: OAuthUserData) -> OAuthResponse:
         """
         Аутентификация через OAuth провайдер.
-
+    
         Flow:
-        1. Поиск пользователя по provider_id
-        2. Если не найден - поиск по email
-        3. Если не найден - создание нового пользователя
+        1. Поиск пользователя по типизированному provider_id
+        2. Если не найден - поиск по валидированному email
+        3. Если не найден - создание пользователя с нормализованными данными
         4. Генерация токенов
-
+    
         Args:
-            user_data: Данные пользователя от провайдера
-
+            user_data: Типизированные данные от handler'а провайдера (YandexUserData/GoogleUserData/VKUserData)
+    
         Returns:
             OAuthResponse: Токены и redirect_uri
-
-        Usage:
-            # В провайдере
-            token_data = await self.get_token(code)
-            user_data = await self.get_user_info(token_data.access_token)
-            return await self.authenticate(user_data)
         """
         user = await self._find_user(user_data)
         if not user:
@@ -97,20 +100,16 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         """
         Поиск существующего пользователя по данным OAuth.
 
-        Порядок поиска:
-        1. По ID провайдера ({provider}_id)
-        2. По email пользователя
+        Flow:
+        1. Получение типизированного provider_id через handler
+        2. Поиск по ID провайдера ({provider}_id)
+        3. Если не найден - поиск по валидированному email
 
         Args:
-            user_data: Данные пользователя от OAuth провайдера
+            user_data: Типизированные данные пользователя от handler'а
 
         Returns:
             UserCredentialsSchema | None: Найденный пользователь или None
-
-        Usage:
-            user = await self._find_user(oauth_data)
-            if not user:
-                user = await self._create_user(oauth_data)
         """
         provider_id = self._get_provider_id(user_data)
         user = await self._user_service.get_user_by_field(
@@ -126,19 +125,17 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         """
         Получение ID пользователя от провайдера.
 
+        Преобразует строковый ID из типизированных данных в числовой формат.
+        Каждый handler гарантирует наличие валидного id.
+
         Args:
-            user_data: Данные пользователя от провайдера
+            user_data: Типизированные данные от handler'а
 
         Returns:
-            ID пользователя в числовом формате
+            int: Числовой ID пользователя
 
-        Usage:
-            # Базовая реализация для VK, Yandex
-            provider_id = self._get_provider_id(user_data)  # Returns: 12345
-
-            # Google провайдер
-            def _get_provider_id(self, user_data: OAuthUserData) -> str:
-                return str(user_data.id)  # Returns: "12345"
+        Raises:
+            ValueError: Если ID невалиден
         """
         try:
             return int(user_data.id)
@@ -149,28 +146,19 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         """
         Получение email пользователя.
 
+        Каждый handler валидирует email через EmailStr.
+        YandexHandler использует default_email
+        GoogleHandler проверяет verified_email
+        VKHandler логирует отсутствие email
+
         Args:
-            user_data: Данные пользователя от провайдера
+            user_data: Типизированные данные от handler'а
 
         Returns:
-            Email пользователя
+            str: Валидированный email
 
         Raises:
-            OAuthUserDataError: Если email не найден
-
-        Usage:
-            # Базовая реализация для Google
-            email = self._get_email(user_data)  # Returns: user@gmail.com
-
-            # VK провайдер
-            def _get_email(self, user_data: VKUserData) -> str:
-                if not user_data.email:
-                    raise OAuthUserDataError(self.provider, "VK не предоставил  email")
-                return user_data.email
-
-            # Yandex провайдер
-            def _get_email(self, user_data: YandexUserData) -> str:
-                return user_data.default_email
+            OAuthUserDataError: Если email отсутствует
         """
         if not user_data.email:
             raise OAuthUserDataError(
@@ -180,28 +168,19 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
 
     async def _create_user(self, user_data: OAuthUserData) -> UserCredentialsSchema:
         """
-        Создание нового пользователя через OAuth.
+        Создание пользователя через OAuth.
 
-        Процесс создания:
-        1. Формирование данных пользователя из OAuth профиля
-        2. Создание пользователя в БД
-        3. Преобразование в схему для токена
+        Flow:
+        1. Получение нормализованных данных от handler'а
+        2. Формирование OAuthUserSchema с валидированными полями
+        3. Создание пользователя с типизированным provider_id
+        4. Логирование результата
 
         Args:
-            user_data: Данные пользователя от OAuth провайдера
+            user_data: Типизированные данные от handler'а
 
         Returns:
-            UserCredentialsSchema: Схема пользователя для создания токена
-
-        Usage:
-            oauth_data = await provider.get_user_info(token)
-            user = await self._create_user(oauth_data)
-            # Returns: UserCredentialsSchema(id=1, email="user@mail.com", name="John")
-
-        Notes:
-            - Если first_name не указан, берется часть email до @
-            - Пароль генерируется случайным образом
-            - ID провайдера сохраняется в поле {provider}_id
+            UserCredentialsSchema: Созданный пользователь
         """
 
         oauth_user = OAuthUserSchema(
@@ -260,48 +239,19 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
 
     def _validate_config(self) -> None:
         """
-        Валидация конфигурации провайдера
+        Валидация конфигурации провайдера.
 
-        Проверяет наличие обязательных полей в конфигурации провайдера:
-            - client_id
-            - client_secret
+        Проверяет обязательные поля для работы с API провайдера:
+        - client_id (str/int в зависимости от провайдера)
+        - client_secret (str)
 
-        Данные параметрые необходимо получить у провайдера и хранить в секретах.
-
-        Если какое-то из полей не указано, выбрасывается исключение OAuthConfigError
+        Raises:
+            OAuthConfigError: Если отсутствуют обязательные поля
         """
         if not self.config.client_id or not self.config.client_secret:
             raise OAuthConfigError(self.provider, ["client_id", "client_secret"])
     
     async def _get_token_data(self, code: str, state: str = None) -> dict:
-        # token_params = OAuthTokenParams(
-        #     client_id=self.config.client_id,
-        #     client_secret=self.config.client_secret,
-        #     code=code,
-        #     redirect_uri=str(await self._get_callback_url()),
-        # )
-
-        # if hasattr(self, "_handle_state"):
-        #     self.logger.debug("Начало работы с handle_state:")
-        #     self.logger.debug(f"state: {state}")
-        #     self.logger.debug(f"token_params: {token_params.model_dump()}")
-        #     await self._handle_state(state, token_params.model_dump())
-
-        # token_data = await self.http_client.get_token(
-        #     self.config.token_url,
-        #     token_params.model_dump()
-        # )
-
-        # if "error" in token_data:
-        #     if token_data["error"] == "invalid_grant":
-        #         raise OAuthInvalidGrantError(self.provider)
-        #     raise OAuthTokenError(self.provider, token_data["error"])
-
-        # return OAuthProviderResponse(
-        #     access_token=token_data["access_token"],
-        #     token_type=token_data.get("token_type", "bearer"),
-        #     expires_in=token_data.get("expires_in")
-        # )
 
         token_params = OAuthTokenParams(
             client_id=self.config.client_id,
@@ -314,6 +264,23 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             self.config.token_url,
             token_params.model_dump()
         )
+
+    async def _get_callback_url(self) -> str:
+        """
+        Генерирует callback URL для OAuth провайдера.
+
+        Этот метод использует конфигурацию приложения для формирования полного URL,
+        который включает в себя текущий домен, версию API и имя провайдера.
+
+        Пример использования:
+            url = await provider._get_callback_url()
+            # Возвращает: https://domain.com/api/v1/oauth/google/callback
+
+        Returns:
+            str: Полный валидный URL для callback эндпоинта провайдера.
+        """
+        return self.config.callback_url.format(provider=self.provider)
+
 
     @abstractmethod
     async def get_auth_url(self) -> RedirectResponse:
@@ -406,27 +373,19 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
 
         Flow:
         1. Запрос к API провайдера с токеном
-        2. Преобразование ответа в единый формат через handler
+        2. Преобразование ответа через типизированный handler (YandexHandler/GoogleHandler/VKHandler)
+        3. Валидация обязательных полей
+        4. Нормализация имен пользователя
 
         Args:
             token: Токен доступа от провайдера
+            client_id: ID приложения (опционально)
 
         Returns:
-            OAuthUserData: Унифицированные данные пользователя
+            OAuthUserData: Типизированные данные пользователя (YandexUserData/GoogleUserData/VKUserData)
 
-        Usage:
-            # В базовом провайдере
-            user_data = await self.http_client.get_user_info(
-                self.config.user_info_url,
-                token
-            )
-            return await self.user_handler(user_data)
-
-            # В конкретном провайдере
-            async def get_user_info(self, token: str) -> OAuthUserData:
-                data = await super().get_user_info(token)
-                # Дополнительная обработка если нужно
-                return data
+        Raises:
+            OAuthUserDataError: Если отсутствуют обязательные поля
         """
         user_data = await self.http_client.get_user_info(
             self.config.user_info_url, 
@@ -434,55 +393,3 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             client_id=client_id
         )
         return await self.user_handler(user_data)
-
-    @abstractmethod
-    async def _get_callback_url(self) -> str:
-        """
-        Генерирует callback URL для OAuth провайдера.
-
-        #! Этот метод должен быть реализован в каждом наследуемом классе.
-
-        Этот метод использует конфигурацию приложения для формирования полного URL,
-        который включает в себя текущий домен, версию API и имя провайдера.
-
-        Пример использования:
-            url = await provider._get_callback_url()
-            # Возвращает: https://domain.com/api/v1/oauth/google/callback
-
-        Returns:
-            str: Полный валидный URL для callback эндпоинта провайдера.
-        """
-        return self.config.callback_url.format(provider=self.provider)
-
-    @abstractmethod
-    async def _handle_state(self, state: str, token_params: dict) -> None:
-        """
-        Обработка state параметра для OAuth провайдера.
-
-        #! Этот метод должен быть реализован в каждом наследуемом классе.
-
-        Метод реализует различные механизмы безопасности OAuth flow:
-        - VK: PKCE (Proof Key for Code Exchange) с code_verifier
-        - Google: Защита от CSRF атак через state
-        - Yandex: Не использует state
-
-        Args:
-            state: Параметр state из OAuth callback
-            token_params: Параметры для получения токена
-
-        Usage:
-            # VK Provider
-            async def _handle_state(self, state: str, token_params: dict) -> None:
-                if state:
-                    verifier = await self._redis_storage.get_verifier(state)
-                    if not verifier:
-                        raise OAuthTokenError(self.provider, "Invalid state/    verifier")
-                    token_params["code_verifier"] = verifier
-                    await self._redis_storage.delete_verifier(state)
-
-            # Google Provider
-            async def _handle_state(self, state: str, token_params: dict) -> None:
-                if state != await self._redis_storage.get_state():
-                    raise OAuthTokenError(self.provider, "Invalid state")
-        """
-        pass
