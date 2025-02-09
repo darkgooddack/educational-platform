@@ -19,7 +19,7 @@ services:
       - dev-network
 
   postgres:
-    image: postgres:latest
+    image: postgres:16
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
