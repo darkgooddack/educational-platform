@@ -24,5 +24,5 @@ __all__ = [
     "get_rabbitmq",
     "oauth2_schema",
     "get_current_user",
-    "get_s3_session"
+    "get_s3_session",
 ]

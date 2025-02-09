@@ -1,7 +1,8 @@
 from fastapi.responses import RedirectResponse
 
 from app.core.exceptions import OAuthUserDataError
-from app.schemas import OAuthProvider, OAuthProviderResponse, YandexUserData, YandexTokenData
+from app.schemas import (OAuthProvider, OAuthProviderResponse, YandexTokenData,
+                         YandexUserData)
 from app.services.v1.oauth.base import BaseOAuthProvider
 
 
@@ -27,13 +28,13 @@ class YandexOAuthProvider(BaseOAuthProvider):
 
     Usage:
         provider = YandexOAuthProvider(session)
-        
+
         # 1. Получение URL для авторизации
         auth_url = await provider.get_auth_url()
-        
+
         # 2. Получение токена по коду
         token = await provider.get_token(code)
-        
+
         # 3. Получение данных пользователя
         user_data = await provider.get_user_info(token.access_token)
     """
@@ -41,7 +42,7 @@ class YandexOAuthProvider(BaseOAuthProvider):
     def __init__(self, session):
         """
         Инициализация Яндекс OAuth провайдера.
-    
+
         Args:
             session: Сессия базы данных
         """
@@ -50,7 +51,7 @@ class YandexOAuthProvider(BaseOAuthProvider):
     def _get_email(self, user_data: YandexUserData) -> str:
         """
         Получение email пользователя из default_email.
-        
+
         Яндекс возвращает основной email в поле default_email,
         который используется для идентификации пользователя.
 
@@ -79,7 +80,9 @@ class YandexOAuthProvider(BaseOAuthProvider):
         """
         return await super().get_auth_url()
 
-    async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
+    async def get_token(
+        self, code: str, state: str = None, device_id: str = None
+    ) -> OAuthProviderResponse:
         """
         Получение токена доступа от Яндекса.
 
@@ -103,14 +106,14 @@ class YandexOAuthProvider(BaseOAuthProvider):
             token_type=token_data.get("token_type", "bearer"),
             expires_in=token_data["expires_in"],
             refresh_token=token_data["refresh_token"],
-            scope=token_data["scope"]
+            scope=token_data["scope"],
         )
 
     async def get_user_info(self, token: str) -> YandexUserData:
         """
         Получение данных пользователя через Яндекс API.
 
-        Использует стандартный эндпоинт Яндекс ID для получения 
+        Использует стандартный эндпоинт Яндекс ID для получения
         информации о пользователе. Возвращает данные в формате YandexUserData.
 
         Args:

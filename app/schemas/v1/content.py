@@ -1,9 +1,10 @@
 from enum import Enum
 
+
 class ContentType(str, Enum):
     """
     Перечисление типов контента
-    
+
     Attributes:
         TEXT (str): Текстовый контент
         IMAGE (str): Изображение
@@ -11,6 +12,7 @@ class ContentType(str, Enum):
         AUDIO (str): Аудио
         CODE (str): Код
     """
+
     TEXT = "text"
     IMAGE = "image"
     VIDEO = "video"

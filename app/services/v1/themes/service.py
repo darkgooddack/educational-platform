@@ -1,11 +1,14 @@
 from typing import List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import ThemeSchema, ThemeCreateSchema, PaginationParams
-from app.models import ThemeModel
-from app.services import BaseService
 from app.core.exceptions import ThemeNotFoundError
+from app.models import ThemeModel
+from app.schemas import PaginationParams, ThemeCreateSchema, ThemeSchema
+from app.services import BaseService
+
 from .data_manager import ThemeDataManager
+
 
 class ThemeService(BaseService):
     def __init__(self, session: AsyncSession):
@@ -16,7 +19,7 @@ class ThemeService(BaseService):
     async def get_themes(self) -> List[ThemeSchema]:
         """
         Получает плоский список всех тем без пагинации.
-    
+
         Returns:
             List[ThemeSchema]: Полный список тем
         """
@@ -58,7 +61,7 @@ class ThemeService(BaseService):
         theme = ThemeModel(
             name=theme_data.name,
             description=theme_data.description,
-            parent_id=theme_data.parent_id
+            parent_id=theme_data.parent_id,
         )
         return await self._data_manager.add_theme(theme)
 

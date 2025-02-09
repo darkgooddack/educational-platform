@@ -58,11 +58,10 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
 
         if not user_model:
             raise InvalidCredentialsError()
-            
+
         if not user_model.is_active:
             raise UserInactiveError(
-                message="Аккаунт деактивирован",
-                extra={"email": credentials.email}
+                message="Аккаунт деактивирован", extra={"email": credentials.email}
             )
 
         if not user_model or not self.verify(

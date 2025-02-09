@@ -24,10 +24,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import UserCreationError, UserExistsError
 from app.core.security import HashingMixin
 from app.models import UserModel
-from app.schemas import (ManagerSelectSchema, Page, PaginationParams,
-                         RegistrationResponseSchema, RegistrationSchema,
-                         UserCredentialsSchema, UserRole, UserSchema,
-                         UserUpdateSchema, OAuthUserSchema)
+from app.schemas import (ManagerSelectSchema, OAuthUserSchema, Page,
+                         PaginationParams, RegistrationResponseSchema,
+                         RegistrationSchema, UserCredentialsSchema, UserRole,
+                         UserSchema, UserUpdateSchema)
 from app.services import BaseService
 
 from .data_manager import UserDataManager
@@ -74,7 +74,6 @@ class UserService(HashingMixin, BaseService):
             UserUpdateSchema: Обновленный пользователь
         """
         return await self._data_manager.toggle_active(user_id, is_active)
-
 
     async def assign_role(self, user_id: int, role: UserRole) -> UserUpdateSchema:
         """
@@ -129,11 +128,15 @@ class UserService(HashingMixin, BaseService):
         """
         created_user = await self._create_user_internal(user)
 
-        self.logger.debug("Созданный пользователь (created_user): %s", vars(created_user))
+        self.logger.debug(
+            "Созданный пользователь (created_user): %s", vars(created_user)
+        )
 
         return created_user
 
-    async def _create_user_internal(self, user: OAuthUserSchema | RegistrationSchema) -> UserCredentialsSchema:
+    async def _create_user_internal(
+        self, user: OAuthUserSchema | RegistrationSchema
+    ) -> UserCredentialsSchema:
         """
         Внутренний метод создания пользователя в базе данных.
 
@@ -155,9 +158,7 @@ class UserService(HashingMixin, BaseService):
         # Преобразуем в OAuthUserSchema если есть OAuth идентификаторы
         user_dict = user.model_dump()
         user = OAuthUserSchema(**user_dict)
-        self.logger.debug(
-                    "user теперь имеет тип '%s'", type(user)
-                )
+        self.logger.debug("user теперь имеет тип '%s'", type(user))
         data_manager = UserDataManager(self.session)
 
         # Проверка email
@@ -181,9 +182,7 @@ class UserService(HashingMixin, BaseService):
         vk_id = user_data.get("vk_id")
         google_id = user_data.get("google_id")
         yandex_id = user_data.get("yandex_id")
-        self.logger.debug(
-                    "user имеет тип '%s'", type(user)
-                )
+        self.logger.debug("user имеет тип '%s'", type(user))
         # Устанавливаем идентификаторы провайдеров, если они есть
         user_model = UserModel(
             first_name=user.first_name,
@@ -206,7 +205,7 @@ class UserService(HashingMixin, BaseService):
                 id=created_user.id,
                 email=created_user.email,
                 name=created_user.first_name,
-                hashed_password=user_model.hashed_password, #! Костыль
+                hashed_password=user_model.hashed_password,  #! Костыль
             )
             return user_credentials
 

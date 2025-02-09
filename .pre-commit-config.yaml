@@ -1,0 +1,14 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lint
+        name: lint
+        entry: uv run lint
+        language: system
+        pass_filenames: false
+
+      - id: test
+        name: test
+        entry: uv run test
+        language: system
+        pass_filenames: false

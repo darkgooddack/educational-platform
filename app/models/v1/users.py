@@ -13,18 +13,19 @@
 Этот модуль предназначен для использования в сочетании с SQLAlchemy ORM
 для выполнения операций с базой данных, связанных с пользователями.
 """
+
 from datetime import datetime
+
 from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import BaseModel
 from app.models.v1.feedbacks import FeedbackModel
-from app.models.v1.videos import VideoLectureModel
-from app.models.v1.tests import TestModel
 from app.models.v1.lectures import LectureModel
 from app.models.v1.posts import PostModel
+from app.models.v1.tests import TestModel
+from app.models.v1.videos import VideoLectureModel
 from app.schemas import UserRole
-
 
 
 class UserModel(BaseModel):
@@ -78,6 +79,12 @@ class UserModel(BaseModel):
     video_lectures: Mapped[list["VideoLectureModel"]] = relationship(
         "VideoLectureModel", back_populates="author", lazy="dynamic"
     )
-    tests: Mapped[list["TestModel"]] = relationship("TestModel", back_populates="author", lazy="dynamic")
-    lectures: Mapped[list["LectureModel"]] = relationship("LectureModel", back_populates="author")
-    posts: Mapped[list["PostModel"]] = relationship("PostModel", back_populates="author")
+    tests: Mapped[list["TestModel"]] = relationship(
+        "TestModel", back_populates="author", lazy="dynamic"
+    )
+    lectures: Mapped[list["LectureModel"]] = relationship(
+        "LectureModel", back_populates="author"
+    )
+    posts: Mapped[list["PostModel"]] = relationship(
+        "PostModel", back_populates="author"
+    )

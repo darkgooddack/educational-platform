@@ -12,12 +12,16 @@
 Модуль использует асинхронные возможности aioboto3 для эффективной работы с S3
 в асинхронных приложениях.
 """
+
 import logging
 from typing import Any, AsyncGenerator
+
 from aioboto3 import Session
 from botocore.config import Config
 from botocore.exceptions import ClientError
+
 from app.core.config import config
+
 
 class S3Session:
     """
@@ -70,11 +74,9 @@ class S3Session:
             "Создание S3 клиента с параметрами: region=%s, endpoint=%s, key_id=%s",
             self.region_name,
             self.endpoint_url,
-            self.access_key_id[:4] + '***'
+            self.access_key_id[:4] + "***",
         )
-        s3_config = Config(
-            s3={'addressing_style': 'virtual'}
-        )
+        s3_config = Config(s3={"addressing_style": "virtual"})
         try:
             session = Session()
             async with session.client(
@@ -91,10 +93,11 @@ class S3Session:
             self.logger.error(
                 "Ошибка создания S3 клиента: %s\nДетали: %s",
                 e,
-                e.response['Error'] if hasattr(e, 'response') else 'Нет деталей'
+                e.response["Error"] if hasattr(e, "response") else "Нет деталей",
             )
             self.logger.error("❌ Ошибка при создании клиента S3: %s", e)
             raise
+
 
 class SessionContextManager:
     """
@@ -154,7 +157,5 @@ async def get_s3_session() -> AsyncGenerator[Any, None]:
         async with SessionContextManager() as client:
             yield client
     except Exception as e:
-        SessionContextManager().logger.error(
-            "Ошибка при получении сессии S3: %s", e
-        )
+        SessionContextManager().logger.error("Ошибка при получении сессии S3: %s", e)
         raise

@@ -137,11 +137,11 @@ class TokenMixin:
         Returns:
             Payload для JWT
         """
-        expires_at = int(datetime.now(timezone.utc).timestamp()) + TokenMixin.get_token_expiration()
-        return {
-            "sub": user.email,
-            "expires_at": expires_at
-        }
+        expires_at = (
+            int(datetime.now(timezone.utc).timestamp())
+            + TokenMixin.get_token_expiration()
+        )
+        return {"sub": user.email, "expires_at": expires_at}
 
     @staticmethod
     def get_token_key() -> str:
@@ -207,7 +207,10 @@ class TokenMixin:
         Returns:
             email: Email пользователя.
         """
-        expires_at = int(datetime.now(timezone.utc).timestamp()) + TokenMixin.get_token_expiration()
+        expires_at = (
+            int(datetime.now(timezone.utc).timestamp())
+            + TokenMixin.get_token_expiration()
+        )
 
         email = payload.get("sub")
         expires_at = payload.get("expires_at")

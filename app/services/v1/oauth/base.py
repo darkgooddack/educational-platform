@@ -17,8 +17,8 @@ from app.schemas import (OAuthConfig, OAuthParams, OAuthProvider,
                          OAuthTokenParams, OAuthUserData, OAuthUserSchema,
                          RegistrationSchema, UserCredentialsSchema)
 from app.services import AuthService
-from app.services.v1.users import UserService
 from app.services.v1.oauth.handlers import PROVIDER_HANDLERS
+from app.services.v1.users import UserService
 
 
 class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
@@ -76,16 +76,16 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
     async def authenticate(self, user_data: OAuthUserData) -> OAuthResponse:
         """
         Аутентификация через OAuth провайдер.
-    
+
         Flow:
         1. Поиск пользователя по типизированному provider_id
         2. Если не найден - поиск по валидированному email
         3. Если не найден - создание пользователя с нормализованными данными
         4. Генерация токенов
-    
+
         Args:
             user_data: Типизированные данные от handler'а провайдера (YandexUserData/GoogleUserData/VKUserData)
-    
+
         Returns:
             OAuthResponse: Токены и redirect_uri
         """
@@ -140,7 +140,9 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         try:
             return int(user_data.id)
         except (ValueError, TypeError):
-            raise ValueError(f"ID провайдера '{user_data.id}' невозможно преобразовать в целое число")
+            raise ValueError(
+                f"ID провайдера '{user_data.id}' невозможно преобразовать в целое число"
+            )
 
     def _get_email(self, user_data: OAuthUserData) -> str:
         """
@@ -196,7 +198,9 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             RegistrationSchema(**oauth_user.model_dump())
         )
 
-        self.logger.debug("Созданный пользователь (user_credentials): %s", vars(user_credentials))
+        self.logger.debug(
+            "Созданный пользователь (user_credentials): %s", vars(user_credentials)
+        )
 
         return user_credentials
 
@@ -250,7 +254,7 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         """
         if not self.config.client_id or not self.config.client_secret:
             raise OAuthConfigError(self.provider, ["client_id", "client_secret"])
-    
+
     async def _get_token_data(self, code: str, state: str = None) -> dict:
 
         token_params = OAuthTokenParams(
@@ -259,10 +263,9 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             code=code,
             redirect_uri=str(await self._get_callback_url()),
         )
-        
+
         return await self.http_client.get_token(
-            self.config.token_url,
-            token_params.model_dump()
+            self.config.token_url, token_params.model_dump()
         )
 
     async def _get_callback_url(self) -> str:
@@ -280,7 +283,6 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             str: Полный валидный URL для callback эндпоинта провайдера.
         """
         return self.config.callback_url.format(provider=self.provider)
-
 
     @abstractmethod
     async def get_auth_url(self) -> RedirectResponse:
@@ -335,7 +337,9 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
         return RedirectResponse(url=auth_url)
 
     @abstractmethod
-    async def get_token(self, code: str, state: str = None, device_id: str = None) -> OAuthProviderResponse:
+    async def get_token(
+        self, code: str, state: str = None, device_id: str = None
+    ) -> OAuthProviderResponse:
         """
         Получение токена доступа от OAuth провайдера.
 
@@ -388,8 +392,6 @@ class BaseOAuthProvider(ABC, HashingMixin, TokenMixin):
             OAuthUserDataError: Если отсутствуют обязательные поля
         """
         user_data = await self.http_client.get_user_info(
-            self.config.user_info_url, 
-            token,
-            client_id=client_id
+            self.config.user_info_url, token, client_id=client_id
         )
         return await self.user_handler(user_data)

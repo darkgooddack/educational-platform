@@ -52,21 +52,15 @@ class Settings(BaseSettings):
             'allow_headers': ['*']
         }
     """
-    aws_service_name: str = Field(
-        default="s3",
-        description="Сервис AWS"
-    )
 
-    aws_region: str = Field(
-        default="ru-central1",
-        description="Регион AWS"
-    )
+    aws_service_name: str = Field(default="s3", description="Сервис AWS")
+
+    aws_region: str = Field(default="ru-central1", description="Регион AWS")
 
     aws_endpoint: str
 
     aws_bucket_name: str = Field(
-        default="education-platform",
-        description="Имя бакета AWS"
+        default="education-platform", description="Имя бакета AWS"
     )
 
     aws_access_key_id: str
@@ -130,7 +124,7 @@ class Settings(BaseSettings):
                 "callback_url": "http://localhost:8000/api/v1/oauth/yandex/callback",
             },
             "vk": {
-                "client_id": 0, # VK: client_id == id приложения >_<
+                "client_id": 0,  # VK: client_id == id приложения >_<
                 "client_secret": "",
                 "auth_url": "https://id.vk.com/authorize",
                 "token_url": "https://id.vk.com/oauth2/auth",
@@ -177,6 +171,7 @@ class Settings(BaseSettings):
             "aws_access_key_id": self.aws_access_key_id,
             "aws_secret_access_key": self.aws_secret_access_key,
         }
+
     @property
     def cors_params(self) -> Dict[str, Any]:
         """

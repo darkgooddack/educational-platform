@@ -22,7 +22,9 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
     """
 
     def __init__(self, session: AsyncSession):
-        super().__init__(session=session, schema=VideoLectureSchema, model=VideoLectureModel)
+        super().__init__(
+            session=session, schema=VideoLectureSchema, model=VideoLectureModel
+        )
 
     async def get_videos(
         self,
@@ -45,10 +47,9 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
 
         # Поиск по названию и описанию
         if search:
-            search_filter = (
-                self.model.title.ilike(f"%{search}%") |
-                self.model.description.ilike(f"%{search}%")
-            )
+            search_filter = self.model.title.ilike(
+                f"%{search}%"
+            ) | self.model.description.ilike(f"%{search}%")
             statement = statement.filter(search_filter)
 
         # Фильтр по тебе

@@ -6,17 +6,17 @@
 
 from .v1.base import BaseModel
 from .v1.feedbacks import FeedbackModel
+from .v1.lectures import LectureContentBlockModel, LectureModel
+from .v1.posts import PostContentBlockModel, PostModel, PostTagModel, TagModel
+from .v1.tests import AnswerModel, QuestionModel, TestModel
+from .v1.themes import ThemeModel
 from .v1.users import UserModel
 from .v1.videos import VideoLectureModel
-from .v1.lectures import LectureModel, LectureContentBlockModel
-from .v1.tests import TestModel, QuestionModel, AnswerModel
-from .v1.posts import PostModel, TagModel, PostTagModel, PostContentBlockModel
-from .v1.themes import ThemeModel
 
 __all__ = [
-    "BaseModel", 
-    "UserModel", 
-    "FeedbackModel", 
+    "BaseModel",
+    "UserModel",
+    "FeedbackModel",
     "VideoLectureModel",
     "LectureModel",
     "LectureContentBlockModel",
@@ -27,5 +27,5 @@ __all__ = [
     "TagModel",
     "PostTagModel",
     "PostContentBlockModel",
-    "ThemeModel"
-    ]
+    "ThemeModel",
+]

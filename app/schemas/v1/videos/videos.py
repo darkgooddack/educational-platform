@@ -1,7 +1,9 @@
 from typing import List, Optional
+
 from fastapi import UploadFile
 from pydantic import Field
-from ..base import BaseSchema, BaseInputSchema, ListResponseSchema
+
+from ..base import BaseInputSchema, BaseSchema, ListResponseSchema
 
 
 class VideoLectureBase(BaseSchema):
@@ -18,6 +20,7 @@ class VideoLectureBase(BaseSchema):
         author_id (int): ID автора видео лекции.
         thumbnail_url (str): URL-адрес миниатюры видео.
     """
+
     title: str = Field(min_length=0, max_length=50)
     description: str = Field(min_length=0, max_length=200)
     theme_id: Optional[int] = None
@@ -26,6 +29,7 @@ class VideoLectureBase(BaseSchema):
     duration: int
     author_id: int
     thumbnail_url: str
+
 
 class VideoLectureCreateSchema(BaseInputSchema):
     """
@@ -39,15 +43,19 @@ class VideoLectureCreateSchema(BaseInputSchema):
         thumbnail_file (UploadFile): Файл миниатюры видео лекции.
 
     """
+
     title: str = Field(min_length=0, max_length=50)
     description: str = Field(min_length=0, max_length=200)
     theme_id: int
     video_file: UploadFile
     thumbnail_file: UploadFile
 
+
 class VideoLectureSchema(VideoLectureBase):
     """Полная схема видео-лекции"""
+
     pass
+
 
 class VideoLectureResponseSchema(BaseInputSchema):
     """
@@ -65,6 +73,8 @@ class VideoLectureResponseSchema(BaseInputSchema):
     thumbnail_url: str
     message: str = "Видео успешно добавлено"
 
+
 class VideoLectureListResponse(ListResponseSchema[VideoLectureSchema]):
     """Схема для списка видео-лекций"""
+
     items: List[VideoLectureSchema]

@@ -8,7 +8,7 @@ class BaseHttpClient:
     def __init__(self):
         self._session: Optional[aiohttp.ClientSession] = None
         self.logger = logging.getLogger(self.__class__.__name__)
-    
+
     async def __aenter__(self):
         return self
 
@@ -20,7 +20,7 @@ class BaseHttpClient:
             await self._session.close()
             self._session = None
             self.logger.debug("Сессия закрыта")
-            
+
     async def _get_session(self) -> aiohttp.ClientSession:
         if not self._session:
             self._session = aiohttp.ClientSession()

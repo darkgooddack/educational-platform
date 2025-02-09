@@ -11,6 +11,7 @@
 
 from app.core.exceptions.v1.base import BaseAPIException
 
+
 class ThemeNotFoundError(BaseAPIException):
     """
     Тема не найдена.
@@ -25,8 +26,9 @@ class ThemeNotFoundError(BaseAPIException):
             status_code=404,
             detail=message,
             error_type="theme_not_found",
-            extra={"theme_id": theme_id} if theme_id else None
+            extra={"theme_id": theme_id} if theme_id else None,
         )
+
 
 class ThemeExistsError(BaseAPIException):
     """
@@ -41,5 +43,5 @@ class ThemeExistsError(BaseAPIException):
             status_code=409,
             detail=f"Тема с названием '{name}' уже существует",
             error_type="theme_exists",
-            extra={"theme_name": name}
+            extra={"theme_name": name},
         )

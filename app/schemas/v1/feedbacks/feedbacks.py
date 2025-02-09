@@ -4,6 +4,7 @@
 
 from enum import Enum
 from typing import Optional
+
 from pydantic import EmailStr, Field
 
 from app.schemas.v1.base import BaseInputSchema, BaseSchema
@@ -36,12 +37,13 @@ class FeedbackSchema(BaseSchema):
         phone (str | None): Телефон пользователя
         email (EmailStr): Электронная почта пользователя
         status (FeedbackStatus): Статус обратной связи
-    
+
     Наследует:
         id: Optional[int] = None
         created_at: Optional[datetime] = None
         updated_at: Optional[datetime] = None
     """
+
     manager_id: Optional[int] = None
     name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
     phone: Optional[str] = Field(

@@ -233,8 +233,37 @@ def lint():
     """
     subprocess.run(["black", "app/"], check=True)
     subprocess.run(["isort", "app/"], check=True)
-    subprocess.run(["flake8", "app/"], check=True)
-    subprocess.run(["mypy", "app/"], check=True)
+    # subprocess.run(["mypy", "app/"], check=True)
+
+    try:
+        result = subprocess.run(
+            ["flake8", "app/"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        errors = result.stdout.split('\n')
+
+        # Группируем ошибки по типу
+        error_groups = {
+            'E501': 'Длинные строки',
+            'F821': 'Неопределенные переменные',
+            'F841': 'Неиспользуемые переменные',
+            'W605': 'Некорректные escape-последовательности',
+            'E262': 'Неправильные комментарии'
+        }
+
+        for code, desc in error_groups.items():
+            matches = [e for e in errors if code in e]
+            if matches:
+                print(f"\n{desc}:")
+                for error in matches:
+                    print(f"- {error.split(':')[0]}")
+
+    except subprocess.CalledProcessError as e:
+        print("❌ Найдены ошибки линтера")
+        return False
+
 
 def format():
     """

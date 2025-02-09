@@ -3,14 +3,16 @@
 Этот модуль предоставляет класс S3DataManager, который используется для управления данными в S3.
 Он содержит методы для создания бакета, проверки существования бакета, загрузки файлов и другие операции.
 """
+
 import logging
 import os
 import uuid
 from typing import List
+
 import aiofiles
+from botocore.exceptions import ClientError
 from fastapi import UploadFile
 
-from botocore.exceptions import ClientError
 from app.core.config import config
 from app.core.dependencies.s3 import S3Session, SessionContextManager
 
@@ -23,6 +25,7 @@ class SessionMixin:
 
     def __init__(self, session: S3Session):
         self.session = session
+
 
 class S3DataManager(SessionMixin):
     """
@@ -174,7 +177,7 @@ class S3DataManager(SessionMixin):
             file.content_type,
             len(await file.read()),  # прочитаем размер
             bucket_name,
-            file_key
+            file_key,
         )
         await file.seek(0)  # вернем указатель в начало
         try:
@@ -183,7 +186,11 @@ class S3DataManager(SessionMixin):
             file_key = (
                 f"{file_key}/{unique_filename}" if file_key else f"{unique_filename}"
             )
-            self.logger.debug("Вызов put_object с параметрами: bucket=%s, key=%s", bucket_name, file_key)
+            self.logger.debug(
+                "Вызов put_object с параметрами: bucket=%s, key=%s",
+                bucket_name,
+                file_key,
+            )
 
             async with self.session as s3:
                 response = await s3.put_object(
@@ -191,8 +198,8 @@ class S3DataManager(SessionMixin):
                     Key=file_key,
                     Body=file_content,
                     ContentType=file.content_type,
-                    ACL='public-read',
-                    CacheControl='max-age=31536000',
+                    ACL="public-read",
+                    CacheControl="max-age=31536000",
                 )
                 self.logger.debug("Ответ S3(put_object): %s", response)
             return self.get_link_file(file_key, bucket_name)
@@ -201,7 +208,7 @@ class S3DataManager(SessionMixin):
                 "Ошибка загрузки файла %s: %s\nДетали: %s",
                 file.filename,
                 e,
-                e.response['Error'] if hasattr(e, 'response') else 'Нет деталей'
+                e.response["Error"] if hasattr(e, "response") else "Нет деталей",
             )
             raise ValueError(f"Ошибка при загрузке файла: {e}") from e
 
@@ -316,9 +323,7 @@ class S3DataManager(SessionMixin):
             async with aiofiles.open(file=file_path, mode="wb") as file:
                 async with self.session as s3:
                     await s3.download_fileobj(
-                        Bucket=bucket_name,
-                        Key=file_key,
-                        Fileobj=file
+                        Bucket=bucket_name, Key=file_key, Fileobj=file
                     )
         except ClientError as e:
             raise ValueError(f"Ошибка при скачивании файла: {e}") from e
@@ -375,10 +380,7 @@ class S3DataManager(SessionMixin):
 
         try:
             async with self.session as s3:
-                response = await s3.list_objects_v2(
-                    Bucket=bucket_name,
-                    Prefix=prefix
-                )
+                response = await s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
             keys = []
             for obj in response.get("Contents", []):
                 keys.append(obj["Key"])

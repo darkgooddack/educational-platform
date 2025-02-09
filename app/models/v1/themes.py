@@ -5,10 +5,11 @@ from app.models import BaseModel
 from app.models.v1 import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from app.models.v1.lectures import LectureModel
+    from app.models.v1.tests import TestModel
     from app.models.v1.users import UserModel
     from app.models.v1.videos import VideoLectureModel
-    from app.models.v1.tests import TestModel
-    from app.models.v1.lectures import LectureModel
+
 
 class ThemeModel(BaseModel):
     """
@@ -30,8 +31,13 @@ class ThemeModel(BaseModel):
     name: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
     parent_id: Mapped[int] = mapped_column(ForeignKey("themes.id"), nullable=True)
-    
-    video_lectures: Mapped[list["VideoLectureModel"]] = relationship("VideoLectureModel", back_populates="theme", lazy="dynamic")
-    tests: Mapped[list["TestModel"]] = relationship("TestModel", back_populates="theme", lazy="dynamic")
-    lectures: Mapped[list["LectureModel"]] = relationship("LectureModel", back_populates="theme", lazy="dynamic")
 
+    video_lectures: Mapped[list["VideoLectureModel"]] = relationship(
+        "VideoLectureModel", back_populates="theme", lazy="dynamic"
+    )
+    tests: Mapped[list["TestModel"]] = relationship(
+        "TestModel", back_populates="theme", lazy="dynamic"
+    )
+    lectures: Mapped[list["LectureModel"]] = relationship(
+        "LectureModel", back_populates="theme", lazy="dynamic"
+    )

@@ -1,11 +1,13 @@
 from typing import List, Optional
-from sqlalchemy import select, or_
+
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import ThemeExistsError, ThemeNotFoundError
 from app.models import ThemeModel
-from app.schemas import ThemeSchema, PaginationParams
+from app.schemas import PaginationParams, ThemeSchema
 from app.services import BaseDataManager
-from app.core.exceptions import ThemeNotFoundError, ThemeExistsError
+
 
 class ThemeDataManager(BaseDataManager):
     def __init__(self, session: AsyncSession):
@@ -52,7 +54,7 @@ class ThemeDataManager(BaseDataManager):
             query = query.filter(
                 or_(
                     self.model.name.ilike(f"%{search}%"),
-                    self.model.description.ilike(f"%{search}%")
+                    self.model.description.ilike(f"%{search}%"),
                 )
             )
 
@@ -92,24 +94,24 @@ class ThemeDataManager(BaseDataManager):
         Raises:
             ThemeNotFoundError: Если тема не найдена
         """
-        theme = await self.get_one(
-            select(self.model).filter(self.model.id == theme_id)
-        )
+        theme = await self.get_one(select(self.model).filter(self.model.id == theme_id))
         if not theme:
             raise ThemeNotFoundError(f"Тема с ID {theme_id} не найдена", theme_id)
         return theme
 
     async def get_themes_tree(self) -> List[ThemeSchema]:
         """
-    Получает полное дерево тем.
-    """
+        Получает полное дерево тем.
+        """
         # Сначала получим ВСЕ темы одним запросом
         query = select(self.model)
         result = await self.session.execute(query)
         all_themes = result.scalars().all()
 
         # Создадим словарь {id: тема} для быстрого поиска
-        themes_dict = {theme.id: ThemeSchema.model_validate(theme) for theme in   all_themes}
+        themes_dict = {
+            theme.id: ThemeSchema.model_validate(theme) for theme in all_themes
+        }
 
         # Строим дерево
         tree = []
@@ -121,11 +123,12 @@ class ThemeDataManager(BaseDataManager):
                 # Дочерние темы добавляем к родителям
                 parent = themes_dict.get(theme.parent_id)
                 if parent:
-                    if not hasattr(parent, 'children'):
+                    if not hasattr(parent, "children"):
                         parent.children = []
                     parent.children.append(theme)
 
         return tree
+
     async def get_child_themes(self, parent_id: int) -> List[ThemeSchema]:
         """
         Получает дочерние темы.

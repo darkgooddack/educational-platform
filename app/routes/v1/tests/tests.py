@@ -1,22 +1,17 @@
 import logging
 from typing import Optional
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db_session, get_current_user
-from app.schemas import (
-    TestCreateSchema,
-    TestListResponse,
-    TestSchema,
-    UserCredentialsSchema,
-    Page,
-    PaginationParams,
-    QuestionCreateSchema,
-    AnswerCreateSchema
-)
+from app.core.dependencies import get_current_user, get_db_session
+from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
+                         QuestionCreateSchema, TestCreateSchema,
+                         TestListResponse, TestSchema, UserCredentialsSchema)
 from app.services import TestService
 
 logger = logging.getLogger(__name__)
+
 
 def setup_routes(router: APIRouter):
 
@@ -38,17 +33,16 @@ def setup_routes(router: APIRouter):
             TestListResponse: Созданный тест
         """
         service = TestService(db_session)
-        result = await service.create_test(
-            test,
-            author_id=_current_user.id
-        )
+        result = await service.create_test(test, author_id=_current_user.id)
         return result
 
-    @router.get("/", response_model=Page[TestSchema]) 
+    @router.get("/", response_model=Page[TestSchema])
     async def get_tests(
         pagination: PaginationParams = Depends(),
         theme_id: Optional[int] = Query(None, description="Фильтр по теме"),
-        video_lecture_id: Optional[int] = Query(None, description="Фильтр по видео-лекции"),
+        video_lecture_id: Optional[int] = Query(
+            None, description="Фильтр по видео-лекции"
+        ),
         lecture_id: Optional[int] = Query(None, description="Фильтр по лекции"),
         search: str = Query(None, description="Поиск по названию и описанию"),
         db_session: AsyncSession = Depends(get_db_session),
@@ -73,13 +67,10 @@ def setup_routes(router: APIRouter):
             theme_id=theme_id,
             video_lecture_id=video_lecture_id,
             lecture_id=lecture_id,
-            search=search
+            search=search,
         )
         return Page(
-            items=tests,
-            total=total,
-            page=pagination.page,
-            size=pagination.limit
+            items=tests, total=total, page=pagination.page, size=pagination.limit
         )
 
     @router.get("/{test_id}", response_model=TestSchema)
@@ -110,5 +101,6 @@ def setup_routes(router: APIRouter):
         """Добавление варианта ответа к вопросу"""
         service = TestService(db_session)
         return await service.add_answer(question_id, answer)
+
 
 __all__ = ["setup_routes"]

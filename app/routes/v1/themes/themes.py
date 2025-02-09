@@ -1,10 +1,13 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
-from app.schemas import ThemeSchema, ThemeCreateSchema, ListResponseSchema, Page, PaginationParams
+from app.schemas import (ListResponseSchema, Page, PaginationParams,
+                         ThemeCreateSchema, ThemeSchema)
 from app.services import ThemeService
+
 
 def setup_routes(router: APIRouter):
 
@@ -16,9 +19,7 @@ def setup_routes(router: APIRouter):
         service = ThemeService(db_session)
         themes = await service.get_themes()
         return ListResponseSchema(
-            success=True,
-            message="Темы успешно получены",
-            items=themes
+            success=True, message="Темы успешно получены", items=themes
         )
 
     @router.get("", response_model=ListResponseSchema[ThemeSchema])
@@ -31,15 +32,10 @@ def setup_routes(router: APIRouter):
         """Получение списка тем с фильтрацией"""
         service = ThemeService(db_session)
         themes, total = await service.get_themes_paginated(
-            pagination=pagination,
-            parent_id=parent_id,
-            search=search
+            pagination=pagination, parent_id=parent_id, search=search
         )
         return ListResponseSchema(
-            success=True,
-            message="Темы успешно получены",
-            items=themes,
-            total=total
+            success=True, message="Темы успешно получены", items=themes, total=total
         )
 
     @router.get("", response_model=ListResponseSchema[ThemeSchema])
@@ -50,9 +46,7 @@ def setup_routes(router: APIRouter):
         service = ThemeService(db_session)
         themes = await service.get_themes()
         return ListResponseSchema(
-            success=True,
-            message="Темы успешно получены",
-            items=themes
+            success=True, message="Темы успешно получены", items=themes
         )
 
     @router.get("/tree", response_model=List[ThemeSchema])
@@ -80,5 +74,6 @@ def setup_routes(router: APIRouter):
         """Создание новой темы"""
         service = ThemeService(db_session)
         return await service.create_theme(theme)
+
 
 __all__ = ["setup_routes"]

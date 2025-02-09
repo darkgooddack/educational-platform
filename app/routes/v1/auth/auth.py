@@ -35,22 +35,16 @@ def setup_routes(router: APIRouter):
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TokenSchema:
         """
-        🔐 **Аутентифицирует пользователя по email и возвращает JWT токен.**
+        🔐 **Аутентифицирует пользователя по username(email) и возвращает JWT токен.**
 
         **Args**:
-        - **credentials**: Данные для аутентификации (AuthSchema)
+        - **form_data**: Данные для аутентификации username и password (OAuth2PasswordRequestForm)
 
         **Returns**:
         - **TokenSchema**: Токен доступа с access_token и token_type
-
-        **Raises**:
-        - **UserNotFoundError**: Если пользователь не найден
         """
         return await AuthService(db_session).authenticate(
-            AuthSchema(
-                email=form_data.username,
-                password=form_data.password
-            )
+            AuthSchema(email=form_data.username, password=form_data.password)
         )
 
     @router.post("/logout")

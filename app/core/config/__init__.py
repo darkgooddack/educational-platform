@@ -17,6 +17,7 @@ Example:
     >>> config.PORT
     8001
 """
+
 import logging
 from functools import lru_cache
 
@@ -24,6 +25,7 @@ from .app import AppConfig
 from .settings import Settings
 
 logger = logging.getLogger(__name__)
+
 
 class Config(Settings, AppConfig):
     """

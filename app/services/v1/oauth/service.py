@@ -3,11 +3,9 @@ import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.v1.oauth.oauth import OAuthProvider, OAuthResponse
-from app.services.v1.oauth.providers import (
-    GoogleOAuthProvider,
-    VKOAuthProvider,
-    YandexOAuthProvider
-)
+from app.services.v1.oauth.providers import (GoogleOAuthProvider,
+                                             VKOAuthProvider,
+                                             YandexOAuthProvider)
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -63,7 +61,7 @@ class OAuthService:
         provider: OAuthProvider,
         code: str,
         state: str = None,
-        device_id: str = None
+        device_id: str = None,
     ) -> OAuthResponse:
         """
         Аутентификация через OAuth

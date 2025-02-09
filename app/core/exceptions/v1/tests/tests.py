@@ -27,7 +27,7 @@ class TestNotFoundError(BaseAPIException):
             status_code=404,
             detail=message,
             error_type="test_not_found",
-            extra={"test_id": test_id} if test_id else None
+            extra={"test_id": test_id} if test_id else None,
         )
 
 
@@ -44,7 +44,7 @@ class TestExistsError(BaseAPIException):
             status_code=409,
             detail=f"Тест с названием '{title}' уже существует",
             error_type="test_exists",
-            extra={"test_title": title}
+            extra={"test_title": title},
         )
 
 
@@ -60,7 +60,7 @@ class QuestionNotFoundError(BaseAPIException):
     def __init__(self, message: str, question_id: int = None):
         super().__init__(
             status_code=404,
-            detail=message, 
+            detail=message,
             error_type="question_not_found",
-            extra={"question_id": question_id} if question_id else None
+            extra={"question_id": question_id} if question_id else None,
         )

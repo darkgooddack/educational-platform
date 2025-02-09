@@ -10,16 +10,14 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import config
-from app.schemas import UserCredentialsSchema
-from app.core.storages.redis.auth import AuthRedisStorage
 from app.core.exceptions.v1.auth.security import TokenInvalidError
+from app.core.storages.redis.auth import AuthRedisStorage
+from app.schemas import UserCredentialsSchema
 
 logger = logging.getLogger(__name__)
 
 oauth2_schema = OAuth2PasswordBearer(
-    tokenUrl=config.auth_url,
-    auto_error=False,
-    scheme_name="OAuth2PasswordBearer"
+    tokenUrl=config.auth_url, auto_error=False, scheme_name="OAuth2PasswordBearer"
 )
 
 

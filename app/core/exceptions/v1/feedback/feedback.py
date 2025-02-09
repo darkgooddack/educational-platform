@@ -14,6 +14,7 @@ class FeedbackAddError(DatabaseError):
             message=f"Ошибка при добавлении обратной связи: {message}", extra=extra
         )
 
+
 class FeedbackDeleteError(DatabaseError):
     """
     Ошибка при удалении обратной связи из базы данных.
@@ -24,9 +25,9 @@ class FeedbackDeleteError(DatabaseError):
 
     def __init__(self, message: str, extra: dict = None):
         super().__init__(
-            message=f"Ошибка при удалении обратной связи: {message}",
-            extra=extra
+            message=f"Ошибка при удалении обратной связи: {message}", extra=extra
         )
+
 
 class FeedbackGetError(DatabaseError):
     """
@@ -38,9 +39,9 @@ class FeedbackGetError(DatabaseError):
 
     def __init__(self, message: str, extra: dict = None):
         super().__init__(
-            message=f"Ошибка при получении обратной связи: {message}",
-            extra=extra
+            message=f"Ошибка при получении обратной связи: {message}", extra=extra
         )
+
 
 class FeedbackUpdateError(DatabaseError):
     """
@@ -49,8 +50,8 @@ class FeedbackUpdateError(DatabaseError):
     Attributes:
         message (str): Сообщение об ошибке.
     """
+
     def __init__(self, message: str, extra: dict = None):
         super().__init__(
-            message=f"Ошибка при обновлении обратной связи: {message}",
-            extra=extra
+            message=f"Ошибка при обновлении обратной связи: {message}", extra=extra
         )

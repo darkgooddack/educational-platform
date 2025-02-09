@@ -1,14 +1,19 @@
 import logging
 from typing import Optional
-from fastapi import APIRouter, Depends, Form, UploadFile, File, Query
+
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db_session, get_current_user, get_s3_session
+from app.core.dependencies import (get_current_user, get_db_session,
+                                   get_s3_session)
 from app.core.dependencies.s3 import S3Session
-from app.schemas import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema, UserCredentialsSchema, Page, PaginationParams
+from app.schemas import (Page, PaginationParams, UserCredentialsSchema,
+                         VideoLectureCreateSchema, VideoLectureResponseSchema,
+                         VideoLectureSchema)
 from app.services import VideoLectureService
 
 logger = logging.getLogger(__name__)
+
 
 def setup_routes(router: APIRouter):
 
@@ -20,7 +25,13 @@ def setup_routes(router: APIRouter):
         video_file: UploadFile = File(
             ...,
             description="Видео лекции",
-            content_type=["video/mov", "video/quicktime", "video/mp4", "video/webm", "video/avi"],
+            content_type=[
+                "video/mov",
+                "video/quicktime",
+                "video/mp4",
+                "video/webm",
+                "video/avi",
+            ],
             max_size=500_000_000,  # 500MB
         ),
         thumbnail_file: UploadFile = File(
@@ -59,7 +70,7 @@ def setup_routes(router: APIRouter):
                 video_file=video_file,
                 thumbnail_file=thumbnail_file,
             ),
-            author_id=_current_user.id
+            author_id=_current_user.id,
         )
 
         return result

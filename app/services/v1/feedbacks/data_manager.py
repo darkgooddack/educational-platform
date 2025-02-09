@@ -34,19 +34,21 @@ phone: str = Field(
 
 Использовать CAPTCHA для веб-форм.
 """
+
 from typing import List, TypeVar
 
 from pydantic import ValidationError
-from sqlalchemy import select, delete, and_
+from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (BaseAPIException, DatabaseError,
-                                 FeedbackAddError, FeedbackDeleteError, FeedbackGetError, FeedbackUpdateError)
+                                 FeedbackAddError, FeedbackDeleteError,
+                                 FeedbackGetError, FeedbackUpdateError)
 from app.models import BaseModel, FeedbackModel
 from app.schemas import (BaseSchema, FeedbackCreateSchema, FeedbackResponse,
                          FeedbackSchema, FeedbackStatus, PaginationParams)
-from app.services.v1.users import UserService
 from app.services.v1.base import BaseDataManager
+from app.services.v1.users import UserService
 
 M = TypeVar("M", bound=BaseModel)
 T = TypeVar("T", bound=BaseSchema)
@@ -97,7 +99,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                 select(self.model).where(
                     and_(
                         self.model.email == feedback.email,
-                        self.model.status == FeedbackStatus.PENDING
+                        self.model.status == FeedbackStatus.PENDING,
                     )
                 )
             )
@@ -168,7 +170,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             if not result:
                 raise FeedbackGetError(
                     message=f"Обратная связь с id {feedback_id} не найдена",
-                    extra={"feedback_id": feedback_id}
+                    extra={"feedback_id": feedback_id},
                 )
             return self.schema.model_validate(result)
         except Exception as e:
@@ -181,7 +183,6 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                     "error": str(e),
                 },
             ) from e
-
 
     async def get_feedbacks(
         self,
@@ -267,14 +268,13 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             if not found_feedback_model:
                 raise FeedbackGetError(
                     message=f"Обратная связь с id {feedback_id} не найдена",
-                    extra={"feedback_id": feedback_id}
+                    extra={"feedback_id": feedback_id},
                 )
 
             found_feedback_model.status = status
 
             return await self.update_one(
-                model_to_update=found_feedback_model,
-                updated_model=found_feedback_model
+                model_to_update=found_feedback_model, updated_model=found_feedback_model
             )
         except DatabaseError as db_error:
             raise FeedbackUpdateError(
@@ -321,7 +321,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             return FeedbackResponse(
                 id=found_feedback.id,
                 manager_id=found_feedback.manager_id,
-                message="Обратная связь успешно удалена!"
+                message="Обратная связь успешно удалена!",
             )
         except Exception as e:
             raise BaseAPIException(

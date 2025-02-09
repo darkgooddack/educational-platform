@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
-from app.schemas import UserSchema, ManagerSelectSchema, UserRole, UserUpdateSchema, Page, PaginationParams
+from app.schemas import (ManagerSelectSchema, Page, PaginationParams, UserRole,
+                         UserSchema, UserUpdateSchema)
 from app.services import UserService
 
 

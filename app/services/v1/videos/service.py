@@ -1,12 +1,17 @@
 import asyncio
 from typing import List
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.dependencies.s3 import S3Session
 from app.core.storages.s3.base import S3DataManager
-from app.services import BaseService
-from app.schemas import  VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema, PaginationParams
 from app.models import VideoLectureModel
+from app.schemas import (PaginationParams, VideoLectureCreateSchema,
+                         VideoLectureResponseSchema, VideoLectureSchema)
+from app.services import BaseService
+
 from .data_manager import VideoLectureDataManager
+
 
 class VideoLectureService(BaseService):
     """
@@ -20,24 +25,19 @@ class VideoLectureService(BaseService):
         _data_manager (VideoLectureDataManager): Менеджер для работы с данными видео лекций
 
     Methods:
-        add_videos: 
+        add_videos:
         get_videos: Получает список видео лекций с возможностью пагинации, поиска и фильтрации.
 
     """
-    def __init__(
-        self,
-        session: AsyncSession,
-        s3_session: S3Session | None = None
-    ):
+
+    def __init__(self, session: AsyncSession, s3_session: S3Session | None = None):
         super().__init__()
         self.session = session
         self._data_manager = VideoLectureDataManager(session)
         self._s3_manager = S3DataManager(s3_session)
 
     async def add_video(
-        self,
-        video_lecture: VideoLectureCreateSchema,
-        author_id: int
+        self, video_lecture: VideoLectureCreateSchema, author_id: int
     ) -> VideoLectureResponseSchema:
         """
         Добавляет новую инструкцию.
@@ -51,33 +51,36 @@ class VideoLectureService(BaseService):
         """
         try:
             self.logger.debug("🎥 Начало обработки запроса на добавление видео лекции")
-            self.logger.debug("📝 Параметры запроса: title='%s', description='%s'", 
-                video_lecture.title, 
-                video_lecture.description
+            self.logger.debug(
+                "📝 Параметры запроса: title='%s', description='%s'",
+                video_lecture.title,
+                video_lecture.description,
             )
-            self.logger.debug("📁 Видео файл лекции: filename='%s', content_type='%s', size=%d bytes",
-                video_lecture.video_file.filename, 
-                video_lecture.video_file.content_type, 
-                video_lecture.video_file.size
+            self.logger.debug(
+                "📁 Видео файл лекции: filename='%s', content_type='%s', size=%d bytes",
+                video_lecture.video_file.filename,
+                video_lecture.video_file.content_type,
+                video_lecture.video_file.size,
             )
-            self.logger.debug("📷 Обложка: filename='%s', content_type='%s', size=%d bytes",
-                video_lecture.thumbnail_file.filename, 
-                video_lecture.thumbnail_file.content_type, 
-                video_lecture.thumbnail_file.size
+            self.logger.debug(
+                "📷 Обложка: filename='%s', content_type='%s', size=%d bytes",
+                video_lecture.thumbnail_file.filename,
+                video_lecture.thumbnail_file.content_type,
+                video_lecture.thumbnail_file.size,
             )
             self.logger.debug("👤 Пользователь: id=%d ", author_id)
 
             video_upload = await self._s3_manager.upload_file_from_content(
-                file=video_lecture.video_file,
-                file_key="videos_lectures/videos"
+                file=video_lecture.video_file, file_key="videos_lectures/videos"
             )
 
             thumbnail_upload = await self._s3_manager.upload_file_from_content(
-                file=video_lecture.thumbnail_file,
-                file_key="videos_lectures/thumbnails"
+                file=video_lecture.thumbnail_file, file_key="videos_lectures/thumbnails"
             )
 
-            video_url, thumbnail_url = await asyncio.gather(video_upload, thumbnail_upload)
+            video_url, thumbnail_url = await asyncio.gather(
+                video_upload, thumbnail_upload
+            )
 
             new_video_lecture = VideoLectureModel(
                 title=video_lecture.title,
@@ -87,7 +90,7 @@ class VideoLectureService(BaseService):
                 views=0,
                 duration=0,
                 author_id=author_id,
-                thumbnail_url=thumbnail_url
+                thumbnail_url=thumbnail_url,
             )
             await self._data_manager.add_item(new_video_lecture)
 
@@ -95,13 +98,13 @@ class VideoLectureService(BaseService):
                 user_id=author_id,
                 video_url=video_url,
                 thumbnail_url=thumbnail_url,
-                message="Видео успешно добавлено"
+                message="Видео успешно добавлено",
             )
 
             self.logger.debug("✅ Видео успешно загружено: %s", result)
-        
+
             return result
-        
+
         except Exception as e:
             logger.error("❌ Ошибка при загрузке видео: %s", str(e))
             raise
