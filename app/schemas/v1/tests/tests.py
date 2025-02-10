@@ -169,6 +169,19 @@ class TestSchema(TestBase):
     id: int
     questions: List[QuestionSchema]
 
+class TestCreateResponse(BaseResponseSchema):
+    """
+    Схема для создания теста
+
+    Attributes:
+        item: TestSchema
+        succes: Признак успешного создания
+        message: Сообщение о создании
+    """
+
+    item: TestSchema
+    success: bool = True
+    message: str = "Тест успешно создан"
 
 class TestUpdateSchema(BaseResponseSchema):
     """
