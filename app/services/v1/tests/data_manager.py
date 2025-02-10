@@ -32,7 +32,10 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             for q in questions
         ]
         created_test = await self.add_item(test)
-        return TestListResponse(items=[created_test])
+        return TestListResponse(
+            items=[created_test],
+            success=True
+        )
 
     async def get_tests_paginated(
         self,
