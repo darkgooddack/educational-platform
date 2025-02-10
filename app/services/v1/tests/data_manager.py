@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import TestNotFoundError
+from app.core.exceptions import TestNotFoundError, QuestionNotFoundError
 from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestListResponse, TestSchema)

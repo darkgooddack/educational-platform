@@ -74,7 +74,8 @@ class VKOAuthParams(OAuthParams):
 
     Attributes:
         state: Строка состояния в виде случайного набора символов
-        code_challenge: Значение code_verifier, преобразованное с помощью code_challenge_method и закодированное в base64
+        code_challenge: Значение code_verifier, 
+            преобразованное с помощью code_challenge_method и закодированное в base64
     """
 
     state: str = Field(default_factory=lambda: secrets.token_urlsafe(32))

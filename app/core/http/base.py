@@ -1,21 +1,21 @@
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional, Type
 
 import aiohttp
 
 
 class BaseHttpClient:
-    def __init__(self):
+    def __init__(self) -> None:
         self._session: Optional[aiohttp.ClientSession] = None
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "BaseHttpClient":
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.close()
 
-    async def close(self):
+    async def close(self) -> None:
         if self._session:
             await self._session.close()
             self._session = None
@@ -26,7 +26,12 @@ class BaseHttpClient:
             self._session = aiohttp.ClientSession()
         return self._session
 
-    async def get(self, url: str, headers: dict = None, params: dict = None) -> dict:
+    async def get(
+        self,
+        url: str,
+        headers: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         try:
             session = await self._get_session()
             self.logger.debug("GET запрос к %s", url)
@@ -35,7 +40,12 @@ class BaseHttpClient:
         finally:
             await self.close()
 
-    async def post(self, url: str, data: dict = None, headers: dict = None) -> dict:
+    async def post(
+        self,
+        url: str,
+        data: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         try:
             if data:
                 # Фильтруем None значения из параметров

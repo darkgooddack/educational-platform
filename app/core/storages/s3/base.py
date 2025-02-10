@@ -37,7 +37,8 @@ class S3DataManager(SessionMixin):
         upload_file_from_path: Загружает файл-подобный объект в S3 из файловой системы.
         upload_file_from_content: Загружает файл-подобный объект в S3 из байтового представления.
         upload_multiple_files_from_path: Загружает несколько файлов-подобных объектов в S3 из файловой системы.
-        upload_multiple_files_from_content: Загружает несколько файлов-подобных объектов в S3 из байтового представления.
+        upload_multiple_files_from_content: Загружает несколько файлов-подобных объектов в S3 
+            из байтового представления.
         get_link_file: Получает ссылку на файл в S3.
         download_file: Скачивает файл из S3.
         download_multiple_files: Скачивает несколько файлов из S3.

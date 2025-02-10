@@ -1,4 +1,5 @@
 from typing import Any, Dict
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -10,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.v1.themes import ThemeModel
     from app.models.v1.users import UserModel
     from app.models.v1.videos import VideoLectureModel
+    from app.models.v1.lectures import LectureModel
 
 
 class TestModel(BaseModel):
@@ -50,7 +52,10 @@ class TestModel(BaseModel):
         "LectureModel", back_populates="tests", lazy="joined"
     )
     questions: Mapped[list["QuestionModel"]] = relationship(
-        "QuestionModel", back_populates="test", cascade="all, delete-orphan", lazy="joined"
+        "QuestionModel",
+        back_populates="test",
+        cascade="all, delete-orphan",
+        lazy="joined",
     )
     theme: Mapped["ThemeModel"] = relationship(
         "ThemeModel", back_populates="tests", lazy="joined"
@@ -65,8 +70,9 @@ class TestModel(BaseModel):
     def to_dict(self) -> Dict[str, Any]:
         return {
             **super().to_dict(),
-            "questions": [question.to_dict() for question in self.questions]
+            "questions": [question.to_dict() for question in self.questions],
         }
+
 
 class QuestionModel(BaseModel):
     """
@@ -92,14 +98,18 @@ class QuestionModel(BaseModel):
 
     test: Mapped["TestModel"] = relationship("TestModel", back_populates="questions")
     answers: Mapped[list["AnswerModel"]] = relationship(
-        "AnswerModel", back_populates="question", cascade="all, delete-orphan", lazy="joined"
+        "AnswerModel",
+        back_populates="question",
+        cascade="all, delete-orphan",
+        lazy="joined",
     )
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             **super().to_dict(),
-            "answers": [answer.to_dict() for answer in self.answers]
+            "answers": [answer.to_dict() for answer in self.answers],
         }
+
 
 class AnswerModel(BaseModel):
     """

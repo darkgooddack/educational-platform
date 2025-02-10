@@ -106,7 +106,7 @@ class VideoLectureService(BaseService):
             return result
 
         except Exception as e:
-            logger.error("❌ Ошибка при загрузке видео: %s", str(e))
+            self.logger.error("❌ Ошибка при загрузке видео: %s", str(e))
             raise
 
     async def get_videos(

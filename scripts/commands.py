@@ -227,14 +227,60 @@ def echo(message: str):
         echo(message)
     subprocess.run(["echo", message], check=True)
 
-def lint():
+def format():
     """
-    Запуск линтера.
+    Форматирование кода.
     """
     subprocess.run(["black", "app/"], check=True)
     subprocess.run(["isort", "app/"], check=True)
-    # subprocess.run(["mypy", "app/"], check=True)
 
+def check():
+    """
+    Проверка кода.
+    """
+    mypy_success = True
+    flake8_success = True
+
+    # Проверка mypy
+    try:
+        mypy_result = subprocess.run(
+            ["mypy", "app/"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        mypy_errors = mypy_result.stdout.split('\n')
+
+        mypy_error_groups = {
+            'error: Incompatible': 'Несовместимые типы',
+            'error: Name': 'Ошибки именования',
+            'error: Missing': 'Отсутствующие типы',
+            'error: Argument': 'Ошибки аргументов',
+            'error: Return': 'Ошибки возвращаемых значений'
+        }
+
+        # Сначала собираем все ошибки в известные группы
+        grouped_errors = set()
+        for pattern, desc in mypy_error_groups.items():
+            matches = [e for e in mypy_errors if pattern in e]
+            if matches:
+                print(f"\n🔍 MyPy - {desc}:")
+                for error in matches:
+                    print(f"- {error}")
+                    grouped_errors.add(error)
+
+        # Оставшиеся ошибки выводим как "Прочие"
+        other_errors = [e for e in mypy_errors if e and e not in grouped_errors]
+        if other_errors:
+            print("\n🔍 MyPy - Прочие ошибки:")
+            for error in other_errors:
+                print(f"- {error}")
+    except subprocess.CalledProcessError as e:
+        print("❌ Найдены ошибки mypy:")
+        print(e.stdout)
+        mypy_success = False
+    
+    # Проверка flake8     
     try:
         result = subprocess.run(
             ["flake8", "app/"],
@@ -253,31 +299,36 @@ def lint():
             'E262': 'Неправильные комментарии'
         }
 
+        # Собираем известные ошибки
+        grouped_errors = set()
         for code, desc in error_groups.items():
-            matches = [e for e in errors if code in e]
+            matches = [e for e in flake8_errors if code in e]
             if matches:
-                print(f"\n{desc}:")
+                print(f"\n🔍 Flake8 - {desc}:")
                 for error in matches:
                     print(f"- {error.split(':')[0]}")
+                    grouped_errors.add(error)
+
+        # Выводим оставшиеся ошибки
+        other_errors = [e for e in flake8_errors if e and e not in grouped_errors]
+        if other_errors:
+            print("\n🔍 Flake8 - Прочие ошибки:")
+            for error in other_errors:
+                print(f"- {error.split(':')[0]}")
 
     except subprocess.CalledProcessError as e:
-        print("❌ Найдены ошибки линтера")
-        return False
+        print("❌ Найдены ошибки flake8: ")
+        print(e.stdout)
+        flake8_success = False
 
+    return mypy_success and flake8_success
 
-def format():
+def lint():
     """
-    Форматирование кода.
+    Запуск линтера.
     """
-    subprocess.run(["black", "app/"], check=True)
-    subprocess.run(["isort", "app/"], check=True)
-
-def check():
-    """
-    Проверка кода.
-    """
-    subprocess.run(["flake8", "app/"], check=True)
-    subprocess.run(["mypy", "app/"], check=True)
+    format()
+    check()
 
 def test():
     """

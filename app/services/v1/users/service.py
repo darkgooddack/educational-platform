@@ -205,7 +205,7 @@ class UserService(HashingMixin, BaseService):
                 id=created_user.id,
                 email=created_user.email,
                 name=created_user.first_name,
-                hashed_password=user_model.hashed_password,  #! Костыль
+                hashed_password=user_model.hashed_password,
             )
             return user_credentials
 
