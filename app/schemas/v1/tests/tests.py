@@ -183,7 +183,7 @@ class TestCreateResponse(BaseResponseSchema):
     success: bool = True
     message: str = "Тест успешно создан"
 
-class TestUpdateSchema(BaseResponseSchema):
+class TestUpdateResponse(BaseResponseSchema):
     """
     Схема для обновления теста
 
