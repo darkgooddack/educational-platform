@@ -10,9 +10,8 @@
 
 from enum import Enum
 from typing import List, Optional
-
-from ..base import (BaseInputSchema, BaseResponseSchema, CommonBaseSchema,
-                    ListResponseSchema)
+from pydantic import Field
+from ..base import (BaseInputSchema, BaseResponseSchema, CommonBaseSchema)
 
 
 class QuestionType(str, Enum):
