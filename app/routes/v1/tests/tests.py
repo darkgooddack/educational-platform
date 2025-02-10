@@ -1,3 +1,13 @@
+"""
+Модуль маршрутов для работы с тестами.
+
+Предоставляет API эндпоинты для:
+- Создания тестов
+- Получения списка тестов с фильтрацией и пагинацией 
+- Получения теста по ID
+- Добавления вопросов к тесту
+- Добавления вариантов ответов к вопросам
+"""
 import logging
 from typing import Optional
 
@@ -14,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def setup_routes(router: APIRouter):
+    """Настраивает маршруты для работы с тестами"""
 
     @router.post("/", response_model=TestListResponse)
     async def create_test(
@@ -22,15 +33,15 @@ def setup_routes(router: APIRouter):
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestListResponse:
         """
-        **Создание нового теста.**
+        # Создание нового теста
 
-        **Args**:
-            test (TestCreateSchema): Данные теста
-            _current_user (UserCredentialsSchema): Текущий пользователь
-            db_session (AsyncSession): Сессия БД
+        ## Args
+        * **test** - данные для создания теста
+        * **_current_user** - текущий авторизованный пользователь 
+        * **db_session** - сессия базы данных
 
-        **Returns**:
-            TestListResponse: Созданный тест
+        ## Returns
+        * Созданный тест в виде списка с одним элементом
         """
         service = TestService(db_session)
         result = await service.create_test(test, author_id=_current_user.id)
@@ -48,18 +59,18 @@ def setup_routes(router: APIRouter):
         db_session: AsyncSession = Depends(get_db_session),
     ) -> Page[TestSchema]:
         """
-        **Получение тестов с пагинацией и фильтрацией.**
+        # Получение списка тестов с пагинацией и фильтрацией
 
-        **Args**:
-            pagination (PaginationParams): Параметры пагинации
-            theme_id (int): ID темы для фильтрации
-            video_lecture_id (int): ID видео-лекции
-            lecture_id (int): ID лекции
-            search (str): Поисковый запрос
-            db_session (AsyncSession): Сессия БД
+        ## Args
+        * **pagination** - параметры пагинации (пропуск, лимит, сортировка)
+        * **theme_id** - фильтр по ID темы
+        * **video_lecture_id** - фильтр по ID видео-лекции
+        * **lecture_id** - фильтр по ID лекции
+        * **search** - поисковый запрос по названию и описанию
+        * **db_session** - сессия базы данных
 
-        **Returns**:
-            Page[TestSchema]: Страница с тестами
+        ## Returns
+        * Страница с тестами и метаданными пагинации
         """
         service = TestService(db_session)
         tests, total = await service.get_tests(
@@ -78,7 +89,16 @@ def setup_routes(router: APIRouter):
         test_id: int,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestSchema:
-        """Получение теста по ID"""
+        """
+        # Получение теста по ID
+
+        ## Args
+        * **test_id** - ID теста для получения
+        * **db_session** - сессия базы данных
+
+        ## Returns
+        * Данные теста
+        """
         service = TestService(db_session)
         return await service.get_test_by_id(test_id)
 
@@ -88,7 +108,17 @@ def setup_routes(router: APIRouter):
         question: QuestionCreateSchema,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestSchema:
-        """Добавление вопроса к тесту"""
+        """
+        # Добавление нового вопроса к тесту
+
+        ## Args
+        * **test_id** - ID теста, к которому добавляется вопрос
+        * **question** - данные создаваемого вопроса
+        * **db_session** - сессия базы данных
+
+        ## Returns
+        * Обновленные данные теста с добавленным вопросом
+        """
         service = TestService(db_session)
         return await service.add_question(test_id, question)
 
@@ -98,7 +128,17 @@ def setup_routes(router: APIRouter):
         answer: AnswerCreateSchema,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestSchema:
-        """Добавление варианта ответа к вопросу"""
+        """
+        # Добавление нового варианта ответа к вопросу
+
+        ## Args
+        * **question_id** - ID вопроса, к которому добавляется ответ
+        * **answer** - данные создаваемого варианта ответа
+        * **db_session** - сессия базы данных
+
+        ## Returns
+        * Обновленные данные теста с добавленным вариантом ответа
+        """
         service = TestService(db_session)
         return await service.add_answer(question_id, answer)
 
