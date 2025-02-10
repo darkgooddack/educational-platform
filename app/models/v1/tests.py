@@ -50,7 +50,7 @@ class TestModel(BaseModel):
         "LectureModel", back_populates="tests", lazy="joined"
     )
     questions: Mapped[list["QuestionModel"]] = relationship(
-        "QuestionModel", back_populates="test", cascade="all, delete-orphan"
+        "QuestionModel", back_populates="test", cascade="all, delete-orphan", lazy="joined"
     )
     theme: Mapped["ThemeModel"] = relationship(
         "ThemeModel", back_populates="tests", lazy="joined"
@@ -92,7 +92,7 @@ class QuestionModel(BaseModel):
 
     test: Mapped["TestModel"] = relationship("TestModel", back_populates="questions")
     answers: Mapped[list["AnswerModel"]] = relationship(
-        "AnswerModel", back_populates="question", cascade="all, delete-orphan"
+        "AnswerModel", back_populates="question", cascade="all, delete-orphan", lazy="joined"
     )
 
     def to_dict(self) -> Dict[str, Any]:
