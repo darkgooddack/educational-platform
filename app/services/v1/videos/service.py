@@ -7,7 +7,7 @@ from app.core.dependencies.s3 import S3Session
 from app.core.storages.s3.base import S3DataManager
 from app.models import VideoLectureModel
 from app.schemas import (PaginationParams, VideoLectureCreateSchema,
-                         VideoLectureResponseSchema, VideoLectureSchema)
+                         VideoLectureCreateResponse, VideoLectureSchema)
 from app.services import BaseService
 
 from .data_manager import VideoLectureDataManager
@@ -38,7 +38,7 @@ class VideoLectureService(BaseService):
 
     async def add_video(
         self, video_lecture: VideoLectureCreateSchema, author_id: int
-    ) -> VideoLectureResponseSchema:
+    ) -> VideoLectureCreateResponse:
         """
         Добавляет новую инструкцию.
 
@@ -94,11 +94,18 @@ class VideoLectureService(BaseService):
             )
             await self._data_manager.add_item(new_video_lecture)
 
-            result = VideoLectureResponseSchema(
-                user_id=author_id,
-                video_url=video_url,
-                thumbnail_url=thumbnail_url,
-                message="Видео успешно добавлено",
+            result = VideoLectureCreateResponse(
+                item=VideoLectureSchema(
+                    id=new_video_lecture.id,
+                    title=video_lecture.title,
+                    description=video_lecture.description,
+                    video_url=video_url,
+                    thumbnail_url=thumbnail_url,
+                    theme_id=video_lecture.theme_id,
+                    author_id=author_id,
+                    views=0,
+                    duration=0
+                )
             )
 
             self.logger.debug("✅ Видео успешно загружено: %s", result)

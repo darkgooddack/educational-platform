@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.schemas.v1.auth.auth import TokenSchema
+from app.schemas.v1.auth.auth import TokenResponseSchema
 from app.schemas.v1.auth.register import RegistrationSchema
 
 from ..base import BaseInputSchema, CommonBaseSchema
@@ -83,7 +83,7 @@ class VKOAuthParams(OAuthParams):
     code_challenge_method: str = "S256"
 
 
-class OAuthResponse(TokenSchema):
+class OAuthResponse(TokenResponseSchema):
     """
     Схема ответа OAuth авторизации.
 

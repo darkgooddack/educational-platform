@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session, oauth2_schema
-from app.schemas import AuthSchema, TokenSchema
+from app.schemas import AuthSchema, TokenResponseSchema
 from app.services import AuthService
 
 
@@ -33,7 +33,7 @@ def setup_routes(router: APIRouter):
     async def authenticate(
         form_data: OAuth2PasswordRequestForm = Depends(),
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> TokenSchema:
+    ) -> TokenResponseSchema:
         """
         🔐 **Аутентифицирует пользователя по username(email) и возвращает JWT токен.**
 
@@ -41,7 +41,7 @@ def setup_routes(router: APIRouter):
         - **form_data**: Данные для аутентификации username и password (OAuth2PasswordRequestForm)
 
         **Returns**:
-        - **TokenSchema**: Токен доступа с access_token и token_type
+        - **TokenResponseSchema**: Токен доступа с access_token и token_type
         """
         return await AuthService(db_session).authenticate(
             AuthSchema(email=form_data.username, password=form_data.password)

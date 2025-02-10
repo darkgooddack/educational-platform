@@ -1,10 +1,10 @@
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import UploadFile
 from pydantic import Field
 
-from ..base import BaseInputSchema, BaseSchema, ListResponseSchema
-
+from ..base import BaseResponseSchema, BaseInputSchema, BaseSchema
+from app.schemas import Page
 
 class VideoLectureBase(BaseSchema):
     """
@@ -30,6 +30,10 @@ class VideoLectureBase(BaseSchema):
     author_id: int
     thumbnail_url: str
 
+class VideoLectureSchema(VideoLectureBase):
+    """Полная схема видео-лекции"""
+
+    pass
 
 class VideoLectureCreateSchema(BaseInputSchema):
     """
@@ -51,13 +55,7 @@ class VideoLectureCreateSchema(BaseInputSchema):
     thumbnail_file: UploadFile
 
 
-class VideoLectureSchema(VideoLectureBase):
-    """Полная схема видео-лекции"""
-
-    pass
-
-
-class VideoLectureResponseSchema(BaseInputSchema):
+class VideoLectureResponseSchema(BaseResponseSchema):
     """
     Схема ответа при успешной дообавлении видео лекции.
 
@@ -71,10 +69,53 @@ class VideoLectureResponseSchema(BaseInputSchema):
     user_id: int
     video_url: str
     thumbnail_url: str
+    success: bool = True
     message: str = "Видео успешно добавлено"
 
+class VideoLectureCreateResponse(BaseResponseSchema):
+    """
+    Схема для создания видео
 
-class VideoLectureListResponse(ListResponseSchema[VideoLectureSchema]):
-    """Схема для списка видео-лекций"""
+    Attributes:
+        item: VideoLectureSchema
+        success: Признак успешного создания
+        message: Сообщение о создании
+    """
+    item: VideoLectureSchema
+    success: bool = True
+    message: str = "Видео успешно создано"
 
-    items: List[VideoLectureSchema]
+class VideoLectureUpdateResponse(BaseResponseSchema):
+    """
+    Схема для обновления видео
+
+    Attributes:
+        id: ID видео
+        success: Признак успешного обновления
+        message: Сообщение об обновлении
+    """
+    id: int
+    success: bool = True
+    message: str = "Видео успешно обновлено"
+
+class VideoLectureDeleteResponse(BaseResponseSchema):
+    """
+    Схема ответа при удалении видео
+
+    Attributes:
+        id: ID видео
+        success: Признак успешного удаления
+        message: Сообщение об удалении
+    """
+    id: int
+    success: bool = True
+    message: str = "Видео успешно удалено"
+
+class VideoLectureListResponse(Page[VideoLectureSchema]):
+    """
+    Схема для возврата списка видео с пагинацией
+
+    Наследуется от Page[VideoLectureSchema] и добавляет поля success и message
+    """
+    success: bool = True
+    message: str = "Список видео успешно получен"
