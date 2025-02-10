@@ -3,11 +3,11 @@
 """
 
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import EmailStr, Field
 
-from app.schemas.v1.base import BaseInputSchema, BaseSchema
+from app.schemas.v1.base import BaseInputSchema, BaseSchema, BaseResponseSchema
 
 
 class FeedbackStatus(str, Enum):
@@ -123,3 +123,61 @@ class FeedbackResponse(BaseInputSchema):
             "Обратная связь успешно удалена!",
         ],
     )
+
+class FeedbackCreateResponse(BaseResponseSchema):
+    """
+    Схема ответа при создании обратной связи
+
+    Attributes:
+        item: FeedbackSchema
+        success: Признак успешного создания
+        message: Сообщение о создании
+    """
+    item: FeedbackSchema
+    success: bool = True
+    message: str = "Обратная связь успешно создана"
+
+class FeedbackUpdateResponse(BaseResponseSchema):
+    """
+    Схема ответа при обновлении обратной связи
+
+    Attributes:
+        id: ID обратной связи
+        success: Признак успешного обновления
+        message: Сообщение об обновлении
+    """
+    id: int
+    success: bool = True
+    message: str = "Обратная связь успешно обновлена"
+
+class FeedbackDeleteResponse(BaseResponseSchema):
+    """
+    Схема ответа при удалении обратной связи
+
+    Attributes:
+        id: ID обратной связи
+        success: Признак успешного удаления
+        message: Сообщение об удалении
+    """
+    id: int
+    success: bool = True
+    message: str = "Обратная связь успешно удалена"
+
+class FeedbackListResponse(BaseResponseSchema):
+    """
+    Схема для возврата списка обратной связи с пагинацией
+
+    Attributes:
+        items: Список обратной связи
+        total: Общее количество
+        page: Текущая страница
+        size: Размер страницы
+        success: Признак успешного получения
+        message: Сообщение об успешном получении
+    """
+    items: List[FeedbackSchema]
+    total: int
+    page: int
+    size: int
+    success: bool = True
+    message: str = "Список обратной связи успешно получен"
