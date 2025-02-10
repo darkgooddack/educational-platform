@@ -10,7 +10,7 @@
 - QuestionNotFoundError: Исключение при отсутствии вопроса
 """
 
-from app.core.exceptions.v1.base import BaseAPIException
+from app.core.exceptions.v1.base import BaseAPIException, DatabaseError
 
 
 class TestNotFoundError(BaseAPIException):
@@ -64,3 +64,24 @@ class QuestionNotFoundError(BaseAPIException):
             error_type="question_not_found",
             extra={"question_id": question_id} if question_id else None,
         )
+
+
+class TestUpdateError(DatabaseError):
+    """
+    Ошибка при обновлении теста в базе данных.
+    """
+
+    def __init__(self, message: str, extra: dict = None):
+        super().__init__(message=f"Ошибка при обновлении теста: {message}", extra=extra)
+
+
+class TestDeleteError(DatabaseError):
+    """
+    Ошибка при удалении теста из базы данных.
+
+    Attributes:
+        message (str): Сообщение об ошибке.
+    """
+
+    def __init__(self, message: str, extra: dict = None):
+        super().__init__(message=f"Ошибка при удалении теста: {message}", extra=extra)

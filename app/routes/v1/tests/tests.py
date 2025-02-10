@@ -17,8 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_current_user, get_db_session
 from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
-                         QuestionCreateSchema, TestCreateSchema,
-                         TestListResponse, TestSchema, UserCredentialsSchema)
+                         QuestionCreateSchema, TestCreateResponse,
+                         TestCreateSchema, TestSchema, UserCredentialsSchema)
 from app.services import TestService
 
 logger = logging.getLogger(__name__)
@@ -27,12 +27,12 @@ logger = logging.getLogger(__name__)
 def setup_routes(router: APIRouter):
     """Настраивает маршруты для работы с тестами"""
 
-    @router.post("/", response_model=TestListResponse)
+    @router.post("/", response_model=TestCreateResponse)
     async def create_test(
         test: TestCreateSchema,
         _current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> TestListResponse:
+    ) -> TestCreateResponse:
         """
         # Создание нового теста
 
@@ -142,6 +142,44 @@ def setup_routes(router: APIRouter):
         """
         service = TestService(db_session)
         return await service.add_answer(question_id, answer)
+
+    @router.put("/{test_id}", response_model=TestSchema)
+    async def update_test(
+        test_id: int,
+        test: TestCreateSchema,
+        db_session: AsyncSession = Depends(get_db_session),
+    ) -> TestSchema:
+        """
+        # Обновление существующего теста
+
+        ## Args
+        * **test_id** - ID обновляемого теста
+        * **test** - новые данные теста
+        * **db_session** - сессия базы данных
+
+        ## Returns
+        * Обновленный тест
+        """
+        service = TestService(db_session)
+        return await service.update_test(test_id, test)
+
+    @router.delete("/{test_id}", response_model=TestSchema)
+    async def delete_test(
+        test_id: int,
+        db_session: AsyncSession = Depends(get_db_session),
+    ) -> TestSchema:
+        """
+        # Удаление теста
+
+        ## Args
+        * **test_id** - ID удаляемого теста
+        * **db_session** - сессия базы данных
+
+        ## Returns
+        * Удаленный тест
+        """
+        service = TestService(db_session)
+        return await service.delete_test(test_id)
 
 
 __all__ = ["setup_routes"]

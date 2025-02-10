@@ -23,8 +23,9 @@ from .v1.pagination import Page, PaginationParams
 from .v1.posts.posts import PostStatus
 from .v1.tests.tests import (AnswerCreateSchema, AnswerSchema,
                              QuestionCreateSchema, QuestionSchema,
-                             QuestionType, TestCreateSchema, TestListResponse,
-                             TestSchema)
+                             QuestionType, TestCreateResponse,
+                             TestCreateSchema, TestDeleteResponse, TestSchema,
+                             TestUpdateResponse)
 from .v1.themes.themes import (ThemeBase, ThemeCreateSchema, ThemeListResponse,
                                ThemeSchema)
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
@@ -85,7 +86,9 @@ __all__ = [
     "GoogleTokenData",
     "YandexTokenData",
     "TestCreateSchema",
-    "TestListResponse",
+    "TestUpdateResponse",
+    "TestDeleteResponse",
+    "TestCreateResponse",
     "TestSchema",
     "QuestionCreateSchema",
     "QuestionSchema",

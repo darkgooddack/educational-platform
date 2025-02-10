@@ -11,7 +11,8 @@
 from enum import Enum
 from typing import List, Optional
 
-from ..base import BaseInputSchema, CommonBaseSchema, ListResponseSchema
+from ..base import (BaseInputSchema, BaseResponseSchema, CommonBaseSchema,
+                    ListResponseSchema)
 
 
 class QuestionType(str, Enum):
@@ -76,7 +77,12 @@ class QuestionBase(CommonBaseSchema):
 
 # Схемы для создания
 class AnswerCreateSchema(BaseInputSchema):
-    """Схема для создания варианта ответа"""
+    """
+    Схема для создания варианта ответа
+    Attributes:
+        text: Текст ответа
+        is_correct: Признак правильного ответа
+    """
 
     text: str
     is_correct: bool
@@ -87,6 +93,9 @@ class QuestionCreateSchema(BaseInputSchema):
     Схема для создания вопроса
 
     Attributes:
+        text: Текст вопроса
+        type: Тип вопроса (один/несколько правильных ответов)
+        points: Количество баллов за вопрос
         answers: Список вариантов ответов
     """
 
@@ -101,6 +110,14 @@ class TestCreateSchema(BaseInputSchema):
     Схема для создания теста
 
     Attributes:
+        title: Название теста
+        description: Описание теста
+        duration: Длительность в минутах
+        passing_score: Проходной балл
+        max_attempts: Максимальное количество попыток
+        theme_id: ID темы теста
+        video_lecture_id: ID связанной видео-лекции (опционально)
+        lecture_id: ID связанной лекции (опционально)
         questions: Список вопросов теста
     """
 
@@ -117,29 +134,82 @@ class TestCreateSchema(BaseInputSchema):
 
 # Схемы для ответов
 class AnswerSchema(AnswerBase):
-    """Схема для возврата данных ответа"""
+    """
+    Схема для возврата данных ответа
+
+    Attributes:
+        id: ID ответа
+    """
 
     id: int
 
 
 class QuestionSchema(QuestionBase):
-    """Схема для возврата данных вопроса"""
+    """
+    Схема для возврата данных вопроса
+
+    Atttributes:
+        id: ID вопроса
+        answers: Список вариантов ответов
+    """
 
     id: int
     answers: List[AnswerSchema]
 
 
 class TestSchema(TestBase):
-    """Схема для возврата данных теста"""
+    """
+    Схема для возврата данных теста
+
+    Attributes:
+        id: ID теста
+        questions: Список вопросов теста
+    """
 
     id: int
     questions: List[QuestionSchema]
 
 
-# Схемы для списков
-class TestListResponse(ListResponseSchema[TestSchema]):
-    """Схема для возврата списка тестов"""
+class TestUpdateSchema(BaseResponseSchema):
+    """
+    Схема для обновления теста
 
-    items: List[TestSchema]
+    Attributes:
+        id: ID теста
+        succes: Признак успешного обновления
+        message: Сообщение об обновлении
+    """
+
+    id: int
+    success: bool = True
+    message: str = "Тест успешно обновлен"
+
+
+class TestDeleteResponse(BaseResponseSchema):
+    """
+    Схема ответа при удалении теста
+
+    Attributes:
+        id: ID теста
+        success: Признак успешного удаления
+        message: Сообщение об удалении
+    """
+
+    id: int
+    success: bool = True
+    message: str = "Тест успешно удален"
+
+
+class TestListResponse(BaseResponseSchema):
+    """
+    Схема для возврата списка тестов
+
+    Attributes:
+        items: Список тестов
+        success: Признак успешного получения списка
+        message: Сообщение об успешном получении списка
+    """
+
+    item: TestSchema
     success: bool = True
     message: str = "Тест успешно добавлен"

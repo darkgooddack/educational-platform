@@ -74,7 +74,7 @@ class VKOAuthParams(OAuthParams):
 
     Attributes:
         state: Строка состояния в виде случайного набора символов
-        code_challenge: Значение code_verifier, 
+        code_challenge: Значение code_verifier,
             преобразованное с помощью code_challenge_method и закодированное в base64
     """
 

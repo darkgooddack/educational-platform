@@ -29,7 +29,7 @@ class RabbitMQClient:
             try:
                 cls._instance = await connect_robust(**config.rabbitmq_params)
                 cls._is_connected = True
-            except Exception as e:
+            except Exception:
                 cls._is_connected = False
                 cls._instance = None
         return cls._instance

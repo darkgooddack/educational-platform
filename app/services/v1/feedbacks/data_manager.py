@@ -109,9 +109,9 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                     manager_id=existing_feedback.manager_id,
                     message="У вас уже есть активная заявка на обратную связь.",
                 )
-            # Проверяем, существует ли менеджер, к которому адресуется обратная связь, если нет, 
+            # Проверяем, существует ли менеджер, к которому адресуется обратная связь, если нет,
             # то адресуем всем менеджерам (None)
-            
+
             if feedback.manager_id == 0:
                 feedback.manager_id = None
             else:
@@ -273,10 +273,11 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                     extra={"feedback_id": feedback_id},
                 )
 
-            found_feedback_model.status = status
+            updated_feedback_model = self.model(status=status)
 
             return await self.update_one(
-                model_to_update=found_feedback_model, updated_model=found_feedback_model
+                model_to_update=found_feedback_model,
+                updated_model=updated_feedback_model,
             )
         except DatabaseError as db_error:
             raise FeedbackUpdateError(

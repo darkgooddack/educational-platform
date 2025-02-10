@@ -21,8 +21,9 @@ from .v1.auth.security import (TokenExpiredError, TokenInvalidError,
 from .v1.base import BaseAPIException, DatabaseError, ValueNotFoundError
 from .v1.feedback.feedback import (FeedbackAddError, FeedbackDeleteError,
                                    FeedbackGetError, FeedbackUpdateError)
-from .v1.tests.tests import (QuestionNotFoundError, TestExistsError,
-                             TestNotFoundError)
+from .v1.tests.tests import (QuestionNotFoundError, TestDeleteError,
+                             TestExistsError, TestNotFoundError,
+                             TestUpdateError)
 from .v1.themes.themes import ThemeExistsError, ThemeNotFoundError
 from .v1.users.users import (UserCreationError, UserExistsError,
                              UserInactiveError, UserNotFoundError)
@@ -60,5 +61,6 @@ __all__ = [
     "ThemeExistsError",
     "TestNotFoundError",
     "TestExistsError",
+    "TestUpdateError",
     "QuestionNotFoundError",
 ]

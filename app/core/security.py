@@ -121,10 +121,10 @@ class TokenMixin:
                 key=TokenMixin.get_token_key(),
                 algorithms=[config.token_algorithm],
             )
-        except ExpiredSignatureError as e:
-            raise TokenExpiredError() from e
-        except JWTError:
-            raise TokenInvalidError() from e
+        except ExpiredSignatureError as error:
+            raise TokenExpiredError() from error
+        except JWTError as error:
+            raise TokenInvalidError() from error
 
     @staticmethod
     def create_payload(user: UserCredentialsSchema) -> dict:

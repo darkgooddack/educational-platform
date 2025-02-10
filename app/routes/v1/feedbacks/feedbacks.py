@@ -82,7 +82,7 @@ def setup_routes(router: APIRouter):
         """
         return await FeedbackService(db_session).get_feedback(feedback_id)
 
-    @router.put("/{feedback_id}/process", response_model=FeedbackSchema)
+    @router.patch("/{feedback_id}/process", response_model=FeedbackSchema)
     async def process_feedback(
         feedback_id: int,
         db_session: AsyncSession = Depends(get_db_session),
@@ -101,7 +101,7 @@ def setup_routes(router: APIRouter):
         """
         return await FeedbackService(db_session).proccess_feedback(feedback_id)
 
-    @router.put("/{feedback_id}/delete", response_model=FeedbackSchema)
+    @router.patch("/{feedback_id}/delete", response_model=FeedbackSchema)
     async def soft_delete_feedback(
         feedback_id: int,
         db_session: AsyncSession = Depends(get_db_session),

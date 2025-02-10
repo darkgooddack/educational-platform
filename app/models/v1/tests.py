@@ -8,10 +8,10 @@ from app.models.v1.base import BaseModel
 from app.schemas import QuestionType
 
 if TYPE_CHECKING:
+    from app.models.v1.lectures import LectureModel
     from app.models.v1.themes import ThemeModel
     from app.models.v1.users import UserModel
     from app.models.v1.videos import VideoLectureModel
-    from app.models.v1.lectures import LectureModel
 
 
 class TestModel(BaseModel):

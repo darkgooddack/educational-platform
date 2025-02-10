@@ -37,7 +37,7 @@ class S3DataManager(SessionMixin):
         upload_file_from_path: Загружает файл-подобный объект в S3 из файловой системы.
         upload_file_from_content: Загружает файл-подобный объект в S3 из байтового представления.
         upload_multiple_files_from_path: Загружает несколько файлов-подобных объектов в S3 из файловой системы.
-        upload_multiple_files_from_content: Загружает несколько файлов-подобных объектов в S3 
+        upload_multiple_files_from_content: Загружает несколько файлов-подобных объектов в S3
             из байтового представления.
         get_link_file: Получает ссылку на файл в S3.
         download_file: Скачивает файл из S3.
@@ -73,10 +73,10 @@ class S3DataManager(SessionMixin):
         try:
             async with self.session as s3:
                 await s3.create_bucket(Bucket=bucket_name)
-        except ClientError as e:
-            raise ValueError(f"Ошибка при создании бакета: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при создании бакета: {e}") from e
+        except ClientError as error:
+            raise ValueError(f"Ошибка при создании бакета: {error}") from error
+        except Exception as error:
+            raise RuntimeError(f"Ошибка при создании бакета: {error}") from error
 
     async def bucket_exists(self, bucket_name: str = None) -> bool:
         """
@@ -94,10 +94,11 @@ class S3DataManager(SessionMixin):
             async with self.session as s3:
                 await s3.head_bucket(Bucket=bucket_name)
             return True
-        except ClientError as e:
-            if e.response["Error"]["Code"] == "404":
+        except ClientError as error:
+            if error.response["Error"]["Code"] == "404":
                 return False
-        raise ValueError(f"Ошибка при проверке наличия бакета: {e}") from e
+            error_message = f"Ошибка при проверке наличия бакета: {error}"
+            raise ValueError(error_message) from error
 
     async def file_exists(self, file_key: str, bucket_name: str = None) -> bool:
         """
@@ -116,10 +117,12 @@ class S3DataManager(SessionMixin):
             async with self.session as s3:
                 await s3.head_object(Bucket=bucket_name, Key=file_key)
             return True
-        except ClientError as e:
-            if e.response["Error"]["Code"] == "404":
+        except ClientError as error:
+            if error.response["Error"]["Code"] == "404":
                 return False
-        raise ValueError(f"Ошибка при проверке наличия файла: {e}") from e
+
+            error_message = f"Ошибка при проверке наличия файла: {error}"
+            raise ValueError(error_message) from error
 
     async def upload_file_from_path(
         self, file_path: str, file_key: str, bucket_name: str = None
@@ -149,12 +152,15 @@ class S3DataManager(SessionMixin):
                         Key=file_key,
                     )
                 return self.get_link_file(file_key, bucket_name)
-        except ClientError as e:
-            raise ValueError(f"Ошибка при загрузке файла: {e}") from e
-        except IOError as e:
-            raise ValueError(f"Ошибка при открытии файла: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при загрузке файла: {e}") from e
+        except ClientError as error:
+            error_message = f"Ошибка при загрузке файла: {error}"
+            raise ValueError(error_message) from error
+        except IOError as error:
+            error_message = f"Ошибка при открытии файла: {error}"
+            raise ValueError(error_message) from error
+        except Exception as error:
+            error_message = f"Ошибка при загрузке файла: {error}"
+            raise RuntimeError(error_message) from error
 
     async def upload_file_from_content(
         self, file: UploadFile, file_key: str = "", bucket_name: str = None
@@ -204,17 +210,17 @@ class S3DataManager(SessionMixin):
                 )
                 self.logger.debug("Ответ S3(put_object): %s", response)
             return self.get_link_file(file_key, bucket_name)
-        except ClientError as e:
+        except ClientError as error:
             self.logger.error(
                 "Ошибка загрузки файла %s: %s\nДетали: %s",
                 file.filename,
-                e,
-                e.response["Error"] if hasattr(e, "response") else "Нет деталей",
+                error,
+                error.response["Error"] if hasattr(error, "response") else "Нет деталей",
             )
-            raise ValueError(f"Ошибка при загрузке файла: {e}") from e
+            raise ValueError(f"Ошибка при загрузке файла: {error}") from error
 
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при загрузке файла: {e}") from e
+        except Exception as error:
+            raise RuntimeError(f"Ошибка при загрузке файла: {error}") from error
 
     async def upload_multiple_files_from_path(
         self,
@@ -245,12 +251,12 @@ class S3DataManager(SessionMixin):
                 await self.upload_file_from_path(file_path, file_key, bucket_name)
                 uploaded_files.append(file_key)
             return uploaded_files
-        except ClientError as e:
-            raise ValueError(f"Ошибка при загрузке файлов: {e}") from e
-        except IOError as e:
-            raise ValueError(f"Ошибка при открытии файлов: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при загрузке файлов: {e}") from e
+        except ClientError as error:
+            raise ValueError(f"Ошибка при загрузке файлов: {error}") from error
+        except IOError as error:
+            raise ValueError(f"Ошибка при открытии файлов: {error}") from error
+        except Exception as error:
+            raise RuntimeError(f"Ошибка при загрузке файлов: {error}") from error
 
     async def upload_multiple_files_from_content(
         self,
@@ -278,10 +284,10 @@ class S3DataManager(SessionMixin):
                 await self.upload_file_from_content(file, file_key, bucket_name)
                 uploaded_files.append(file_key)
             return uploaded_files
-        except ClientError as e:
-            raise ValueError(f"Ошибка при загрузке файлов: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при загрузке файлов: {e}") from e
+        except ClientError as error:
+            raise ValueError(f"Ошибка при загрузке файлов: {error}") from error
+        except Exception as error:
+            raise RuntimeError(f"Ошибка при загрузке файлов: {error}") from error
 
     async def get_link_file(self, file_key: str, bucket_name: str = None) -> str:
         """
@@ -299,10 +305,12 @@ class S3DataManager(SessionMixin):
 
         try:
             return f"{self.endpoint}/{bucket_name}/{file_key}"
-        except ClientError as e:
-            raise ValueError(f"Ошибка при получении ссылки на файл: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при получении ссылки на файл: {e}") from e
+        except ClientError as error:
+            error_message = f"Ошибка при получении ссылки на файл: {error}"
+            raise ValueError(error_message) from error
+        except Exception as error:
+            error_message = f"Ошибка при получении ссылки на файл: {error}"
+            raise RuntimeError(error_message) from error
 
     async def download_file(
         self, file_key: str, file_path: str, bucket_name: str = None
@@ -326,12 +334,15 @@ class S3DataManager(SessionMixin):
                     await s3.download_fileobj(
                         Bucket=bucket_name, Key=file_key, Fileobj=file
                     )
-        except ClientError as e:
-            raise ValueError(f"Ошибка при скачивании файла: {e}") from e
-        except IOError as e:
-            raise ValueError(f"Ошибка при открытии файла для записи: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при скачивании файла: {e}") from e
+        except ClientError as error:
+            error_message = f"Ошибка при скачивании файла: {error}"
+            raise ValueError(error_message) from error
+        except IOError as error:
+            error_message = f"Ошибка при открытии файла для записи: {error}"
+            raise ValueError(error_message) from error
+        except Exception as error:
+            error_message = f"Ошибка при скачивании файла: {error}"
+            raise RuntimeError(error_message) from error
 
     async def download_multiple_files(
         self, file_keys: List[str], file_paths: List[str], bucket_name: str = None
@@ -356,12 +367,15 @@ class S3DataManager(SessionMixin):
                 await self.download_file(file_key, file_path, bucket_name)
                 downloaded_files.append(file_key)
             return downloaded_files
-        except ClientError as e:
-            raise ValueError(f"Ошибка при скачивании файлов: {e}") from e
-        except IOError as e:
-            raise ValueError(f"Ошибка при открытии файлов для записи: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при скачивании файлов: {e}") from e
+        except ClientError as error:
+            error_message = f"Ошибка при скачивании файлов: {error}"
+            raise ValueError(error_message) from error
+        except IOError as error:
+            error_message = f"Ошибка при открытии файлов для записи: {error}"
+            raise ValueError(error_message) from error
+        except Exception as error:
+            error_message = f"Ошибка при скачивании файлов: {error}"
+            raise RuntimeError(error_message) from error
 
     async def get_file_keys(
         self, prefix: str = "", bucket_name: str = None
@@ -386,10 +400,12 @@ class S3DataManager(SessionMixin):
             for obj in response.get("Contents", []):
                 keys.append(obj["Key"])
             return keys
-        except ClientError as e:
-            raise ValueError(f"Ошибка при получении списка файлов: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при получении списка файлов: {e}") from e
+        except ClientError as error:
+            raise ValueError(f"Ошибка при получении списка файлов: {error}") from error
+        except Exception as error:
+            raise RuntimeError(
+                f"Ошибка при получении списка файлов: {error}"
+            ) from error
 
     async def download_all_files(
         self, folder_path: str, prefix: str = "", bucket_name: str = None
@@ -415,12 +431,14 @@ class S3DataManager(SessionMixin):
                 file_keys, file_paths, bucket_name
             )
             return downloaded_files
-        except ClientError as e:
-            raise ValueError(f"Ошибка при скачивании файлов: {e}") from e
-        except IOError as e:
-            raise ValueError(f"Ошибка при открытии файлов для записи: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при скачивании файлов: {e}") from e
+        except ClientError as error:
+            raise ValueError(f"Ошибка при скачивании файлов: {error}") from error
+        except IOError as error:
+            raise ValueError(
+                f"Ошибка при открытии файлов для записи: {error}"
+            ) from error
+        except Exception as error:
+            raise RuntimeError(f"Ошибка при скачивании файлов: {error}") from error
 
     async def delete_file(self, file_key: str, bucket_name: str = None) -> bool:
         """
@@ -439,7 +457,9 @@ class S3DataManager(SessionMixin):
             async with self.session as s3:
                 await s3.delete_object(Bucket=bucket_name, Key=file_key)
             return True
-        except ClientError as e:
-            raise ValueError(f"Ошибка при удалении файла из бакета: {e}") from e
-        except Exception as e:
-            raise RuntimeError(f"Ошибка при удалении файла из бакета: {e}") from e
+        except ClientError as error:
+            raise ValueError(f"Ошибка при удалении файла из бакета: {error}") from error
+        except Exception as error:
+            raise RuntimeError(
+                f"Ошибка при удалении файла из бакета: {error}"
+            ) from error

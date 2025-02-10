@@ -1,6 +1,6 @@
 from fastapi.responses import RedirectResponse
 
-from app.core.exceptions import OAuthUserDataError, OAuthTokenError
+from app.core.exceptions import OAuthTokenError, OAuthUserDataError
 from app.schemas import (OAuthProvider, OAuthProviderResponse, YandexTokenData,
                          YandexUserData)
 from app.services.v1.oauth.base import BaseOAuthProvider
