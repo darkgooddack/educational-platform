@@ -50,3 +50,5 @@ class ThemeListResponse(ListResponseSchema[ThemeSchema]):
     """
 
     items: List[ThemeSchema]
+    success: bool = True
+    message: str = "Тема успешно добавлена"
