@@ -141,3 +141,5 @@ class TestListResponse(ListResponseSchema[TestSchema]):
     """Схема для возврата списка тестов"""
 
     items: List[TestSchema]
+    success: bool = True
+    message: str = "Тест успешно добавлен"
