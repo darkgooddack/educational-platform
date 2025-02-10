@@ -37,8 +37,12 @@ class TestBase(CommonBaseSchema):
         lecture_id: ID связанной лекции (опционально)
     """
 
-    title: str
-    description: str
+    title: str = Field(
+        min_length=10, max_length=150, description="Название теста"
+    )
+    description: str = Field(
+        min_length=0, max_length=250, description="Описание теста"
+    )
     duration: int
     passing_score: int
     max_attempts: int
@@ -121,8 +125,12 @@ class TestCreateSchema(BaseInputSchema):
         questions: Список вопросов теста
     """
 
-    title: str
-    description: str
+    title: str = Field(
+        min_length=10, max_length=150, description="Название теста"
+    )
+    descriptiont: str = Field(
+        min_length=0, max_length=250, description="Описание теста"
+    )
     duration: int
     passing_score: int = 60
     max_attempts: int = 3
@@ -223,6 +231,6 @@ class TestListResponse(BaseResponseSchema):
         message: Сообщение об успешном получении списка
     """
 
-    item: TestSchema
+    items: List[TestSchema]
     success: bool = True
     message: str = "Тест успешно добавлен"
