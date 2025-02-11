@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (BaseAPIException, DatabaseError,
                                  QuestionNotFoundError, TestDeleteError,
-                                 TestNotFoundError, TestUpdateError)
+                                 TestGetError, TestUpdateError)
 from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse,
@@ -114,7 +114,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         """
         test = await self.get_item(test_id)
         if not test:
-            raise TestNotFoundError(f"Тест с ID {test_id} не найден")
+            raise TestGetError(f"Тест с ID {test_id} не найден")
         return test
 
     async def add_question(
@@ -188,7 +188,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             TestUpdateResponse: Обновленный тест (ID).
 
         Raises:
-            TestNotFoundError: Если тест с указанным ID не найден.
+            TestGetError: Если тест с указанным ID не найден.
             TestUpdateError: Если возникла ошибка при обновлении теста.
         """
 
@@ -197,8 +197,9 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             found_test_model = await self.get_one(statement)
 
             if not found_test_model:
-                raise TestNotFoundError(
-                    message=f"Тест с id {test_id} не найден", extra={"test_id": test_id}
+                raise TestGetError(
+                    message=f"Тест с id {test_id} не найден",
+                    extra={"test_id": test_id}
                 )
 
             for field, value in test_data.model_dump().items():

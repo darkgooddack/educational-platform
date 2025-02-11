@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import TestNotFoundError
+from app.core.exceptions import TestGetError
 from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse,
@@ -103,7 +103,7 @@ class TestService(BaseService):
         """
         test = await self._data_manager.get_test(test_id)
         if not test:
-            raise TestNotFoundError(f"Тест с ID {test_id} не найден")
+            raise TestGetError(f"Тест с ID {test_id} не найден")
         return test
 
     async def add_question(
