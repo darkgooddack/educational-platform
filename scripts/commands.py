@@ -288,7 +288,7 @@ def check():
             text=True,
             check=True
         )
-        errors = result.stdout.split('\n')
+        flake8_errors = result.stdout.split('\n')
 
         # Группируем ошибки по типу
         error_groups = {
