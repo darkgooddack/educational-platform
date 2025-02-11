@@ -5,7 +5,7 @@ WORKDIR /usr/src/app/
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apk update
+RUN apk update && apk list --available
 
 RUN apk add --no-cache --virtual .build-deps \
     gcc \
