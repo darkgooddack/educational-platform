@@ -99,7 +99,7 @@ def setup_routes(router: APIRouter):
         videos, total = await service.get_videos(
             pagination=pagination,
             theme_id=theme_id,
-            search=search,
+            search=search
         )
         return VideoLectureListResponse(
             items=videos, total=total, page=pagination.page, size=pagination.limit

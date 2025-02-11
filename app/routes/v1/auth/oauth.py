@@ -5,6 +5,8 @@
 - Аутентификации пользователей через OAuth2.
 """
 
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -46,10 +48,10 @@ def setup_routes(router: APIRouter):
 
     @router.get("/{provider}/callback")
     async def oauth_callback(
-        provider: str,
+        provider: OAuthProvider,
         code: str,
-        state: str = None,
-        device_id: str | None = None,
+        state: str,
+        device_id: str,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> OAuthResponse:
         """

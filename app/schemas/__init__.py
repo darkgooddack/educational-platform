@@ -10,10 +10,12 @@ from .v1.base import (BaseInputSchema, BaseResponseSchema, BaseSchema,
                       CommonBaseSchema, ErrorResponseSchema,
                       ItemResponseSchema, ListResponseSchema)
 from .v1.content import ContentType
-from .v1.feedbacks.feedbacks import (FeedbackCreateSchema, FeedbackCreateResponse, 
-                                    FeedbackUpdateResponse, FeedbackDeleteResponse,
-                                    FeedbackSchema, FeedbackStatus, FeedbackUpdateSchema,
-                                                                  FeedbackListResponse)
+from .v1.feedbacks.feedbacks import (FeedbackCreateResponse,
+                                     FeedbackCreateSchema,
+                                     FeedbackDeleteResponse,
+                                     FeedbackListResponse, FeedbackSchema,
+                                     FeedbackStatus, FeedbackUpdateResponse,
+                                     FeedbackUpdateSchema)
 from .v1.oauth.oauth import (GoogleTokenData, GoogleUserData, OAuthConfig,
                              OAuthParams, OAuthProvider, OAuthProviderResponse,
                              OAuthResponse, OAuthTokenParams, OAuthUserData,
@@ -27,8 +29,9 @@ from .v1.tests.tests import (AnswerCreateSchema, AnswerSchema,
                              QuestionType, TestCreateResponse,
                              TestCreateSchema, TestDeleteResponse, TestSchema,
                              TestUpdateResponse)
-from .v1.themes.themes import (ThemeBase, ThemeCreateSchema, ThemeListResponse,
-                               ThemeSchema)
+from .v1.themes.themes import (ThemeBase, ThemeSchema, ThemeCreateSchema, 
+                            ThemeListResponse, ThemeSelectResponse, ThemeTreeResponse,
+                            ThemeCreateResponse, ThemeUpdateResponse, ThemeDeleteResponse)
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
                              UserUpdateSchema)
@@ -78,7 +81,7 @@ __all__ = [
     "FeedbackCreateResponse",
     "FeedbackUpdateResponse",
     "FeedbackDeleteResponse",
-    "FeedbackListRespone",
+    "FeedbackListResponse",
     "VideoLectureSchema",
     "VideoLectureCreateSchema",
     "VideoLectureCreateResponse",
@@ -91,7 +94,11 @@ __all__ = [
     "ThemeBase",
     "ThemeCreateSchema",
     "ThemeSchema",
-    "ThemeListResponse",
+    "ThemeCreateResponse",
+    "ThemeUpdateResponse",
+    "ThemeDeleteResponse",
+    "ThemeSelectResponse",
+    "ThemeTreeResponse",
     "VKOAuthTokenParams",
     "VKTokenData",
     "GoogleTokenData",

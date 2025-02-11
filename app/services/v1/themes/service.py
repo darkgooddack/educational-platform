@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ThemeNotFoundError
 from app.models import ThemeModel
-from app.schemas import PaginationParams, ThemeCreateSchema, ThemeSchema
+from app.schemas import (PaginationParams, ThemeCreateSchema, ThemeSchema, 
+                        ThemeCreateResponse, ThemeUpdateResponse, ThemeDeleteResponse, 
+                        ThemeListResponse, ThemeSelectResponse, ThemeTreeResponse)
 from app.services import BaseService
 
 from .data_manager import ThemeDataManager
@@ -14,7 +16,24 @@ class ThemeService(BaseService):
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.session = session
-        self._data_manager = ThemeDataManager(session)
+        self.theme_manager = ThemeDataManager(session)
+
+    async def create_theme(self, theme_data: ThemeCreateSchema) -> ThemeCreateResponse:
+        """
+        Создает новую тему.
+
+        Args:
+            theme_data: Данные для создания темы
+
+        Returns:
+            ThemeSchema: Созданная тема
+        """
+        theme = ThemeModel(
+            name=theme_data.name,
+            description=theme_data.description,
+            parent_id=theme_data.parent_id,
+        )
+        return await self.theme_manager.add_theme(theme)
 
     async def get_themes(self) -> List[ThemeSchema]:
         """
@@ -23,7 +42,7 @@ class ThemeService(BaseService):
         Returns:
             List[ThemeSchema]: Полный список тем
         """
-        return await self._data_manager.get_themes()
+        return await self.theme_manager.get_themes()
 
     async def get_themes_paginated(
         self,
@@ -42,28 +61,11 @@ class ThemeService(BaseService):
         Returns:
             tuple[List[ThemeSchema], int]: Список тем и общее количество
         """
-        return await self._data_manager.get_themes_paginated(
+        return await self.theme_manager.get_themes_paginated(
             pagination=pagination,
             parent_id=parent_id,
             search=search,
         )
-
-    async def create_theme(self, theme_data: ThemeCreateSchema) -> ThemeSchema:
-        """
-        Создает новую тему.
-
-        Args:
-            theme_data: Данные для создания темы
-
-        Returns:
-            ThemeSchema: Созданная тема
-        """
-        theme = ThemeModel(
-            name=theme_data.name,
-            description=theme_data.description,
-            parent_id=theme_data.parent_id,
-        )
-        return await self._data_manager.add_theme(theme)
 
     async def get_theme_by_id(self, theme_id: int) -> ThemeSchema:
         """
@@ -78,7 +80,7 @@ class ThemeService(BaseService):
         Raises:
             ThemeNotFoundError: Если тема не найдена
         """
-        theme = await self._data_manager.get_theme(theme_id)
+        theme = await self.theme_manager.get_theme(theme_id)
         if not theme:
             raise ThemeNotFoundError(f"Тема с ID {theme_id} не найдена")
         return theme
@@ -90,4 +92,29 @@ class ThemeService(BaseService):
         Returns:
             List[ThemeSchema]: Список корневых тем с их дочерними темами
         """
-        return await self._data_manager.get_themes_tree()
+        return await self.theme_manager.get_themes_tree()
+
+    async def update_theme(self, theme_id: int, theme: ThemeCreateSchema) -> ThemeUpdateResponse:
+        """
+        Обновляет тему.
+
+        Args:
+            theme_id (int): ID темы
+            theme (ThemeCreateSchema): Новые данные темы
+
+        Returns:
+            ThemeUpdateResponse: Схема ответа на обновление темы
+        """
+        return await self.theme_manager.update_theme(theme_id, theme)
+
+    async def delete_theme(self, theme_id: int) -> ThemeDeleteResponse:
+        """
+        Удаляет тему.
+
+        Args:
+            theme_id (int): ID темы
+
+        Returns:
+            ThemeDeleteResponse: Схема ответа на удаление темы
+        """
+        return await self.theme_manager.delete_theme(theme_id)

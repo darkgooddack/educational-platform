@@ -11,6 +11,7 @@
 import logging
 import uuid
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 import pytz
 from fastapi import HTTPException
@@ -37,7 +38,11 @@ class BaseAPIException(HTTPException):
     """
 
     def __init__(
-        self, status_code: int, detail: str, error_type: str, extra: dict = None
+        self,
+        status_code: int,
+        detail: str,
+        error_type: str,
+        extra: Optional[Dict[Any, Any]] = None,
     ) -> None:
 
         context = {
@@ -57,7 +62,7 @@ class DatabaseError(BaseAPIException):
     Ошибка при работе с базой данных.
     """
 
-    def __init__(self, message: str, extra: dict = None):
+    def __init__(self, message: str, extra: Optional[Dict[Any, Any]] = None):
         super().__init__(
             status_code=500,
             detail=f"Ошибка базы данных: {message}",

@@ -12,9 +12,10 @@ from app.core.exceptions import (BaseAPIException, DatabaseError,
                                  FeedbackAddError, FeedbackDeleteError,
                                  FeedbackGetError, FeedbackUpdateError)
 from app.models import BaseModel, FeedbackModel
-from app.schemas import (BaseSchema, FeedbackCreateSchema, FeedbackCreateResponse,
-                        FeedbackUpdateResponse, FeedbackDeleteResponse, FeedbackSchema,
-                        FeedbackStatus, PaginationParams)
+from app.schemas import (BaseSchema, FeedbackCreateResponse,
+                         FeedbackCreateSchema, FeedbackDeleteResponse,
+                         FeedbackSchema, FeedbackStatus,
+                         FeedbackUpdateResponse, PaginationParams)
 from app.services.v1.base import BaseDataManager
 from app.services.v1.users import UserService
 
@@ -225,7 +226,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             status (FeedbackStatus): Новый статус обратной связи
 
         Returns:
-            FeedbackUpdateResponse: Схема обратной связи с обновленным статусом, либо None если обратная связь не найдена
+            FeedbackUpdateResponse: Схема обратной связи с обновленным статусом
         """
         try:
             statement = select(self.model).where(self.model.id == feedback_id)
@@ -244,10 +245,11 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                 updated_model=found_feedback_model,
             )
 
+
             return FeedbackUpdateResponse(
                 id=updated_feedback.id,
                 status=updated_feedback.status,
-                message=f"Статус обратной связи изменен на {status}"
+                message=f"Статус обратной связи изменен на {status}",
             )
         except DatabaseError as db_error:
             raise FeedbackUpdateError(

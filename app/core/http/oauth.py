@@ -1,3 +1,5 @@
+from typing import Optional
+
 from aiohttp.client_exceptions import ContentTypeError
 
 from .base import BaseHttpClient
@@ -39,7 +41,9 @@ class OAuthHttpClient(BaseHttpClient):
             self.logger.error("Неожиданная ошибка при получении токена: %s", str(e))
             raise
 
-    async def get_user_info(self, url: str, token: str, client_id: str = None) -> dict:
+    async def get_user_info(
+        self, url: str, token: str, client_id: Optional[str] = None
+    ) -> dict:
         headers = {"Authorization": f"Bearer {token}"}
         params = {}
 

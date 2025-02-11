@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,6 +8,10 @@ from app.schemas import (FeedbackCreateSchema, FeedbackCreateResponse,
                         FeedbackUpdateResponse, FeedbackDeleteResponse,
                         FeedbackSchema, FeedbackStatus, FeedbackListResponse,
                         Page, PaginationParams)
+from app.schemas import (FeedbackCreateResponse, FeedbackCreateSchema,
+                         FeedbackDeleteResponse, FeedbackListResponse,
+                         FeedbackSchema, FeedbackStatus,
+                         FeedbackUpdateResponse, Page, PaginationParams)
 from app.services import FeedbackService
 
 
@@ -32,8 +38,8 @@ def setup_routes(router: APIRouter):
     @router.get("/", response_model=FeedbackListResponse)
     async def get_feedbacks(
         pagination: PaginationParams = Depends(),
-        status: FeedbackStatus = None,
-        search: str = None,
+        status: Optional[FeedbackStatus] = FeedbackStatus.PENDING,
+        search: str = "",
         db_session: AsyncSession = Depends(get_db_session),
     ) -> FeedbackListResponse:
         """

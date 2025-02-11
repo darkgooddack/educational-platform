@@ -17,8 +17,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_current_user, get_db_session
 from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
-                         QuestionCreateSchema, TestCreateResponse,
-                         TestCreateSchema, TestSchema, UserCredentialsSchema)
+                         QuestionCreateSchema, TestCreateResponse, TestUpdateResponse,
+                         TestDeleteResponse, TestCreateSchema, TestSchema, 
+                         UserCredentialsSchema)
 from app.services import TestService
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ def setup_routes(router: APIRouter):
     @router.post("/", response_model=TestCreateResponse)
     async def create_test(
         test: TestCreateSchema,
-        _current_user: UserCredentialsSchema = Depends(get_current_user),
+        current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestCreateResponse:
         """
@@ -38,14 +39,14 @@ def setup_routes(router: APIRouter):
 
         ## Args
         * **test** - данные для создания теста
-        * **_current_user** - текущий авторизованный пользователь
+        * **current_user** - текущий авторизованный пользователь
         * **db_session** - сессия базы данных
 
         ## Returns
         * Созданный тест в виде списка с одним элементом
         """
         service = TestService(db_session)
-        result = await service.create_test(test, author_id=_current_user.id)
+        result = await service.create_test(test, author_id=current_user.id)
         return result
 
     @router.get("/", response_model=Page[TestSchema])
@@ -143,12 +144,12 @@ def setup_routes(router: APIRouter):
         service = TestService(db_session)
         return await service.add_answer(question_id, answer)
 
-    @router.put("/{test_id}", response_model=TestSchema)
+    @router.put("/{test_id}", response_model=TestUpdateResponse)
     async def update_test(
         test_id: int,
         test: TestCreateSchema,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> TestSchema:
+    ) -> TestUpdateResponse:
         """
         # Обновление существующего теста
 
@@ -163,11 +164,11 @@ def setup_routes(router: APIRouter):
         service = TestService(db_session)
         return await service.update_test(test_id, test)
 
-    @router.delete("/{test_id}", response_model=TestSchema)
+    @router.delete("/{test_id}", response_model=TestDeleteResponse)
     async def delete_test(
         test_id: int,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> TestSchema:
+    ) -> TestDeleteResponse:
         """
         # Удаление теста
 

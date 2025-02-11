@@ -2,8 +2,10 @@ from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import (FeedbackCreateSchema, FeedbackCreateResponse, FeedbackUpdateResponse, 
-                        FeedbackDeleteResponse, FeedbackSchema, FeedbackStatus, PaginationParams)
+from app.schemas import (FeedbackCreateResponse, FeedbackCreateSchema,
+                         FeedbackDeleteResponse, FeedbackSchema,
+                         FeedbackStatus, FeedbackUpdateResponse,
+                         PaginationParams)
 from app.services import BaseService
 
 from .data_manager import FeedbackDataManager
