@@ -6,7 +6,7 @@ from enum import Enum
 from typing import List, Optional
 
 from pydantic import EmailStr, Field
-from app.schemas import Page
+from app.schemas.v1.pagination import Page
 from app.schemas.v1.base import BaseInputSchema, BaseResponseSchema, BaseSchema
 
 
