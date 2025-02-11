@@ -6,7 +6,7 @@ from enum import Enum
 from typing import List, Optional
 
 from pydantic import EmailStr, Field
-
+from app.schemas import Page
 from app.schemas.v1.base import BaseInputSchema, BaseResponseSchema, BaseSchema
 
 
@@ -148,22 +148,12 @@ class FeedbackDeleteResponse(BaseResponseSchema):
     message: str = "Обратная связь успешно удалена"
 
 
-class FeedbackListResponse(BaseResponseSchema):
+class FeedbackListResponse(Page[FeedbackSchema]):
     """
     Схема для возврата списка обратной связи с пагинацией
 
-    Attributes:
-        items: Список обратной связи
-        total: Общее количество
-        page: Текущая страница
-        size: Размер страницы
-        success: Признак успешного получения
-        message: Сообщение об успешном получении
+    Наследуется от Page[VideoLectureSchema] и добавляет поля success и message
     """
 
-    items: List[FeedbackSchema]
-    total: int
-    page: int
-    size: int
     success: bool = True
     message: str = "Список обратной связи успешно получен"

@@ -29,13 +29,13 @@ def setup_routes(router: APIRouter):
         """
         return await FeedbackService(db_session).create_feedback(feedback)
 
-    @router.get("/", response_model=Page[FeedbackSchema])
+    @router.get("/", response_model=FeedbackListResponse)
     async def get_feedbacks(
         pagination: PaginationParams = Depends(),
         status: FeedbackStatus = None,
         search: str = None,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> Page[FeedbackSchema]:
+    ) -> FeedbackListResponse:
         """
         **Получение всех отзывов с пагинацией, фильтрацией и поиском.**
 
@@ -46,16 +46,17 @@ def setup_routes(router: APIRouter):
             - db_session (AsyncSession): Сессия базы данных.
 
         **Returns**:
-            - Page[FeedbackSchema]: Страница с отзывами.
+            - FeedbackListResponse: Страница с отзывами.
 
 
         """
-        feedbacks, total = await FeedbackService(db_session).get_feedbacks(
+        service = FeedbackService(db_session)
+        feedbacks, total = await service.get_feedbacks(
             pagination=pagination,
             status=status,
             search=search,
         )
-        return Page(
+        return FeedbackListResponse(
             items=feedbacks, total=total, page=pagination.page, size=pagination.limit
         )
 
