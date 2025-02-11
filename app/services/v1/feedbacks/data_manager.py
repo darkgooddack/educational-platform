@@ -1,38 +1,5 @@
 """
 Модуль для работы с данными обратной связи.
-
-TODO:
-
-# Проверяем время последнего запроса
-last_feedback = await self.get_one(
-    select(self.model)
-    .where(self.model.email == feedback.email)
-    .order_by(self.model.created_at.desc())
-)
-
-if last_feedback:
-    time_diff = datetime.now(timezone.utc) - last_feedback.created_at
-    if time_diff.total_seconds() < 3600:  # 1 час
-        raise BaseAPIException(
-            status_code=400,
-            detail="Слишком частые запросы. Попробуйте позже",
-            error_type="rate_limit"
-        )
-
-# Добавить в FeedbackCreateSchema
-email: EmailStr = Field(
-    ...,
-    description="Email пользователя",
-    regex=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-)
-phone: str = Field(
-    None,
-    pattern=r"^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$"
-)
-
-Добавить rate limiting на уровне API через middleware.
-
-Использовать CAPTCHA для веб-форм.
 """
 
 from typing import List, TypeVar

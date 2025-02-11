@@ -10,8 +10,10 @@
 
 from enum import Enum
 from typing import List, Optional
+
 from pydantic import Field
-from ..base import (BaseInputSchema, BaseResponseSchema, CommonBaseSchema)
+
+from ..base import BaseInputSchema, BaseResponseSchema, CommonBaseSchema
 
 
 class QuestionType(str, Enum):
@@ -36,12 +38,8 @@ class TestBase(CommonBaseSchema):
         lecture_id: ID связанной лекции (опционально)
     """
 
-    title: str = Field(
-        min_length=10, max_length=150, description="Название теста"
-    )
-    description: str = Field(
-        min_length=0, max_length=250, description="Описание теста"
-    )
+    title: str = Field(min_length=10, max_length=150, description="Название теста")
+    description: str = Field(min_length=0, max_length=250, description="Описание теста")
     duration: int
     passing_score: int
     max_attempts: int
@@ -124,9 +122,7 @@ class TestCreateSchema(BaseInputSchema):
         questions: Список вопросов теста
     """
 
-    title: str = Field(
-        min_length=10, max_length=150, description="Название теста"
-    )
+    title: str = Field(min_length=10, max_length=150, description="Название теста")
     descriptiont: str = Field(
         min_length=0, max_length=250, description="Описание теста"
     )
@@ -176,6 +172,7 @@ class TestSchema(TestBase):
     id: int
     questions: List[QuestionSchema]
 
+
 class TestCreateResponse(BaseResponseSchema):
     """
     Схема для создания теста
@@ -189,6 +186,7 @@ class TestCreateResponse(BaseResponseSchema):
     item: TestSchema
     success: bool = True
     message: str = "Тест успешно создан"
+
 
 class TestUpdateResponse(BaseResponseSchema):
     """

@@ -35,6 +35,7 @@ class TokenSchema(BaseInputSchema):
     access_token: str
     token_type: str = "bearer"
 
+
 class TokenResponseSchema(BaseResponseSchema):
     """
     Схема ответа с токеном доступа
@@ -44,6 +45,7 @@ class TokenResponseSchema(BaseResponseSchema):
         success: Признак успешной авторизации
         message: Сообщение об успешной авторизации
     """
+
     item: TokenSchema
     success: bool = True
     message: str = "Авторизация успешна"

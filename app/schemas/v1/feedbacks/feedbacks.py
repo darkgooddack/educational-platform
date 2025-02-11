@@ -3,11 +3,11 @@
 """
 
 from enum import Enum
-from typing import Optional, List
+from typing import List, Optional
 
 from pydantic import EmailStr, Field
 
-from app.schemas.v1.base import BaseInputSchema, BaseSchema, BaseResponseSchema
+from app.schemas.v1.base import BaseInputSchema, BaseResponseSchema, BaseSchema
 
 
 class FeedbackStatus(str, Enum):
@@ -124,6 +124,7 @@ class FeedbackResponse(BaseInputSchema):
         ],
     )
 
+
 class FeedbackCreateResponse(BaseResponseSchema):
     """
     Схема ответа при создании обратной связи
@@ -133,9 +134,11 @@ class FeedbackCreateResponse(BaseResponseSchema):
         success: Признак успешного создания
         message: Сообщение о создании
     """
+
     item: FeedbackSchema
     success: bool = True
     message: str = "Обратная связь успешно создана"
+
 
 class FeedbackUpdateResponse(BaseResponseSchema):
     """
@@ -146,9 +149,11 @@ class FeedbackUpdateResponse(BaseResponseSchema):
         success: Признак успешного обновления
         message: Сообщение об обновлении
     """
+
     id: int
     success: bool = True
     message: str = "Обратная связь успешно обновлена"
+
 
 class FeedbackDeleteResponse(BaseResponseSchema):
     """
@@ -159,9 +164,11 @@ class FeedbackDeleteResponse(BaseResponseSchema):
         success: Признак успешного удаления
         message: Сообщение об удалении
     """
+
     id: int
     success: bool = True
     message: str = "Обратная связь успешно удалена"
+
 
 class FeedbackListResponse(BaseResponseSchema):
     """
@@ -175,6 +182,7 @@ class FeedbackListResponse(BaseResponseSchema):
         success: Признак успешного получения
         message: Сообщение об успешном получении
     """
+
     items: List[FeedbackSchema]
     total: int
     page: int

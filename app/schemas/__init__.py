@@ -4,7 +4,7 @@
 Предоставляет единую точку доступа ко всем Pydantic схемам.
 """
 
-from .v1.auth.auth import AuthSchema, TokenSchema, TokenResponseSchema
+from .v1.auth.auth import AuthSchema, TokenResponseSchema, TokenSchema
 from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema
 from .v1.base import (BaseInputSchema, BaseResponseSchema, BaseSchema,
                       CommonBaseSchema, ErrorResponseSchema,
@@ -31,14 +31,11 @@ from .v1.themes.themes import (ThemeBase, ThemeCreateSchema, ThemeListResponse,
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
                              UserUpdateSchema)
-from .v1.videos.videos import (
-    VideoLectureCreateSchema,
-    VideoLectureSchema,
-    VideoLectureCreateResponse,
-    VideoLectureUpdateResponse,
-    VideoLectureDeleteResponse,
-    VideoLectureListResponse
-)
+from .v1.videos.videos import (VideoLectureCreateResponse,
+                               VideoLectureCreateSchema,
+                               VideoLectureDeleteResponse,
+                               VideoLectureListResponse, VideoLectureSchema,
+                               VideoLectureUpdateResponse)
 
 __all__ = [
     "BaseSchema",

@@ -215,7 +215,11 @@ class S3DataManager(SessionMixin):
                 "Ошибка загрузки файла %s: %s\nДетали: %s",
                 file.filename,
                 error,
-                error.response["Error"] if hasattr(error, "response") else "Нет деталей",
+                (
+                    error.response["Error"]
+                    if hasattr(error, "response")
+                    else "Нет деталей"
+                ),
             )
             raise ValueError(f"Ошибка при загрузке файла: {error}") from error
 

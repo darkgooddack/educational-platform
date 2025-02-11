@@ -8,7 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import InvalidCredentialsError, UserInactiveError
 from app.core.security import HashingMixin, TokenMixin
 from app.core.storages.redis.auth import AuthRedisStorage
-from app.schemas import AuthSchema, TokenSchema, TokenResponseSchema, UserCredentialsSchema
+from app.schemas import (AuthSchema, TokenResponseSchema, TokenSchema,
+                         UserCredentialsSchema)
 from app.services.v1.base import BaseService
 
 from .data_manager import AuthDataManager
@@ -73,7 +74,9 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
 
         return await self.create_token(user_schema)
 
-    async def create_token(self, user_schema: UserCredentialsSchema) -> TokenResponseSchema:
+    async def create_token(
+        self, user_schema: UserCredentialsSchema
+    ) -> TokenResponseSchema:
         """
         Создание JWT токена
 
@@ -88,10 +91,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         await self._redis_storage.save_token(user_schema, token)
 
         return TokenResponseSchema(
-            item = TokenSchema(
-                access_token=token,
-                token_type="bearer"
-            )
+            item=TokenSchema(access_token=token, token_type="bearer")
         )
 
     async def logout(self, token: str) -> dict:

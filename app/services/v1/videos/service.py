@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies.s3 import S3Session
 from app.core.storages.s3.base import S3DataManager
 from app.models import VideoLectureModel
-from app.schemas import (PaginationParams, VideoLectureCreateSchema,
-                         VideoLectureCreateResponse, VideoLectureSchema)
+from app.schemas import (PaginationParams, VideoLectureCreateResponse,
+                         VideoLectureCreateSchema, VideoLectureSchema)
 from app.services import BaseService
 
 from .data_manager import VideoLectureDataManager
@@ -104,7 +104,7 @@ class VideoLectureService(BaseService):
                     theme_id=video_lecture.theme_id,
                     author_id=author_id,
                     views=0,
-                    duration=0
+                    duration=0,
                 )
             )
 

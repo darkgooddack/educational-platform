@@ -8,7 +8,7 @@ from app.core.dependencies import (get_current_user, get_db_session,
                                    get_s3_session)
 from app.core.dependencies.s3 import S3Session
 from app.schemas import (PaginationParams, UserCredentialsSchema,
-                         VideoLectureCreateSchema, VideoLectureCreateResponse,
+                         VideoLectureCreateResponse, VideoLectureCreateSchema,
                          VideoLectureListResponse)
 from app.services import VideoLectureService
 
@@ -102,10 +102,7 @@ def setup_routes(router: APIRouter):
             search=search,
         )
         return VideoLectureListResponse(
-            items=videos,
-            total=total,
-            page=pagination.page,
-            size=pagination.limit
+            items=videos, total=total, page=pagination.page, size=pagination.limit
         )
 
 
