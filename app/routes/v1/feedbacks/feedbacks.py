@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies import get_db_session
 from app.schemas import (FeedbackCreateSchema, FeedbackCreateResponse, 
                         FeedbackUpdateResponse, FeedbackDeleteResponse,
-                        FeedbackSchema, FeedbackStatus, Page,
-                        PaginationParams)
+                        FeedbackSchema, FeedbackStatus, FeedbackListResponse,
+                        Page, PaginationParams)
 from app.services import FeedbackService
 
 
