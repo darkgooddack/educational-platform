@@ -101,30 +101,6 @@ class FeedbackUpdateSchema(BaseInputSchema):
     email: EmailStr = Field(description="Email пользователя")
     status: FeedbackStatus
 
-
-class FeedbackResponse(BaseInputSchema):
-    """
-    Схема ответа на создание обратной связи.
-
-    Attributes:
-        id (int | None): Идентификатор обратной связи.
-        manager_id (int | None): ID менеджера, которому адресована обратная связь.
-        message (str): Сообщение об успешном создании обратной связи.
-    """
-
-    id: Optional[int] = None
-    manager_id: Optional[int] = None
-    message: str = Field(
-        default="Обратная связь успешно отправлена!",
-        description="Сообщение, отправляемое после совершенной работы с обратной связью \
-            (создание, обновление, удаление)",
-        examples=[
-            "Обратная связь успешно отправлена!",
-            "Обратная связь успешно удалена!",
-        ],
-    )
-
-
 class FeedbackCreateResponse(BaseResponseSchema):
     """
     Схема ответа при создании обратной связи
@@ -151,6 +127,7 @@ class FeedbackUpdateResponse(BaseResponseSchema):
     """
 
     id: int
+    status: FeedbackStatus
     success: bool = True
     message: str = "Обратная связь успешно обновлена"
 
@@ -166,6 +143,7 @@ class FeedbackDeleteResponse(BaseResponseSchema):
     """
 
     id: int
+    manager_id: Optional[int] = None
     success: bool = True
     message: str = "Обратная связь успешно удалена"
 

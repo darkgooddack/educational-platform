@@ -2,18 +2,19 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
-from app.schemas import (FeedbackCreateSchema, FeedbackResponse,
-                         FeedbackSchema, FeedbackStatus, Page,
-                         PaginationParams)
+from app.schemas import (FeedbackCreateSchema, FeedbackCreateResponse, 
+                        FeedbackUpdateResponse, FeedbackDeleteResponse,
+                        FeedbackSchema, FeedbackStatus, Page,
+                        PaginationParams)
 from app.services import FeedbackService
 
 
 def setup_routes(router: APIRouter):
-    @router.post("/", response_model=FeedbackResponse)
+    @router.post("/", response_model=FeedbackCreateResponse)
     async def create_feedback(
         feedback: FeedbackCreateSchema,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> FeedbackResponse:
+    ) -> FeedbackCreateResponse:
         """
         Создание отзыва со статусом "Ожидает обработки"
 
@@ -24,7 +25,7 @@ def setup_routes(router: APIRouter):
             db_session (AsyncSession): Сессия базы данных.
 
         **Returns**:
-            FeedbackResponse: Созданный отзыв.
+            FeedbackCreateResponse: Созданный отзыв.
         """
         return await FeedbackService(db_session).create_feedback(feedback)
 
@@ -82,11 +83,11 @@ def setup_routes(router: APIRouter):
         """
         return await FeedbackService(db_session).get_feedback(feedback_id)
 
-    @router.patch("/{feedback_id}/process", response_model=FeedbackSchema)
+    @router.patch("/{feedback_id}/process", response_model=FeedbackUpdateResponse)
     async def process_feedback(
         feedback_id: int,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> FeedbackSchema:
+    ) -> FeedbackUpdateResponse:
         """
         Обработка отзыва. Изменение статуса отзыва на "Обработан".
 
@@ -97,15 +98,15 @@ def setup_routes(router: APIRouter):
             db_session (AsyncSession): Сессия базы данных.
 
         **Returns**:
-            FeedbackResponse: Обработанный отзыв.
+            FeedbackUpdateResponse: Обработанный отзыв.
         """
         return await FeedbackService(db_session).proccess_feedback(feedback_id)
 
-    @router.patch("/{feedback_id}/delete", response_model=FeedbackSchema)
+    @router.patch("/{feedback_id}/delete", response_model=FeedbackUpdateResponse)
     async def soft_delete_feedback(
         feedback_id: int,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> FeedbackSchema:
+    ) -> FeedbackUpdateResponse:
         """
         Мягкое удаление отзыва (изменение статуса на "Удален").
 
@@ -116,15 +117,15 @@ def setup_routes(router: APIRouter):
             db_session (AsyncSession): Сессия базы данных.
 
         **Returns**:
-            FeedbackResponse: Удаленный отзыв.
+            FeedbackUpdateResponse: Удаленный отзыв.
         """
         return await FeedbackService(db_session).soft_delete_feedback(feedback_id)
 
-    @router.delete("/{feedback_id}", response_model=FeedbackResponse)
+    @router.delete("/{feedback_id}", response_model=FeedbackDeleteResponse)
     async def delete_feedback(
         feedback_id: int,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> FeedbackResponse:
+    ) -> FeedbackDeleteResponse:
         """
         Удаление отзыва (полное удаление).
 
@@ -133,7 +134,7 @@ def setup_routes(router: APIRouter):
             db_session (AsyncSession): Сессия базы данных.
 
         **Returns**:
-            FeedbackResponse: Удаленный отзыв.
+            FeedbackDeleteResponse: Удаленный отзыв.
         """
         return await FeedbackService(db_session).delete_feedback(feedback_id)
 

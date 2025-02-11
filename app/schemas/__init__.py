@@ -10,9 +10,9 @@ from .v1.base import (BaseInputSchema, BaseResponseSchema, BaseSchema,
                       CommonBaseSchema, ErrorResponseSchema,
                       ItemResponseSchema, ListResponseSchema)
 from .v1.content import ContentType
-from .v1.feedbacks.feedbacks import (FeedbackCreateSchema, FeedbackResponse,
-                                     FeedbackSchema, FeedbackStatus,
-                                     FeedbackUpdateSchema)
+from .v1.feedbacks.feedbacks import (FeedbackCreateSchema, FeedbackCreateResponse, 
+                                    FeedbackUpdateResponse, FeedbackDeleteResponse,
+                                    FeedbackSchema, FeedbackStatus, FeedbackUpdateSchema)
 from .v1.oauth.oauth import (GoogleTokenData, GoogleUserData, OAuthConfig,
                              OAuthParams, OAuthProvider, OAuthProviderResponse,
                              OAuthResponse, OAuthTokenParams, OAuthUserData,
@@ -74,7 +74,9 @@ __all__ = [
     "FeedbackSchema",
     "FeedbackCreateSchema",
     "FeedbackUpdateSchema",
-    "FeedbackResponse",
+    "FeedbackCreateResponse",
+    "FeedbackUpdateResponse",
+    "FeedbackDeleteResponse",
     "VideoLectureSchema",
     "VideoLectureCreateSchema",
     "VideoLectureCreateResponse",

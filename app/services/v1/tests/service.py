@@ -160,6 +160,6 @@ class TestService(BaseService):
             test_id (int): ID удаляемого теста
 
         Returns:
-            FeedbackResponse: Схема ответа на создание обратной связи
+            TestDeleteResponse: Схема ответа на удаление теста
         """
         return await self.test_manager.delete_test(test_id)

@@ -12,8 +12,9 @@ from app.core.exceptions import (BaseAPIException, DatabaseError,
                                  FeedbackAddError, FeedbackDeleteError,
                                  FeedbackGetError, FeedbackUpdateError)
 from app.models import BaseModel, FeedbackModel
-from app.schemas import (BaseSchema, FeedbackCreateSchema, FeedbackResponse,
-                         FeedbackSchema, FeedbackStatus, PaginationParams)
+from app.schemas import (BaseSchema, FeedbackCreateSchema, FeedbackCreateResponse, 
+                        FeedbackUpdateResponse, FeedbackDeleteResponse, FeedbackSchema, 
+                        FeedbackStatus, PaginationParams)
 from app.services.v1.base import BaseDataManager
 from app.services.v1.users import UserService
 
@@ -50,7 +51,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
     async def create_feedback(
         self,
         feedback: FeedbackCreateSchema,
-    ) -> FeedbackResponse:
+    ) -> FeedbackCreateResponse:
         """
         Создает новую обратную связь.
 
@@ -58,7 +59,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             feedback (FeedbackCreateSchema): Схема создания обратной связи.
 
         Returns:
-            FeedbackResponse: Схема ответа на создание обратной связи.
+            FeedbackCreateResponse: Схема ответа на создание обратной связи.
         """
         try:
             # Проверяем существование фидбека с таким email и статусом PENDING
@@ -71,9 +72,9 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                 )
             )
             if existing_feedback:
-                return FeedbackResponse(
-                    id=existing_feedback.id,
-                    manager_id=existing_feedback.manager_id,
+                return FeedbackCreateResponse(
+                    item=existing_feedback,
+                    success=False,
                     message="У вас уже есть активная заявка на обратную связь.",
                 )
             # Проверяем, существует ли менеджер, к которому адресуется обратная связь, если нет,
@@ -90,11 +91,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             feedback_model = self.model(**feedback_data)
             created_feedback_schema = await self.add_one(feedback_model)
 
-            return FeedbackResponse(
-                id=created_feedback_schema.id,
-                manager_id=created_feedback_schema.manager_id,
-                message="Обратная связь успешно отправлена!",
-            )
+            return FeedbackCreateResponse(item=created_feedback_schema)
         except DatabaseError as db_error:
             raise FeedbackAddError(
                 message=str(db_error),
@@ -219,7 +216,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
 
     async def update_feedback_status(
         self, feedback_id: int, status: FeedbackStatus
-    ) -> FeedbackSchema:
+    ) -> FeedbackUpdateResponse:
         """
         Обновляет статус обратной связи.
 
@@ -228,7 +225,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             status (FeedbackStatus): Новый статус обратной связи
 
         Returns:
-            FeedbackSchema: Схема обратной связи с обновленным статусом, либо None если обратная связь не найдена
+            FeedbackUpdateResponse: Схема обратной связи с обновленным статусом, либо None если обратная связь не найдена
         """
         try:
             statement = select(self.model).where(self.model.id == feedback_id)
@@ -242,10 +239,16 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
 
             updated_feedback_model = self.model(status=status)
 
-            return await self.update_one(
+            updated_feedback = await self.update_one(
                 model_to_update=found_feedback_model,
                 updated_model=updated_feedback_model,
             )
+            
+            return FeedbackUpdateResponse(
+                id=updated_feedback.id,
+                status=updated_feedback.status,
+                message=f"Статус обратной связи изменен на {status}"
+            )   
         except DatabaseError as db_error:
             raise FeedbackUpdateError(
                 message=str(db_error),
@@ -264,7 +267,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                 },
             ) from e
 
-    async def delete_feedback(self, feedback_id: int) -> FeedbackResponse:
+    async def delete_feedback(self, feedback_id: int) -> FeedbackDeleteResponse:
         """
         Удаляет обратную связь из базы данных.
 
@@ -272,7 +275,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackResponse: Сообщение об удалении обратной связи
+            FeedbackDeleteResponse: Сообщение об удалении обратной связи
 
         """
         try:
@@ -288,7 +291,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             if not await self.delete(statement):
                 raise FeedbackDeleteError(message="Не удалось удалить обратную  связь")
 
-            return FeedbackResponse(
+            return FeedbackDeleteResponse(
                 id=found_feedback.id,
                 manager_id=found_feedback.manager_id,
                 message="Обратная связь успешно удалена!",

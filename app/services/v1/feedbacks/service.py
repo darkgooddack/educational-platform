@@ -2,8 +2,8 @@ from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import (FeedbackCreateSchema, FeedbackResponse,
-                         FeedbackSchema, FeedbackStatus, PaginationParams)
+from app.schemas import (FeedbackCreateSchema, FeedbackCreateResponse, FeedbackUpdateResponse, 
+                        FeedbackDeleteResponse, FeedbackSchema, FeedbackStatus, PaginationParams)
 from app.services import BaseService
 
 from .data_manager import FeedbackDataManager
@@ -34,7 +34,7 @@ class FeedbackService(BaseService):
     async def create_feedback(
         self,
         feedback: FeedbackCreateSchema,
-    ) -> FeedbackResponse:
+    ) -> FeedbackCreateResponse:
         """
         Создает новую обратную связь.
 
@@ -42,7 +42,7 @@ class FeedbackService(BaseService):
             feedback (FeedbackCreateSchema): Схема создания обратной связи
 
         Returns:
-            FeedbackResponse: Схема ответа на создание обратной связи
+            FeedbackCreateResponse: Схема ответа на создание обратной связи
 
         TODO: Подумать как сделать оповещение о новой обратной связи, это нужно делать от сюда.
         """
@@ -66,7 +66,7 @@ class FeedbackService(BaseService):
     async def proccess_feedback(
         self,
         feedback_id: int,
-    ) -> FeedbackSchema:
+    ) -> FeedbackUpdateResponse:
         """
         Обрабатывает обратнцю связь.
 
@@ -76,7 +76,7 @@ class FeedbackService(BaseService):
             feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackSchema: Схема обратной связи
+            FeedbackUpdateResponse: ID обратной связи с обновленным статусом
         """
         return await self.feedback_manager.update_feedback_status(
             feedback_id, FeedbackStatus.PROCESSED.value
@@ -85,7 +85,7 @@ class FeedbackService(BaseService):
     async def restore_feedback(
         self,
         feedback_id: int,
-    ) -> FeedbackSchema:
+    ) -> FeedbackUpdateResponse:
         """
         Восстанавливает удаленную (обработанную) обратную связь.
 
@@ -98,7 +98,7 @@ class FeedbackService(BaseService):
             feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackSchema: Схема обратной связи
+            FeedbackUpdateResponse: ID обратной связи с обновленным статусом
         """
         return await self.feedback_manager.update_feedback_status(
             feedback_id, FeedbackStatus.PENDING.value
@@ -107,7 +107,7 @@ class FeedbackService(BaseService):
     async def soft_delete_feedback(
         self,
         feedback_id: int,
-    ) -> FeedbackSchema:
+    ) -> FeedbackUpdateResponse:
         """
         Удаляет обратную связь мягким удалением.
 
@@ -115,7 +115,7 @@ class FeedbackService(BaseService):
             feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackSchema: Схема обратной связи
+            FeedbackUpdateResponse: Схема обратной связи
         """
         return await self.feedback_manager.update_feedback_status(
             feedback_id, FeedbackStatus.DELETED.value
@@ -124,7 +124,7 @@ class FeedbackService(BaseService):
     async def delete_feedback(
         self,
         feedback_id: int,
-    ) -> FeedbackResponse:
+    ) -> FeedbackDeleteResponse:
         """
         Удаляет обратную связь из базы данных.
 
@@ -132,7 +132,7 @@ class FeedbackService(BaseService):
             feedback_id (int): ID обратной связи
 
         Returns:
-            FeedbackResponse: Схема ответа на создание обратной связи
+            FeedbackDeleteResponse: Схема ответа на создание обратной связи
         """
         return await self.feedback_manager.delete_feedback(feedback_id)
 
