@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import UploadFile
 from pydantic import Field
 
-from app.schemas import Page
+from app.schemas.v1.pagination import Page
 
 from ..base import BaseInputSchema, BaseResponseSchema, BaseSchema
 
