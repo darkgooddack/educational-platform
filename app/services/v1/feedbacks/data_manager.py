@@ -12,8 +12,8 @@ from app.core.exceptions import (BaseAPIException, DatabaseError,
                                  FeedbackAddError, FeedbackDeleteError,
                                  FeedbackGetError, FeedbackUpdateError)
 from app.models import BaseModel, FeedbackModel
-from app.schemas import (BaseSchema, FeedbackCreateSchema, FeedbackCreateResponse, 
-                        FeedbackUpdateResponse, FeedbackDeleteResponse, FeedbackSchema, 
+from app.schemas import (BaseSchema, FeedbackCreateSchema, FeedbackCreateResponse,
+                        FeedbackUpdateResponse, FeedbackDeleteResponse, FeedbackSchema,
                         FeedbackStatus, PaginationParams)
 from app.services.v1.base import BaseDataManager
 from app.services.v1.users import UserService
@@ -237,18 +237,18 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                     extra={"feedback_id": feedback_id},
                 )
 
-            updated_feedback_model = self.model(status=status)
+            found_feedback_model.status = status
 
             updated_feedback = await self.update_one(
                 model_to_update=found_feedback_model,
-                updated_model=updated_feedback_model,
+                updated_model=found_feedback_model,
             )
-            
+
             return FeedbackUpdateResponse(
                 id=updated_feedback.id,
                 status=updated_feedback.status,
                 message=f"Статус обратной связи изменен на {status}"
-            )   
+            )
         except DatabaseError as db_error:
             raise FeedbackUpdateError(
                 message=str(db_error),
