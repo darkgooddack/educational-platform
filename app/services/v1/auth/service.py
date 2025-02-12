@@ -2,6 +2,7 @@
 Модуль для работы с пользователями.
 В данном модуле реализованы функции для работы с пользователями.
 """
+import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +15,7 @@ from app.services.v1.base import BaseService
 
 from .data_manager import AuthDataManager
 
+logger = logging.getLogger(__name__)
 
 class AuthService(HashingMixin, TokenMixin, BaseService):
     """
@@ -87,8 +89,11 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             TokenResponseSchema: Схема с access_token и token_type
         """
         payload = TokenMixin.create_payload(user_schema)
+        logger.info("Token payload", extra={"payload": payload})
         token = TokenMixin.generate_token(payload)
+        logger.info("Token generated", extra={"token": token})
         await self._redis_storage.save_token(user_schema, token)
+        logger.info("Token saved to redis", extra={"token": token})
 
         return TokenResponseSchema(
             item=TokenSchema(access_token=token, token_type="bearer")
