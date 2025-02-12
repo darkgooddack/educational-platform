@@ -211,9 +211,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 model_to_update=found_test_model, updated_model=updated_test_model
             )
 
-            return TestUpdateResponse(
-                id=updated_test.id, message="Тест успешно обновлен!"
-            )
+            return TestUpdateResponse(id=updated_test.id)
 
         except DatabaseError as db_error:
             raise TestUpdateError(

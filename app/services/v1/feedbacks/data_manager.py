@@ -295,8 +295,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
 
             return FeedbackDeleteResponse(
                 id=found_feedback.id,
-                manager_id=found_feedback.manager_id,
-                message="Обратная связь успешно удалена!",
+                manager_id=found_feedback.manager_id
             )
         except Exception as e:
             raise BaseAPIException(

@@ -35,21 +35,22 @@ class ThemeService(BaseService):
         )
         return await self.theme_manager.add_theme(theme)
 
-    async def get_themes(self) -> List[ThemeSchema]:
+    async def get_themes(self) -> ThemeSelectResponse:
         """
         Получает плоский список всех тем без пагинации.
 
         Returns:
-            List[ThemeSchema]: Полный список тем
+            ThemeSelectResponse: Полный список тем
         """
-        return await self.theme_manager.get_themes()
+        themes = await self.theme_manager.get_themes()
+        return ThemeSelectResponse(items=themes)
 
     async def get_themes_paginated(
         self,
         pagination: PaginationParams,
         parent_id: Optional[int] = None,
         search: Optional[str] = None,
-    ) -> tuple[List[ThemeSchema], int]:
+    ) -> ThemeListResponse:
         """
         Получает список тем с возможностью пагинации, поиска и фильтрации.
 
@@ -59,12 +60,18 @@ class ThemeService(BaseService):
             search: Поиск по названию и описанию
 
         Returns:
-            tuple[List[ThemeSchema], int]: Список тем и общее количество
+            ThemeListResponse: Список тем и общее количество
         """
-        return await self.theme_manager.get_themes_paginated(
+        themes, total = await self.theme_manager.get_themes_paginated(
             pagination=pagination,
             parent_id=parent_id,
             search=search,
+        )
+        return ThemeListResponse(
+            items=themes,
+            total=total,
+            page=pagination.page,
+            size=pagination.limit
         )
 
     async def get_theme_by_id(self, theme_id: int) -> ThemeSchema:
@@ -85,14 +92,15 @@ class ThemeService(BaseService):
             raise ThemeNotFoundError(f"Тема с ID {theme_id} не найдена")
         return theme
 
-    async def get_themes_tree(self) -> List[ThemeSchema]:
+    async def get_themes_tree(self) -> ThemeTreeResponse:
         """
         Получает дерево тем.
 
         Returns:
-            List[ThemeSchema]: Список корневых тем с их дочерними темами
+            ThemeTreeResponse: Список корневых тем с их дочерними темами
         """
-        return await self.theme_manager.get_themes_tree()
+        themes = await self.theme_manager.get_themes_tree()
+        return ThemeTreeResponse(items=themes)
 
     async def update_theme(self, theme_id: int, theme: ThemeCreateSchema) -> ThemeUpdateResponse:
         """

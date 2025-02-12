@@ -5,13 +5,36 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ThemeExistsError, ThemeNotFoundError
 from app.models import ThemeModel
-from app.schemas import PaginationParams, ThemeSchema, ThemeCreateSchema
+from app.schemas import (PaginationParams, ThemeSchema, ThemeCreateSchema, 
+                        ThemeCreateResponse, ThemeUpdateResponse, ThemeDeleteResponse)
 from app.services import BaseDataManager
 
 
 class ThemeDataManager(BaseDataManager):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session, schema=ThemeSchema, model=ThemeModel)
+
+    async def add_theme(self, theme: ThemeModel) -> ThemeCreateResponse:
+        """
+        Добавляет новую тему с проверкой на существование.
+
+        Args:
+            theme: Модель темы для добавления
+
+        Returns:
+            ThemeCreateResponse: Добавленная тема
+
+        Raises:
+            ThemeExistsError: Если тема с таким названием уже существует
+        """
+        existing_theme = await self.session.execute(
+            select(self.model).where(self.model.name == theme.name)
+        )
+        if existing_theme.scalar_one_or_none():
+            raise ThemeExistsError(theme.name)
+
+        created_theme = await self.add_one(theme)
+        return ThemeCreateResponse(item=created_theme)
 
     async def get_themes(self) -> List[ThemeSchema]:
         """
@@ -59,27 +82,6 @@ class ThemeDataManager(BaseDataManager):
             )
 
         return await self.get_paginated(query, pagination)
-
-    async def add_theme(self, theme: ThemeModel) -> ThemeSchema:
-        """
-        Добавляет новую тему с проверкой на существование.
-
-        Args:
-            theme: Модель темы для добавления
-
-        Returns:
-            ThemeSchema: Добавленная тема
-
-        Raises:
-            ThemeExistsError: Если тема с таким названием уже существует
-        """
-        existing_theme = await self.session.execute(
-            select(self.model).where(self.model.name == theme.name)
-        )
-        if existing_theme.scalar_one_or_none():
-            raise ThemeExistsError(theme.name)
-
-        return await self.add_one(theme)
 
     async def get_theme(self, theme_id: int) -> Optional[ThemeSchema]:
         """
@@ -143,12 +145,14 @@ class ThemeDataManager(BaseDataManager):
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def update_theme(self, theme_id: int, theme_data: ThemeCreateSchema) -> ThemeSchema:
+    async def update_theme(self, theme_id: int, theme_data: ThemeCreateSchema) -> ThemeUpdateResponse:
         """Обновляет тему в базе данных"""
         theme = await self.get_theme(theme_id)
-        return await self.update_one(theme_id, theme_data)
+        updated = await self.update_one(theme_id, theme_data)
+        return ThemeUpdateResponse(id=theme_id)
 
-    async def delete_theme(self, theme_id: int) -> ThemeSchema:
+    async def delete_theme(self, theme_id: int) -> ThemeDeleteResponse:
         """Удаляет тему из базы данных"""
         theme = await self.get_theme(theme_id)
-        return await self.delete_one(theme_id)
+        await self.delete_one(theme_id)
+        return ThemeDeleteResponse(id=theme_id)
