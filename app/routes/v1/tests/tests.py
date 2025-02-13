@@ -10,7 +10,7 @@
 """
 
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -52,7 +52,7 @@ def setup_routes(router: APIRouter):
     @router.get("/", response_model=Page[TestSchema])
     async def get_tests(
         pagination: PaginationParams = Depends(),
-        theme_id: Optional[int] = Query(None, description="Фильтр по теме"),
+        theme_ids: Optional[List[int]] = Query(None, description="Фильтр по темам"),
         video_lecture_id: Optional[int] = Query(
             None, description="Фильтр по видео-лекции"
         ),
@@ -65,7 +65,7 @@ def setup_routes(router: APIRouter):
 
         ## Args
         * **pagination** - параметры пагинации (пропуск, лимит, сортировка)
-        * **theme_id** - фильтр по ID темы
+        * **theme_ids** - фильтр по ID темы
         * **video_lecture_id** - фильтр по ID видео-лекции
         * **lecture_id** - фильтр по ID лекции
         * **search** - поисковый запрос по названию и описанию
@@ -77,7 +77,7 @@ def setup_routes(router: APIRouter):
         service = TestService(db_session)
         tests, total = await service.get_tests(
             pagination=pagination,
-            theme_id=theme_id,
+            theme_ids=theme_ids,
             video_lecture_id=video_lecture_id,
             lecture_id=lecture_id,
             search=search,

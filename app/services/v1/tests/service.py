@@ -65,7 +65,7 @@ class TestService(BaseService):
     async def get_tests(
         self,
         pagination: PaginationParams,
-        theme_id: Optional[int] = None,
+        theme_ids: Optional[List[int]] = None,
         video_lecture_id: Optional[int] = None,
         lecture_id: Optional[int] = None,
         search: Optional[str] = None,
@@ -75,7 +75,7 @@ class TestService(BaseService):
 
         Args:
             pagination: Параметры пагинации
-            theme_id: Фильтр по теме
+            theme_ids: Фильтр по темам
             video_lecture_id: Фильтр по видео-лекции
             lecture_id: Фильтр по лекции
             search: Поисковый запрос
@@ -85,7 +85,7 @@ class TestService(BaseService):
         """
         return await self._data_manager.get_tests_paginated(
             pagination=pagination,
-            theme_id=theme_id,
+            theme_ids=theme_ids,
             video_lecture_id=video_lecture_id,
             lecture_id=lecture_id,
             search=search,

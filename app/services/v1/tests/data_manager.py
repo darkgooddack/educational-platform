@@ -66,7 +66,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
     async def get_tests_paginated(
         self,
         pagination: PaginationParams,
-        theme_id: Optional[int] = None,
+        theme_ids: Optional[List[int]] = None,
         video_lecture_id: Optional[int] = None,
         lecture_id: Optional[int] = None,
         search: Optional[str] = None,
@@ -86,8 +86,8 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         """
         query = select(self.model)
 
-        if theme_id:
-            query = query.filter(self.model.theme_id == theme_id)
+        if theme_ids:
+            query = query.filter(self.model.theme_id.in_(theme_ids))
         if video_lecture_id:
             query = query.filter(self.model.video_lecture_id == video_lecture_id)
         if lecture_id:
