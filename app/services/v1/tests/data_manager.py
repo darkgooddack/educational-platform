@@ -64,6 +64,21 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         created_test = await self.add_item(test)
         return TestCreateResponse(item=created_test)
 
+    def _transform_test(item: TestModel) -> dict:
+        """
+        Преобразует модель теста перед валидацией схемы.
+        Добавляет количество вопросов в тест.
+    
+        Args:
+            item (TestModel): Модель теста
+    
+        Returns:
+            dict: Словарь с данными теста и количеством вопросов
+        """
+        data = item.__dict__
+        data['questions_count'] = len(item.questions)
+        return data
+
     async def get_tests_paginated(
         self,
         pagination: PaginationParams,
@@ -104,11 +119,12 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                     self.model.description.ilike(f"%{search}%"),
                 )
             )
-        items, total = await self.get_paginated(query, pagination, schema=TestCatalogSchema)
-
-        for item in items:
-            item.questions_count = len(item.questions)
-    
+        items, total = await self.get_paginated(
+            query, 
+            pagination, 
+            schema=TestCatalogSchema,
+            transform_func=transform_test
+        )
         return items, total
 
     async def get_test(self, test_id: int) -> TestSchema:
