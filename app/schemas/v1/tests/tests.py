@@ -38,7 +38,7 @@ class TestBase(CommonBaseSchema):
         lecture_id: ID связанной лекции (опционально)
     """
 
-    title: str = Field(min_length=10, max_length=150, description="Название теста")
+    title: str = Field(max_length=150, description="Название теста")
     description: str = Field(min_length=0, max_length=250, description="Описание теста")
     duration: int
     passing_score: int
