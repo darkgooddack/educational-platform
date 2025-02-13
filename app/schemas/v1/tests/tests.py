@@ -11,7 +11,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import Field, validator, field_validator
+from pydantic import Field, validator
 
 from ..base import BaseInputSchema, BaseResponseSchema, CommonBaseSchema
 
@@ -77,11 +77,6 @@ class TestCatalogSchema(CommonBaseSchema):
         if not v:
             return 'Без названия'
         return v
-    
-    @field_validator('questions_count')
-    @classmethod
-    def get_questions_count(cls, v, values):
-        return len(values.data.get('questions', []))
 
 class AnswerBase(CommonBaseSchema):
     """
