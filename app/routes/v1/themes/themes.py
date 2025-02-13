@@ -31,13 +31,16 @@ def setup_routes(router: APIRouter):
     ) -> ThemeListResponse:
         """Получение списка тем с фильтрацией"""
         service = ThemeService(db_session)
-        themes, total = await service.get_themes_paginated(
-            pagination=pagination, 
-            parent_id=parent_id, 
+        page = await service.get_themes_paginated(
+            pagination=pagination,
+            parent_id=parent_id,
             search=search
         )
         return ThemeListResponse(
-            items=themes, total=total, page=pagination.page, size=pagination.limit 
+            items=page.items,
+            total=page.total,
+            page=page.page,
+            size=page.size,
         )
 
     @router.get("", response_model=ThemeSelectResponse)
