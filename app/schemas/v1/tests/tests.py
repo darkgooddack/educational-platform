@@ -11,7 +11,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import Field
+from pydantic import Field, validator
 
 from ..base import BaseInputSchema, BaseResponseSchema, CommonBaseSchema
 
@@ -139,7 +139,7 @@ class TestCreateSchema(BaseInputSchema):
         if not v:
             return 'Без названия'
         return v
-        
+
 # Схемы для ответов
 class AnswerSchema(AnswerBase):
     """
