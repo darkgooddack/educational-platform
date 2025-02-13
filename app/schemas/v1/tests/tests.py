@@ -236,3 +236,16 @@ class TestListResponse(BaseResponseSchema):
     items: List[TestSchema]
     success: bool = True
     message: str = "Тест успешно добавлен"
+
+class TestCompleteResponse(BaseResponseSchema):
+    """
+    Схема ответа при завершении теста
+
+    Attributes:
+        item: TestSchema
+        success: Признак успешного завершения
+        message: Сообщение о завершении
+    """
+    item: TestSchema
+    success: bool = True 
+    message: str = "Тест успешно пройден"

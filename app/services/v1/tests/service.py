@@ -7,7 +7,7 @@ from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse,
                          TestCreateSchema, TestDeleteResponse, TestSchema,
-                         TestUpdateResponse)
+                         TestUpdateResponse, TestCompleteResponse)
 from app.services import BaseService
 
 from .data_manager import TestDataManager
@@ -163,3 +163,16 @@ class TestService(BaseService):
             TestDeleteResponse: Схема ответа на удаление теста
         """
         return await self.test_manager.delete_test(test_id)
+
+    async def increment_popularity(
+        seld,
+        test_id: int
+    ) -> TestCompleteResponse:
+        """
+        Увеличивает популярность теста.
+        Args:
+            test_id (int): ID
+        Returns:
+            TestCompleteResponse: Схема ответа на увеличение популярности теста
+        """
+        return await self.test_manager.increment_popularity(test_id)

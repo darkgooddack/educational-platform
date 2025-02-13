@@ -10,7 +10,7 @@ from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse,
                          TestCreateSchema, TestDeleteResponse, TestSchema,
-                         TestUpdateResponse)
+                         TestUpdateResponse, TestCompleteResponse)
 from app.services import BaseEntityManager
 
 
@@ -261,4 +261,48 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                     "context": "Неизвестная ошибка при удалении теста.",
                     "error": str(e),
                 },
+            ) from e
+
+    async def increment_popularity(self, test_id: int) -> TestSchema:
+        """
+        Увеличивает счетчик популярности теста на 1.
+
+        Args:
+            test_id: ID теста
+        Returns:
+            TestCompleteResponse: Ответ с обновленным тестом
+        """
+        try:
+            statement = select(self.model).where(self.model.id == test_id)
+            found_test = await self.get_one(statement)
+
+            if not found_test:
+                raise TestNotFoundError(
+                    message=f"Тест с id {test_id} не найден",
+                    extra={"test_id": test_id}
+                )
+
+            found_test.popularity_count += 1
+
+            updated_test = await self.update_one(
+                model_to_update=found_test,
+                updated_model=found_test
+            )
+
+            return TestCompleteResponse(item=updated_test)
+
+        except DatabaseError as db_error:
+            raise TestUpdateError(
+                message=str(db_error),
+                extra={"context": "Ошибка при обновлении популярности теста"}
+            ) from db_error
+        except Exception as e:
+            raise BaseAPIException(
+                status_code=500,
+                detail="Произошла непредвиденная ошибка",
+                error_type="unknown_error",
+                extra={
+                    "context": "Неизвестная ошибка при обновлении популярности теста",
+                    "error": str(e)
+                }
             ) from e

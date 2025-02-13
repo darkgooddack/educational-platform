@@ -19,7 +19,7 @@ from app.core.dependencies import get_current_user, get_db_session
 from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse, TestUpdateResponse,
                          TestDeleteResponse, TestCreateSchema, TestSchema, 
-                         UserCredentialsSchema)
+                         UserCredentialsSchema, TestCompleteResponse)
 from app.services import TestService
 
 logger = logging.getLogger(__name__)
@@ -186,5 +186,21 @@ def setup_routes(router: APIRouter):
         service = TestService(db_session)
         return await service.delete_test(test_id)
 
+
+    @router.post("/{test_id}/complete")
+    async def complete_test(
+        test_id: int,
+        db_session: AsyncSession = Depends(get_db_session),
+    ) -> dict:
+        """
+        📊 # Увеличивает счетчик прохождений теста
+        ## Args
+        * **test_id** - ID теста
+        * **db_session** - сессия базы данных
+        ## Returns
+
+        """
+        service = TestService(db_session)
+        return await service.increment_popularity(test_id)
 
 __all__ = ["setup_routes"]
