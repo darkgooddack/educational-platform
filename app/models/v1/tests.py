@@ -24,10 +24,11 @@ class TestModel(BaseModel):
         duration (int): Длительность теста в минутах
         passing_score (int): Проходной балл
         max_attempts (int): Максимальное количество попыток
+        popularity_count (int): Количество прохождения теста (популярность)
         theme_id (int): ID тематики
         author_id (int): ID автора теста
         video_lecture_id (int): ID связанной видео-лекции
-
+        
     Relationships:
         questions (list[QuestionModel]): Список вопросов теста
         theme (ThemeModel): Связанная тематика
@@ -42,6 +43,7 @@ class TestModel(BaseModel):
     duration: Mapped[int] = mapped_column(nullable=False)  # в минутах
     passing_score: Mapped[int] = mapped_column(default=60, nullable=False)
     max_attempts: Mapped[int] = mapped_column(default=3, nullable=False)
+    popularity_count: Mapped[int] = mapped_column(default=0, nullable=False)
     theme_id: Mapped[int] = mapped_column(ForeignKey("themes.id"), nullable=False)
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     video_lecture_id: Mapped[int] = mapped_column(
