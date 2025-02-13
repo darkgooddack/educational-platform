@@ -64,7 +64,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         created_test = await self.add_item(test)
         return TestCreateResponse(item=created_test)
 
-    def _transform_test(item: TestModel) -> dict:
+    def _transform_test(self, item: TestModel) -> dict:
         """
         Преобразует модель теста перед валидацией схемы.
         Добавляет количество вопросов в тест.
