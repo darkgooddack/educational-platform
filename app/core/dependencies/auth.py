@@ -6,7 +6,7 @@
 
 import logging
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import config
