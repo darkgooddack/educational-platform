@@ -86,6 +86,10 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         """
         query = select(self.model)
 
+        query = query.options(
+            selectinload(TestModel.questions)
+        )
+
         if theme_ids:
             query = query.filter(self.model.theme_id.in_(theme_ids))
         if video_lecture_id:
@@ -99,8 +103,12 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                     self.model.description.ilike(f"%{search}%"),
                 )
             )
+        items, total = await self.get_paginated(query, pagination, schema=TestCatalogSchema)
 
-        return await self.get_paginated(query, pagination, schema=TestCatalogSchema)
+        for item in items:
+            item.questions_count = len(item.questions)
+    
+        return items, total
 
     async def get_test(self, test_id: int) -> TestSchema:
         """
