@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, List, Optional, Type, TypeVar, Callable
 
 from sqlalchemy import asc, delete, desc, func, select
 from sqlalchemy.exc import SQLAlchemyError
