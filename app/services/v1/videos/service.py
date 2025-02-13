@@ -22,7 +22,7 @@ class VideoLectureService(BaseService):
 
     Attributes:
         session (AsyncSession): Асинхронная сессия для работы с БД
-        _data_manager (VideoLectureDataManager): Менеджер для работы с данными видео лекций
+        video_manager (VideoLectureDataManager): Менеджер для работы с данными видео лекций
 
     Methods:
         add_videos:
@@ -33,7 +33,7 @@ class VideoLectureService(BaseService):
     def __init__(self, session: AsyncSession, s3_session: S3Session | None = None):
         super().__init__()
         self.session = session
-        self._data_manager = VideoLectureDataManager(session)
+        self.video_manager = VideoLectureDataManager(session)
         self._s3_manager = S3DataManager(s3_session)
 
     async def add_video(
@@ -92,7 +92,7 @@ class VideoLectureService(BaseService):
                 author_id=author_id,
                 thumbnail_url=thumbnail_url,
             )
-            await self._data_manager.add_item(new_video_lecture)
+            await self.video_manager.add_item(new_video_lecture)
 
             result = VideoLectureCreateResponse(
                 item=VideoLectureSchema(
@@ -134,7 +134,7 @@ class VideoLectureService(BaseService):
         Returns:
             tuple[List[VideoLectureSchema], int]: Список с видео лекциями и общее количество.
         """
-        return await self._data_manager.get_videos(
+        return await self.video_manager.get_videos(
             pagination=pagination,
             theme_ids=theme_ids,
             search=search,

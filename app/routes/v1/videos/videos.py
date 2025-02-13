@@ -79,11 +79,11 @@ def setup_routes(router: APIRouter):
     async def get_videos(
         pagination: PaginationParams = Depends(),
         theme_ids: Optional[List[int]] = Query(
-            None,
-            description="Фильтр по темам",
-            example=[1, 2, 3]
+            None, description="Фильтр по темам"
         ),
-        search: str = Query(None, description="Поиск по названию и описанию"),
+        search: str = Query(
+            None, description="Поиск по названию и описанию"
+        ),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> VideoLectureListResponse:
         """
