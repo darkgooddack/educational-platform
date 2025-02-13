@@ -22,7 +22,7 @@ def setup_routes(router: APIRouter):
         service = ThemeService(db_session)
         return await service.create_theme(theme)
 
-    @router.get("", response_model=ThemeListResponse)
+    @router.get("/paginated", response_model=ThemeListResponse)
     async def get_themes_paginated(
         pagination: PaginationParams = Depends(),
         parent_id: int = Query(None, description="ID родительской темы"),
