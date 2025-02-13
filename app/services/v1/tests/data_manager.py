@@ -68,10 +68,10 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         """
         Преобразует модель теста перед валидацией схемы.
         Добавляет количество вопросов в тест.
-    
+
         Args:
             item (TestModel): Модель теста
-    
+
         Returns:
             dict: Словарь с данными теста и количеством вопросов
         """
@@ -123,7 +123,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             query, 
             pagination, 
             schema=TestCatalogSchema,
-            transform_func=transform_test
+            transform_func=_transform_test
         )
         return items, total
 
