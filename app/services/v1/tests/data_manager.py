@@ -123,7 +123,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             query, 
             pagination, 
             schema=TestCatalogSchema,
-            transform_func=_transform_test
+            transform_func=self._transform_test
         )
         return items, total
 
