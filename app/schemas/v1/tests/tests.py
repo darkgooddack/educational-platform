@@ -47,6 +47,11 @@ class TestBase(CommonBaseSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
 
+    @validator('title')
+    def validate_title(cls, v):
+        if not v:
+            return 'Без названия'
+        return v
 
 class AnswerBase(CommonBaseSchema):
     """
@@ -133,12 +138,6 @@ class TestCreateSchema(BaseInputSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
     questions: List[QuestionCreateSchema]
-
-    @validator('title')
-    def validate_title(cls, v):
-        if not v:
-            return 'Без названия'
-        return v
 
 # Схемы для ответов
 class AnswerSchema(AnswerBase):
