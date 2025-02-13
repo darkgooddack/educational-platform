@@ -148,6 +148,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
         self,
         select_statement: Executable,
         pagination: PaginationParams,
+        schema: Type[T] = None,
     ) -> tuple[List[T], int]:
         """
         Получает пагинированные записи из базы данных.
@@ -155,6 +156,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
         Args:
             select_statement (Executable): SQL-запрос для выборки.
             pagination (PaginationParams): Параметры пагинации.
+            schema: Опциональная схема для сериализации (если None, используется self.schema)
 
         Returns:
             tuple[List[T], int]: Список пагинированных записей и общее количество записей.
@@ -177,7 +179,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
                 pagination.limit
             )
 
-            items = await self.get_all(select_statement)
+            items = await self.get_all(select_statement, schema=schema or self.schema)
 
             return items, total
         except SQLAlchemyError as e:
