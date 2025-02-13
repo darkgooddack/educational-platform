@@ -34,7 +34,7 @@ class TestService(BaseService):
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.session = session
-        self._data_manager = TestDataManager(session)
+        self.test_manager = TestDataManager(session)
 
     async def create_test(
         self, test_data: TestCreateSchema, author_id: int
@@ -60,7 +60,7 @@ class TestService(BaseService):
             lecture_id=test_data.lecture_id,
             author_id=author_id,
         )
-        return await self._data_manager.create_test(test, test_data.questions)
+        return await self.test_manager.create_test(test, test_data.questions)
 
     async def get_tests(
         self,
@@ -83,7 +83,7 @@ class TestService(BaseService):
         Returns:
             Tuple[List[TestCatalogSchema], int]: Список тестов и общее количество
         """
-        return await self._data_manager.get_tests_paginated(
+        return await self.test_manager.get_tests_paginated(
             pagination=pagination,
             theme_ids=theme_ids,
             video_lecture_id=video_lecture_id,
@@ -101,7 +101,7 @@ class TestService(BaseService):
         Returns:
             TestSchema: Тест с указанным ID
         """
-        test = await self._data_manager.get_test(test_id)
+        test = await self.test_manager.get_test(test_id)
         if not test:
             raise TestGetError(f"Тест с ID {test_id} не найден")
         return test
@@ -119,7 +119,7 @@ class TestService(BaseService):
         Returns:
             TestSchema: Обновленный тест с добавленным вопросом
         """
-        return await self._data_manager.add_question(test_id, question_data)
+        return await self.test_manager.add_question(test_id, question_data)
 
     async def add_answer(
         self, question_id: int, answer_data: AnswerCreateSchema
@@ -134,7 +134,7 @@ class TestService(BaseService):
         Returns:
             TestSchema: Обновленный тест с добавленным ответом
         """
-        return await self._data_manager.add_answer(question_id, answer_data)
+        return await self.test_manager.add_answer(question_id, answer_data)
 
     async def update_test(self, test_id: int, test_data) -> TestUpdateResponse:
         """
