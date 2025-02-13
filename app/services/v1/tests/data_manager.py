@@ -9,7 +9,7 @@ from app.core.exceptions import (BaseAPIException, DatabaseError,
 from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse,
-                         TestCreateSchema, TestDeleteResponse, TestSchema,
+                         TestCreateSchema, TestDeleteResponse, TestSchema, TestCatalogSchema,
                          TestUpdateResponse, TestCompleteResponse)
 from app.services import BaseEntityManager
 
@@ -70,7 +70,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         video_lecture_id: Optional[int] = None,
         lecture_id: Optional[int] = None,
         search: Optional[str] = None,
-    ) -> Tuple[List[TestSchema], int]:
+    ) -> Tuple[List[TestCatalogSchema], int]:
         """
         Получает список тестов с фильтрацией
 
@@ -82,7 +82,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             search (str, optional): Строка поиска
 
         Returns:
-            Tuple[List[TestSchema], int]: Список тестов и общее количество
+            Tuple[List[TestCatalogSchema], int]: Список тестов и общее количество
         """
         query = select(self.model)
 
@@ -100,7 +100,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 )
             )
 
-        return await self.get_paginated(query, pagination)
+        return await self.get_paginated(query, pagination, schema=TestCatalogSchema)
 
     async def get_test(self, test_id: int) -> TestSchema:
         """

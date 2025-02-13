@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import TestGetError
 from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
-                         QuestionCreateSchema, TestCreateResponse,
+                         QuestionCreateSchema, TestCreateResponse, TestCatalogSchema,
                          TestCreateSchema, TestDeleteResponse, TestSchema,
                          TestUpdateResponse, TestCompleteResponse)
 from app.services import BaseService
@@ -69,7 +69,7 @@ class TestService(BaseService):
         video_lecture_id: Optional[int] = None,
         lecture_id: Optional[int] = None,
         search: Optional[str] = None,
-    ) -> Tuple[List[TestSchema], int]:
+    ) -> Tuple[List[TestCatalogSchema], int]:
         """
         Получает список тестов с фильтрацией.
 
@@ -81,7 +81,7 @@ class TestService(BaseService):
             search: Поисковый запрос
 
         Returns:
-            Tuple[List[TestSchema], int]: Список тестов и общее количество
+            Tuple[List[TestCatalogSchema], int]: Список тестов и общее количество
         """
         return await self._data_manager.get_tests_paginated(
             pagination=pagination,
