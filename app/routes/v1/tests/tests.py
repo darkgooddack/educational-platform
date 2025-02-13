@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies import get_current_user, get_db_session
 from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse, TestUpdateResponse,
-                         TestDeleteResponse, TestCreateSchema, TestSchema, 
+                         TestDeleteResponse, TestCreateSchema, TestSchema, TestCatalogSchema,
                          UserCredentialsSchema, TestCompleteResponse)
 from app.services import TestService
 
@@ -49,7 +49,7 @@ def setup_routes(router: APIRouter):
         result = await service.create_test(test, author_id=1)#current_user.id)
         return result
 
-    @router.get("/", response_model=Page[TestSchema])
+    @router.get("/", response_model=Page[TestCatalogSchema])
     async def get_tests(
         pagination: PaginationParams = Depends(),
         theme_ids: Optional[List[int]] = Query(None, description="Фильтр по темам"),
@@ -59,7 +59,7 @@ def setup_routes(router: APIRouter):
         lecture_id: Optional[int] = Query(None, description="Фильтр по лекции"),
         search: str = Query(None, description="Поиск по названию и описанию"),
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> Page[TestSchema]:
+    ) -> Page[TestCatalogSchema]:
         """
         # Получение списка тестов с пагинацией и фильтрацией
 

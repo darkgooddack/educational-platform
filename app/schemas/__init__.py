@@ -26,7 +26,7 @@ from .v1.pagination import Page, PaginationParams
 from .v1.posts.posts import PostStatus
 from .v1.tests.tests import (AnswerCreateSchema, AnswerSchema,
                              QuestionCreateSchema, QuestionSchema,
-                             QuestionType, TestCreateResponse,
+                             QuestionType, TestCreateResponse, TestCatalogSchema,
                              TestCreateSchema, TestDeleteResponse, TestSchema,
                              TestUpdateResponse, TestCompleteResponse)
 from .v1.themes.themes import (ThemeBase, ThemeSchema, ThemeCreateSchema, 
@@ -109,6 +109,7 @@ __all__ = [
     "TestCreateResponse",
     "TestCompleteResponse",
     "TestSchema",
+    "TestCatalogSchema",
     "QuestionCreateSchema",
     "QuestionSchema",
     "AnswerCreateSchema",

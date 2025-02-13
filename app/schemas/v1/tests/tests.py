@@ -54,6 +54,35 @@ class TestBase(CommonBaseSchema):
             return 'Без названия'
         return v
 
+class TestCatalogSchema(CommonBaseSchema):
+    """
+    Схема для каталога тестов с упрощенной информацией
+
+    Attributes:
+        title: Название теста
+        duration: Длительность в минутах
+        questions_count: Количество вопросов в тесте
+        theme_id: ID темы теста
+        author_id: ID автора теста
+    """
+    title: str = Field(max_length=150, description="Название теста")
+    duration: int
+    questions_count: int = Field(description="Количество вопросов в тесте")
+    theme_id: int
+    author_id: int = Field(description="ID автора теста")
+
+    @validator('title')
+    @classmethod
+    def validate_title(cls, v):
+        if not v:
+            return 'Без названия'
+        return v
+    
+    @field_validator('questions_count')
+    @classmethod
+    def get_questions_count(cls, v, values):
+        return len(values.data.get('questions', []))
+
 class AnswerBase(CommonBaseSchema):
     """
     Базовая схема ответа на вопрос
