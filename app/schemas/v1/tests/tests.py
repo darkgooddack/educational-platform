@@ -48,6 +48,7 @@ class TestBase(CommonBaseSchema):
     lecture_id: Optional[int] = None
 
     @validator('title')
+    @classmethod
     def validate_title(cls, v):
         if not v:
             return 'Без названия'
