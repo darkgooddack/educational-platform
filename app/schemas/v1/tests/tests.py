@@ -123,7 +123,7 @@ class TestCreateSchema(BaseInputSchema):
     """
 
     title: str = Field(min_length=10, max_length=150, description="Название теста")
-    descriptiont: str = Field(
+    description: str = Field(
         min_length=0, max_length=250, description="Описание теста"
     )
     duration: int
