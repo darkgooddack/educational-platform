@@ -49,8 +49,7 @@ def setup_routes(router: APIRouter):
     ) -> ThemeSelectResponse:
         """Получение списка всех тем"""
         service = ThemeService(db_session)
-        themes = await service.get_themes()
-        return ThemeSelectResponse(items=themes)
+        return await service.get_themes()
 
     @router.get("/tree", response_model=ThemeTreeResponse)
     async def get_themes_tree(
@@ -58,8 +57,7 @@ def setup_routes(router: APIRouter):
     ) -> ThemeTreeResponse:
         """Получение дерева тем"""
         service = ThemeService(db_session)
-        themes = await service.get_themes_tree()
-        return ThemeTreeResponse(items=themes)
+        return await service.get_themes_tree()
 
     @router.get("/{theme_id}", response_model=ThemeSchema)
     async def get_theme(
