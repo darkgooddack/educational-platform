@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -78,7 +78,11 @@ def setup_routes(router: APIRouter):
     @router.get("/", response_model=VideoLectureListResponse)
     async def get_videos(
         pagination: PaginationParams = Depends(),
-        theme_id: Optional[int] = Query(None, description="Фильтр по тематике"),
+        theme_ids: Optional[List[int]] = Query(
+            None,
+            description="Фильтр по темам",
+            example=[1, 2, 3]
+        ),
         search: str = Query(None, description="Поиск по названию и описанию"),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> VideoLectureListResponse:
@@ -98,7 +102,7 @@ def setup_routes(router: APIRouter):
         service = VideoLectureService(db_session)
         videos, total = await service.get_videos(
             pagination=pagination,
-            theme_id=theme_id,
+            theme_ids=theme_ids,
             search=search
         )
         return VideoLectureListResponse(

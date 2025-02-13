@@ -1,5 +1,5 @@
 import asyncio
-from typing import List
+from typing import Optional, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -119,7 +119,7 @@ class VideoLectureService(BaseService):
     async def get_videos(
         self,
         pagination: PaginationParams,
-        theme_id: int = None,
+        theme_ids: Optional[List[int]] = None,
         search: str = None,
     ) -> tuple[List[VideoLectureSchema], int]:
         """
@@ -127,7 +127,7 @@ class VideoLectureService(BaseService):
 
         Args:
             pagination (PaginationParams): Параметры пагинации.
-            theme_id (int): Фильтр по тематике
+            theme_ids (List[int]): Фильтр по тематике
             search (str): Поиск по названию и описанию
             sort_by: Доступные значения (views, updated_at)
 
@@ -136,6 +136,6 @@ class VideoLectureService(BaseService):
         """
         return await self._data_manager.get_videos(
             pagination=pagination,
-            theme_id=theme_id,
+            theme_ids=theme_ids,
             search=search,
         )

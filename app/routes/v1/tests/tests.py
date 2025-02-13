@@ -52,7 +52,9 @@ def setup_routes(router: APIRouter):
     @router.get("/", response_model=Page[TestCatalogSchema])
     async def get_tests(
         pagination: PaginationParams = Depends(),
-        theme_ids: Optional[List[int]] = Query(None, description="Фильтр по темам"),
+        theme_ids: Optional[List[int]] = Query(
+            None, description="Фильтр по темам"
+        ),
         video_lecture_id: Optional[int] = Query(
             None, description="Фильтр по видео-лекции"
         ),

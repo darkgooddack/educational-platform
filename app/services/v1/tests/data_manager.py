@@ -92,7 +92,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
 
         Args:
             pagination (PaginationParams): Параметры пагинации
-            theme_id (int, optional): ID темы
+            theme_ids (List[int], optional): ID темы
             video_lecture_id (int, optional): ID видеолекции
             lecture_id (int, optional): ID лекции
             search (str, optional): Строка поиска
@@ -120,8 +120,8 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 )
             )
         items, total = await self.get_paginated(
-            query, 
-            pagination, 
+            query,
+            pagination,
             schema=TestCatalogSchema,
             transform_func=self._transform_test
         )
@@ -302,10 +302,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             found_test = await self.get_one(statement)
 
             if not found_test:
-                raise TestNotFoundError(
-                    message=f"Тест с id {test_id} не найден",
-                    extra={"test_id": test_id}
-                )
+                raise TestGetError(f"Тест с ID {test_id} не найден")
 
             found_test.popularity_count += 1
 

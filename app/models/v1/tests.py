@@ -43,7 +43,7 @@ class TestModel(BaseModel):
     duration: Mapped[int] = mapped_column(nullable=False)  # в минутах
     passing_score: Mapped[int] = mapped_column(default=60, nullable=False)
     max_attempts: Mapped[int] = mapped_column(default=3, nullable=False)
-    # popularity_count: Mapped[int] = mapped_column(default=0, nullable=False)
+    popularity_count: Mapped[int] = mapped_column(default=0, nullable=False)
     theme_id: Mapped[int] = mapped_column(ForeignKey("themes.id"), nullable=False)
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     video_lecture_id: Mapped[int] = mapped_column(

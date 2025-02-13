@@ -1,6 +1,6 @@
-from typing import List
+from typing import Optional, List
 
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import VideoLectureModel
@@ -29,7 +29,7 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
     async def get_videos(
         self,
         pagination: PaginationParams,
-        theme_id: int = None,
+        theme_ids: Optional[List[int]] = None,
         search: str = None,
     ) -> tuple[List[VideoLectureSchema], int]:
         """
@@ -37,23 +37,31 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
 
         Args:
             pagination (PaginationParams): Параметры пагинации
-            theme_id (int): Фильтрация по роли пользователя
+            theme_ids (List[int]): Фильтрация по роли пользователя
             search (str): Поиск по тексту пользователя
 
         Returns:
             tuple[List[VideoLectureSchema], int]: Список пользователей и их общее количество
         """
-        statement = select(self.model).distinct()
+        query = select(self.model).distinct()
 
         # Поиск по названию и описанию
         if search:
-            search_filter = self.model.title.ilike(
-                f"%{search}%"
-            ) | self.model.description.ilike(f"%{search}%")
-            statement = statement.filter(search_filter)
+            query = query.filter(
+                or_(
+                    self.model.title.ilike(f"%{search}%"),
+                    self.model.description.ilike(f"%{search}%"),
+                )
+            )
 
         # Фильтр по тебе
-        if theme_id:
-            statement = statement.filter(self.model.theme_id == theme_id)
+        if theme_ids:
+            query = query.filter(self.model.theme_id.in_(theme_ids))
 
-        return await self.get_paginated(statement, pagination)
+        items, total = await self.get_paginated(
+            query,
+            pagination,
+            schema=VideoLectureSchema
+        )
+
+        return items, total
