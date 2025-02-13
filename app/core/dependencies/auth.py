@@ -22,6 +22,7 @@ oauth2_schema = OAuth2PasswordBearer(
 
 
 async def get_current_user(
+    request: Request,
     token: str = Depends(oauth2_schema),
 ) -> UserCredentialsSchema:
     """
@@ -33,6 +34,7 @@ async def get_current_user(
     Returns:
         Данные текущего пользователя.
     """
+    logger.debug("Все заголовки запроса: %s", request.headers)
     logger.debug("Начало получения текущего пользователя")
     logger.debug("Получен токен: %s", token)
 
