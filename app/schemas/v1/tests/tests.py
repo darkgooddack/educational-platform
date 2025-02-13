@@ -11,7 +11,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from ..base import BaseInputSchema, BaseResponseSchema, CommonBaseSchema
 
@@ -47,7 +47,7 @@ class TestBase(CommonBaseSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
 
-    @validator('title')
+    @field_validator('title')
     @classmethod
     def validate_title(cls, v):
         if not v:
@@ -65,13 +65,14 @@ class TestCatalogSchema(CommonBaseSchema):
         theme_id: ID темы теста
         author_id: ID автора теста
     """
+    id: int
     title: str = Field(max_length=150, description="Название теста")
     duration: int
     questions_count: int = Field(description="Количество вопросов в тесте")
     theme_id: int
     author_id: int = Field(description="ID автора теста")
 
-    @validator('title')
+    @field_validator('title')
     @classmethod
     def validate_title(cls, v):
         if not v:
@@ -271,5 +272,5 @@ class TestCompleteResponse(BaseResponseSchema):
         message: Сообщение о завершении
     """
     item: TestSchema
-    success: bool = True 
+    success: bool = True
     message: str = "Тест успешно пройден"
