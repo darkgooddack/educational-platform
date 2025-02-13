@@ -134,7 +134,12 @@ class TestCreateSchema(BaseInputSchema):
     lecture_id: Optional[int] = None
     questions: List[QuestionCreateSchema]
 
-
+    @validator('title')
+    def validate_title(cls, v):
+        if not v:
+            return 'Без названия'
+        return v
+        
 # Схемы для ответов
 class AnswerSchema(AnswerBase):
     """
