@@ -165,7 +165,7 @@ class TestService(BaseService):
         return await self.test_manager.delete_test(test_id)
 
     async def increment_popularity(
-        seld,
+        self,
         test_id: int
     ) -> TestCompleteResponse:
         """
