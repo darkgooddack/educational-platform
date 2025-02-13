@@ -106,7 +106,11 @@ class BaseDataManager(SessionMixin, Generic[T]):
             self.logger.error("❌ Ошибка при получении записи: %s", e)
             raise
 
-    async def get_all(self, select_statement: Executable) -> List[Any]:
+    async def get_all(
+        self, 
+        select_statement: Executable,
+        schema: Type[T] = None
+    ) -> List[Any]:
         """
         Получает все записи из базы данных.
 
@@ -122,7 +126,8 @@ class BaseDataManager(SessionMixin, Generic[T]):
         try:
             result = await self.session.execute(select_statement)
             items = result.unique().scalars().all()
-            return [self.schema.model_validate(item) for item in items]
+            schema_to_use = schema or self.schema
+            return [schema_to_use.model_validate(item) for item in items]
         except SQLAlchemyError as e:
             self.logger.error("❌ Ошибка при получении записей: %s", e)
             return []
