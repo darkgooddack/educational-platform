@@ -11,7 +11,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import Field, validator
+from pydantic import Field, validator, field_validator
 
 from ..base import BaseInputSchema, BaseResponseSchema, CommonBaseSchema
 
