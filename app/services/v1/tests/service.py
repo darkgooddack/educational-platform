@@ -7,7 +7,7 @@ from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse, TestCatalogSchema,
                          TestCreateSchema, TestDeleteResponse, TestSchema,
-                         TestUpdateResponse, TestCompleteResponse)
+                         TestUpdateResponse, TestCompleteResponse, TestAnswerSchema)
 from app.services import BaseService
 
 from .data_manager import TestDataManager
@@ -164,15 +164,32 @@ class TestService(BaseService):
         """
         return await self.test_manager.delete_test(test_id)
 
-    async def increment_popularity(
-        self,
-        test_id: int
-    ) -> TestCompleteResponse:
-        """
-        Увеличивает популярность теста.
-        Args:
-            test_id (int): ID
-        Returns:
-            TestCompleteResponse: Схема ответа на увеличение популярности теста
-        """
-        return await self.test_manager.increment_popularity(test_id)
+
+async def complete_test_with_answers(
+    self,
+    test_id: int,
+    user_id: int,
+    answers: List[TestAnswerSchema]
+) -> TestCompleteResponse:
+    """
+    Обрабатывает завершение теста пользователем.
+
+    Args:
+        test_id: ID теста
+        user_id: ID пользователя
+        answers: Список ответов пользователя
+
+    Returns:
+        TestCompleteResponse: Результаты прохождения теста
+    """
+    # TODO: 
+    # 1. Получить тест с правильными ответами
+    # 2. Проверить ответы пользователя
+    # 3. Подсчитать баллы
+    # 4. Сохранить результат в БД
+    # 5. Обновить статистику пользователя
+    # 6. Сгенерировать сертификат если нужно
+    # 7. Отправить уведомление
+    
+    # Пока просто увеличиваем счетчик
+    return await self.test_manager.increment_popularity(test_id)

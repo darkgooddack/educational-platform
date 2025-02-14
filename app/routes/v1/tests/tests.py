@@ -19,7 +19,7 @@ from app.core.dependencies import get_current_user, get_db_session
 from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
                          QuestionCreateSchema, TestCreateResponse, TestUpdateResponse,
                          TestDeleteResponse, TestCreateSchema, TestSchema, TestCatalogSchema,
-                         UserCredentialsSchema, TestCompleteResponse)
+                         UserCredentialsSchema, TestCompleteResponse, TestAnswerSchema)
 from app.services import TestService
 
 logger = logging.getLogger(__name__)
@@ -192,17 +192,36 @@ def setup_routes(router: APIRouter):
     @router.patch("/{test_id}/complete")
     async def complete_test(
         test_id: int,
+        answers: List[TestAnswerSchema],
+        #current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestCompleteResponse:
         """
-        📊 # Увеличивает счетчик прохождений теста
+        📊 # Завершение теста и получение результатов
+
         ## Args
         * **test_id** - ID теста
-        * **db_session** - сессия базы данных
+        * **answers** - Список ответов пользователя
+        * **current_user** - Текущий пользователь
+        * **db_session** - Сессия базы данных
+
         ## Return
-        TestCompleteResponse
+        TestCompleteResponse - Объект, содержащий результаты теста и статистику
         """
+        # TODO: Добавить:
+        # 1. Проверку ответов пользователя
+        # 2. Подсчет баллов/статистики
+        # 3. Сохранение результатов в БД
+        # 4. Формирование детального отчета
+        # 5. Обновление статистики пользователя
+        # 6. Отправку уведомления о завершении
+        # 7. Выдачу сертификата/бейджа при успешном прохождении
+        
         service = TestService(db_session)
-        return await service.increment_popularity(test_id)
+        return await service.complete_test_with_answers(
+            test_id=test_id,
+            user_id=1, #current_user.id,
+            answers=answers
+        )
 
 __all__ = ["setup_routes"]

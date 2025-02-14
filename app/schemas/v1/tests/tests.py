@@ -274,3 +274,17 @@ class TestCompleteResponse(BaseResponseSchema):
     item: TestSchema
     success: bool = True
     message: str = "Тест успешно пройден"
+
+
+class TestAnswerSchema(BaseInputSchema):
+    """
+    Схема ответа пользователя на вопрос теста
+
+    Attributes:
+        question_id: ID вопроса
+        answer_ids: Список ID выбранных ответов
+        time_spent: Время потраченное на ответ в секундах
+    """
+    question_id: int
+    answer_ids: List[int]
+    time_spent: Optional[int] = None
