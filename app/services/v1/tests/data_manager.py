@@ -325,10 +325,12 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         except Exception as e:
             raise BaseAPIException(
                 status_code=500,
-                detail="Произошла непредвиденная ошибка",
-                error_type="unknown_error",
+                detail=f"Ошибка при обновлении счетчика популярности теста {test_id}",
+                error_type="popularity_update_error",
                 extra={
-                    "context": "Неизвестная ошибка при обновлении популярности теста",
-                    "error": str(e)
+                    "test_id": test_id,
+                    "error_class": e.__class__.__name__,
+                    "error_details": str(e),
+                    "traceback": traceback.format_exc()
                 }
             ) from e
