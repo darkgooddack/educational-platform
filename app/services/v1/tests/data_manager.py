@@ -298,7 +298,11 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             TestCompleteResponse: Ответ с обновленным тестом
         """
         try:
-            statement = select(self.model).where(self.model.id == test_id)
+            statement = (
+                select(self.model)
+                .where(self.model.id == test_id)
+                .options(noload('*')) # Отключаем загрузку связанных объектов
+            )
             found_test = await self.get_one(statement)
 
             if not found_test:

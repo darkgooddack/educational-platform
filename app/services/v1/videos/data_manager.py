@@ -54,7 +54,7 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
                 )
             )
 
-        # Фильтр по тебе
+        # Фильтр по теме
         if theme_ids:
             query = query.filter(self.model.theme_id.in_(theme_ids))
 
