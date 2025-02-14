@@ -193,14 +193,14 @@ def setup_routes(router: APIRouter):
     async def complete_test(
         test_id: int,
         db_session: AsyncSession = Depends(get_db_session),
-    ) -> dict:
+    ) -> TestCompleteResponse:
         """
         📊 # Увеличивает счетчик прохождений теста
         ## Args
         * **test_id** - ID теста
         * **db_session** - сессия базы данных
-        ## Returns
-
+        ## Return
+        TestCompleteResponse
         """
         service = TestService(db_session)
         return await service.increment_popularity(test_id)
