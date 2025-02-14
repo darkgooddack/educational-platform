@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple
 import traceback
 from sqlalchemy import delete, or_, select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, noload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (BaseAPIException, DatabaseError,
