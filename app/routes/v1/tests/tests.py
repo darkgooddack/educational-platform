@@ -189,7 +189,7 @@ def setup_routes(router: APIRouter):
         return await service.delete_test(test_id)
 
 
-    @router.post("/{test_id}/complete")
+    @router.patch("/{test_id}/complete")
     async def complete_test(
         test_id: int,
         db_session: AsyncSession = Depends(get_db_session),
