@@ -18,10 +18,15 @@ from app.core.logging import setup_logging
 from app.core.middlewares.docs_auth import DocsAuthMiddleware
 from app.core.middlewares.logging import LoggingMiddleware
 from app.routes import all_routes
+from app.core.handlers import api_exception_handler
+from app.core.exceptions import BaseAPIException
 
 # Создаем FastAPI приложение с параметрами из конфига
 app = FastAPI(**config.app_params)
 setup_logging()
+
+# Добавляем обработчик исключений
+app.add_exception_handler(BaseAPIException, api_exception_handler)
 
 # Добавляем middleware в порядке выполнения
 app.add_middleware(LoggingMiddleware)  # Логирование запросов
