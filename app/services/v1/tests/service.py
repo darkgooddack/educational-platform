@@ -165,31 +165,31 @@ class TestService(BaseService):
         return await self.test_manager.delete_test(test_id)
 
 
-async def complete_test_with_answers(
-    self,
-    test_id: int,
-    user_id: int,
-    answers: List[TestAnswerSchema]
-) -> TestCompleteResponse:
-    """
-    Обрабатывает завершение теста пользователем.
+    async def complete_test_with_answers(
+        self,
+        test_id: int,
+        user_id: int,
+        answers: List[TestAnswerSchema]
+    ) -> TestCompleteResponse:
+        """
+        Обрабатывает завершение теста пользователем.
 
-    Args:
-        test_id: ID теста
-        user_id: ID пользователя
-        answers: Список ответов пользователя
+        Args:
+            test_id: ID теста
+            user_id: ID пользователя
+            answers: Список ответов пользователя
 
-    Returns:
-        TestCompleteResponse: Результаты прохождения теста
-    """
-    # TODO: 
-    # 1. Получить тест с правильными ответами
-    # 2. Проверить ответы пользователя
-    # 3. Подсчитать баллы
-    # 4. Сохранить результат в БД
-    # 5. Обновить статистику пользователя
-    # 6. Сгенерировать сертификат если нужно
-    # 7. Отправить уведомление
+        Returns:
+            TestCompleteResponse: Результаты прохождения теста
+        """
+        # TODO: 
+        # 1. Получить тест с правильными ответами
+        # 2. Проверить ответы пользователя
+        # 3. Подсчитать баллы
+        # 4. Сохранить результат в БД
+        # 5. Обновить статистику пользователя
+        # 6. Сгенерировать сертификат если нужно
+        # 7. Отправить уведомление
     
-    # Пока просто увеличиваем счетчик
-    return await self.test_manager.increment_popularity(test_id)
+        # Пока просто увеличиваем счетчик
+        return await self.test_manager.increment_popularity(test_id)
