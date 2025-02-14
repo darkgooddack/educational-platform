@@ -320,7 +320,12 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         except DatabaseError as db_error:
             raise TestUpdateError(
                 message=str(db_error),
-                extra={"context": "Ошибка при обновлении популярности теста"}
+                extra={
+                    "context": "Ошибка при обновлении популярности теста",
+                    "test_id": test_id,
+                    "current_popularity": getattr(found_test, 'popularity_count', None),
+                    "error_details": str(db_error)
+                }
             ) from db_error
         except Exception as e:
             raise BaseAPIException(
