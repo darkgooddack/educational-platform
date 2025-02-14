@@ -44,6 +44,9 @@ class BaseAPIException(HTTPException):
         error_type: str,
         extra: Optional[Dict[Any, Any]] = None,
     ) -> None:
+    
+        self.error_type = error_type  # Сохраняем error_type
+        self.extra = extra or {}      # Сохраняем extra
 
         context = {
             "timestamp": datetime.now(moscow_tz).isoformat(),
