@@ -50,8 +50,8 @@ def setup_routes(router: APIRouter):
     async def oauth_callback(
         provider: OAuthProvider,
         code: str,
-        state: str,
-        device_id: str,
+        state: Optional[str] = None,
+        device_id: Optional[str] = None,
         db_session: AsyncSession = Depends(get_db_session),
     ) -> OAuthResponse:
         """
