@@ -8,7 +8,7 @@ from sqlalchemy.orm import noload, selectinload
 from app.core.exceptions import (BaseAPIException, DatabaseError,
                                  QuestionNotFoundError, TestDeleteError,
                                  TestGetError, TestUpdateError)
-from app.models import AnswerModel, QuestionModel, TestModel
+from app.models import AnswerModel, QuestionModel, TestModel, ThemeModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCatalogSchema,
                          TestCompleteResponse, TestCreateResponse,
@@ -157,10 +157,11 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         if lecture_id:
             query = query.filter(self.model.lecture_id == lecture_id)
         if search:
-            query = query.filter(
+            query = query.join(ThemeModel).filter(
                 or_(
                     self.model.title.ilike(f"%{search}%"),
                     self.model.description.ilike(f"%{search}%"),
+                    ThemeModel.name.ilike(f"%{search}%")
                 )
             )
         items, total = await self.get_paginated(
