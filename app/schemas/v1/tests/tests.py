@@ -13,7 +13,7 @@ from typing import List, Optional
 
 from pydantic import Field, field_validator
 
-from ..base import BaseInputSchema, BaseResponseSchema, CommonBaseSchema
+from ..base import BaseSchema, BaseInputSchema, BaseResponseSchema, CommonBaseSchema
 
 
 class QuestionType(str, Enum):
@@ -36,6 +36,7 @@ class TestBase(CommonBaseSchema):
         theme_id: ID темы теста
         video_lecture_id: ID связанной видео-лекции (опционально)
         lecture_id: ID связанной лекции (опционально)
+        popularity_count: Количество прохождения теста (популярность)
     """
 
     title: str = Field(max_length=150, description="Название теста")
@@ -46,6 +47,7 @@ class TestBase(CommonBaseSchema):
     theme_id: int
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
+    popularity_count: int
 
     @field_validator("title")
     @classmethod
@@ -55,7 +57,7 @@ class TestBase(CommonBaseSchema):
         return v
 
 
-class TestCatalogSchema(CommonBaseSchema):
+class TestCatalogSchema(BaseSchema):
     """
     Схема для каталога тестов с упрощенной информацией
 
@@ -65,14 +67,15 @@ class TestCatalogSchema(CommonBaseSchema):
         questions_count: Количество вопросов в тесте
         theme_id: ID темы теста
         author_id: ID автора теста
+        popularity_count: Количество прохождения теста (популярность)
     """
 
-    id: int
     title: str = Field(max_length=150, description="Название теста")
     duration: int
     questions_count: int = Field(description="Количество вопросов в тесте")
     theme_id: int
     author_id: int = Field(description="ID автора теста")
+    popularity_count: int
 
     @field_validator("title")
     @classmethod
