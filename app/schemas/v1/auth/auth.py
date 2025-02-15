@@ -4,7 +4,7 @@
 
 from pydantic import EmailStr, Field
 
-from ..base import BaseInputSchema
+from ..base import BaseInputSchema, BaseResponseSchema
 
 
 class AuthSchema(BaseInputSchema):
@@ -34,3 +34,18 @@ class TokenSchema(BaseInputSchema):
 
     access_token: str
     token_type: str = "bearer"
+
+
+class TokenResponseSchema(BaseResponseSchema):
+    """
+    Схема ответа с токеном доступа
+
+    Attributes:
+        item: TokenSchema
+        success: Признак успешной авторизации
+        message: Сообщение об успешной авторизации
+    """
+
+    item: TokenSchema
+    success: bool = True
+    message: str = "Авторизация успешна"

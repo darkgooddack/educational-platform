@@ -1,7 +1,8 @@
 """
 Пакет конфигурации приложения.
 
-Предоставляет централизованный доступ к настройкам всего приложения через единый объект config.
+Предоставляет централизованный доступ к настройкам всего приложения
+через единый объект config.
 
 Example:
     >>> from app.core.config import config
@@ -17,6 +18,7 @@ Example:
     >>> config.PORT
     8001
 """
+
 import logging
 from functools import lru_cache
 
@@ -24,6 +26,7 @@ from .app import AppConfig
 from .settings import Settings
 
 logger = logging.getLogger(__name__)
+
 
 class Config(Settings, AppConfig):
     """

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Generic, List, Optional, Type, TypeVar
+from typing import Any, Callable, Generic, List, Optional, Type, TypeVar
 
 from sqlalchemy import asc, delete, desc, func, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -106,7 +106,14 @@ class BaseDataManager(SessionMixin, Generic[T]):
             self.logger.error("❌ Ошибка при получении записи: %s", e)
             raise
 
-    async def get_all(self, select_statement: Executable) -> List[Any]:
+    async def get_all(
+        self,
+        select_statement: Executable,
+        schema: Type[T] = None,
+        transform_func: Optional[
+            Callable
+        ] = None,  # для преобразования данных перед возвратом
+    ) -> List[Any]:
         """
         Получает все записи из базы данных.
 
@@ -122,7 +129,12 @@ class BaseDataManager(SessionMixin, Generic[T]):
         try:
             result = await self.session.execute(select_statement)
             items = result.unique().scalars().all()
-            return [self.schema.model_validate(item) for item in items]
+            schema_to_use = schema or self.schema
+
+            if transform_func:
+                items = [transform_func(item) for item in items]
+
+            return [schema_to_use.model_validate(item) for item in items]
         except SQLAlchemyError as e:
             self.logger.error("❌ Ошибка при получении записей: %s", e)
             return []
@@ -148,6 +160,8 @@ class BaseDataManager(SessionMixin, Generic[T]):
         self,
         select_statement: Executable,
         pagination: PaginationParams,
+        schema: Type[T] = None,
+        transform_func: Optional[Callable] = None,
     ) -> tuple[List[T], int]:
         """
         Получает пагинированные записи из базы данных.
@@ -155,7 +169,8 @@ class BaseDataManager(SessionMixin, Generic[T]):
         Args:
             select_statement (Executable): SQL-запрос для выборки.
             pagination (PaginationParams): Параметры пагинации.
-
+            schema: Опциональная схема для сериализации (если None, используется self.schema)
+            transform_func: Опциональная функция для преобразования данных перед валидацией схемы
         Returns:
             tuple[List[T], int]: Список пагинированных записей и общее количество записей.
 
@@ -177,7 +192,11 @@ class BaseDataManager(SessionMixin, Generic[T]):
                 pagination.limit
             )
 
-            items = await self.get_all(select_statement)
+            items = await self.get_all(
+                select_statement,
+                schema=schema or self.schema,
+                transform_func=transform_func,
+            )
 
             return items, total
         except SQLAlchemyError as e:

@@ -1,12 +1,17 @@
 import asyncio
-from typing import List
+from typing import List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.dependencies.s3 import S3Session
 from app.core.storages.s3.base import S3DataManager
-from app.services import BaseService
-from app.schemas import  VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema, PaginationParams
 from app.models import VideoLectureModel
+from app.schemas import (PaginationParams, VideoLectureCreateResponse,
+                         VideoLectureCreateSchema, VideoLectureSchema)
+from app.services import BaseService
+
 from .data_manager import VideoLectureDataManager
+
 
 class VideoLectureService(BaseService):
     """
@@ -17,28 +22,23 @@ class VideoLectureService(BaseService):
 
     Attributes:
         session (AsyncSession): Асинхронная сессия для работы с БД
-        _data_manager (VideoLectureDataManager): Менеджер для работы с данными видео лекций
+        video_manager (VideoLectureDataManager): Менеджер для работы с данными видео лекций
 
     Methods:
-        add_videos: 
+        add_videos:
         get_videos: Получает список видео лекций с возможностью пагинации, поиска и фильтрации.
 
     """
-    def __init__(
-        self,
-        session: AsyncSession,
-        s3_session: S3Session | None = None
-    ):
+
+    def __init__(self, session: AsyncSession, s3_session: S3Session | None = None):
         super().__init__()
         self.session = session
-        self._data_manager = VideoLectureDataManager(session)
+        self.video_manager = VideoLectureDataManager(session)
         self._s3_manager = S3DataManager(s3_session)
 
     async def add_video(
-        self,
-        video_lecture: VideoLectureCreateSchema,
-        author_id: int
-    ) -> VideoLectureResponseSchema:
+        self, video_lecture: VideoLectureCreateSchema, author_id: int
+    ) -> VideoLectureCreateResponse:
         """
         Добавляет новую инструкцию.
 
@@ -51,33 +51,36 @@ class VideoLectureService(BaseService):
         """
         try:
             self.logger.debug("🎥 Начало обработки запроса на добавление видео лекции")
-            self.logger.debug("📝 Параметры запроса: title='%s', description='%s'", 
-                video_lecture.title, 
-                video_lecture.description
+            self.logger.debug(
+                "📝 Параметры запроса: title='%s', description='%s'",
+                video_lecture.title,
+                video_lecture.description,
             )
-            self.logger.debug("📁 Видео файл лекции: filename='%s', content_type='%s', size=%d bytes",
-                video_lecture.video_file.filename, 
-                video_lecture.video_file.content_type, 
-                video_lecture.video_file.size
+            self.logger.debug(
+                "📁 Видео файл лекции: filename='%s', content_type='%s', size=%d bytes",
+                video_lecture.video_file.filename,
+                video_lecture.video_file.content_type,
+                video_lecture.video_file.size,
             )
-            self.logger.debug("📷 Обложка: filename='%s', content_type='%s', size=%d bytes",
-                video_lecture.thumbnail_file.filename, 
-                video_lecture.thumbnail_file.content_type, 
-                video_lecture.thumbnail_file.size
+            self.logger.debug(
+                "📷 Обложка: filename='%s', content_type='%s', size=%d bytes",
+                video_lecture.thumbnail_file.filename,
+                video_lecture.thumbnail_file.content_type,
+                video_lecture.thumbnail_file.size,
             )
             self.logger.debug("👤 Пользователь: id=%d ", author_id)
 
             video_upload = await self._s3_manager.upload_file_from_content(
-                file=video_lecture.video_file,
-                file_key="videos_lectures/videos"
+                file=video_lecture.video_file, file_key="videos_lectures/videos"
             )
 
             thumbnail_upload = await self._s3_manager.upload_file_from_content(
-                file=video_lecture.thumbnail_file,
-                file_key="videos_lectures/thumbnails"
+                file=video_lecture.thumbnail_file, file_key="videos_lectures/thumbnails"
             )
 
-            video_url, thumbnail_url = await asyncio.gather(video_upload, thumbnail_upload)
+            video_url, thumbnail_url = await asyncio.gather(
+                video_upload, thumbnail_upload
+            )
 
             new_video_lecture = VideoLectureModel(
                 title=video_lecture.title,
@@ -87,29 +90,36 @@ class VideoLectureService(BaseService):
                 views=0,
                 duration=0,
                 author_id=author_id,
-                thumbnail_url=thumbnail_url
-            )
-            await self._data_manager.add_item(new_video_lecture)
-
-            result = VideoLectureResponseSchema(
-                user_id=author_id,
-                video_url=video_url,
                 thumbnail_url=thumbnail_url,
-                message="Видео успешно добавлено"
+            )
+            await self.video_manager.add_item(new_video_lecture)
+
+            result = VideoLectureCreateResponse(
+                item=VideoLectureSchema(
+                    id=new_video_lecture.id,
+                    title=video_lecture.title,
+                    description=video_lecture.description,
+                    video_url=video_url,
+                    thumbnail_url=thumbnail_url,
+                    theme_id=video_lecture.theme_id,
+                    author_id=author_id,
+                    views=0,
+                    duration=0,
+                )
             )
 
             self.logger.debug("✅ Видео успешно загружено: %s", result)
-        
+
             return result
-        
+
         except Exception as e:
-            logger.error("❌ Ошибка при загрузке видео: %s", str(e))
+            self.logger.error("❌ Ошибка при загрузке видео: %s", str(e))
             raise
 
     async def get_videos(
         self,
         pagination: PaginationParams,
-        theme_id: int = None,
+        theme_ids: Optional[List[int]] = None,
         search: str = None,
     ) -> tuple[List[VideoLectureSchema], int]:
         """
@@ -117,15 +127,15 @@ class VideoLectureService(BaseService):
 
         Args:
             pagination (PaginationParams): Параметры пагинации.
-            theme_id (int): Фильтр по тематике
+            theme_ids (List[int]): Фильтр по тематике
             search (str): Поиск по названию и описанию
             sort_by: Доступные значения (views, updated_at)
 
         Returns:
             tuple[List[VideoLectureSchema], int]: Список с видео лекциями и общее количество.
         """
-        return await self._data_manager.get_videos(
+        return await self.video_manager.get_videos(
             pagination=pagination,
-            theme_id=theme_id,
+            theme_ids=theme_ids,
             search=search,
         )

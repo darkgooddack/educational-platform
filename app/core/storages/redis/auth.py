@@ -1,16 +1,16 @@
-import logging
 import json
+import logging
 from datetime import datetime
 from typing import Optional
-from app.core.exceptions import UserInactiveError, TokenInvalidError
+
+from app.core.config import AppConfig
+from app.core.exceptions import TokenInvalidError, UserInactiveError
 from app.core.security import TokenMixin
 from app.core.storages.redis.base import BaseRedisStorage
 from app.schemas import UserCredentialsSchema
 
-
-from app.core.config import AppConfig
-
 logger = logging.getLogger(__name__)
+
 
 class AuthRedisStorage(BaseRedisStorage, TokenMixin):
     """
@@ -109,8 +109,7 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
             return UserCredentialsSchema.model_validate(user_data)
 
         return UserCredentialsSchema(email=email)
-    
-    
+
     async def verify_and_get_user(self, token: str) -> UserCredentialsSchema:
         """
         Основной метод проверки токена и получения пользователя
@@ -122,25 +121,24 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
             Данные пользователя.
         """
         logger.debug("Начало верификации токена: %s", token)
-    
+
         if not token:
             logger.debug("Токен отсутствует")
             raise TokenInvalidError()
         try:
             payload = self.verify_token(token)
             logger.debug("Получен payload: %s", payload)
-            
+
             email = self.validate_payload(payload)
             logger.debug("Получен email: %s", email)
-            
+
             user = await self.get_user_from_redis(token, email)
             logger.debug("Получен пользователь: %s", user)
             logger.debug("Проверка активации пользователя: %s", user.is_active)
-            
+
             if not user.is_active:
                 raise UserInactiveError(
-                    message="Аккаунт деактивирован",
-                    extra={"user_id": user.id}
+                    message="Аккаунт деактивирован", extra={"user_id": user.id}
                 )
 
             return user

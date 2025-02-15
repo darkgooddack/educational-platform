@@ -3,15 +3,20 @@
 В данном модуле реализованы функции для работы с пользователями.
 """
 
+import logging
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import InvalidCredentialsError, UserInactiveError
 from app.core.security import HashingMixin, TokenMixin
 from app.core.storages.redis.auth import AuthRedisStorage
-from app.schemas import AuthSchema, TokenSchema, UserCredentialsSchema
+from app.schemas import (AuthSchema, TokenResponseSchema, TokenSchema,
+                         UserCredentialsSchema)
 from app.services.v1.base import BaseService
 
 from .data_manager import AuthDataManager
+
+logger = logging.getLogger(__name__)
 
 
 class AuthService(HashingMixin, TokenMixin, BaseService):
@@ -36,7 +41,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         self._data_manager = AuthDataManager(session)
         self._redis_storage = AuthRedisStorage()
 
-    async def authenticate(self, credentials: AuthSchema) -> TokenSchema:
+    async def authenticate(self, credentials: AuthSchema) -> TokenResponseSchema:
         """
         Аутентифицирует пользователя по логину и паролю.
 
@@ -44,7 +49,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             auth: Данные для аутентификации пользователя.
 
         Returns:
-            Токен доступа.
+            TokenResponseSchema: Токен доступа.
 
         Raises:
             InvalidCredentialsError: Если пользователь не найден или пароль неверный.
@@ -58,11 +63,10 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
 
         if not user_model:
             raise InvalidCredentialsError()
-            
+
         if not user_model.is_active:
             raise UserInactiveError(
-                message="Аккаунт деактивирован",
-                extra={"email": credentials.email}
+                message="Аккаунт деактивирован", extra={"email": credentials.email}
             )
 
         if not user_model or not self.verify(
@@ -74,7 +78,9 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
 
         return await self.create_token(user_schema)
 
-    async def create_token(self, user_schema: UserCredentialsSchema) -> TokenSchema:
+    async def create_token(
+        self, user_schema: UserCredentialsSchema
+    ) -> TokenResponseSchema:
         """
         Создание JWT токена
 
@@ -82,13 +88,18 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             user_schema: Данные пользователя
 
         Returns:
-            TokenSchema: Схема с access_token и token_type
+            TokenResponseSchema: Схема с access_token и token_type
         """
         payload = TokenMixin.create_payload(user_schema)
+        logger.info("Token payload", extra={"payload": payload})
         token = TokenMixin.generate_token(payload)
+        logger.info("Token generated", extra={"token": token})
         await self._redis_storage.save_token(user_schema, token)
+        logger.info("Token saved to redis", extra={"token": token})
 
-        return TokenSchema(access_token=token, token_type="bearer")
+        return TokenResponseSchema(
+            item=TokenSchema(access_token=token, token_type="bearer")
+        )
 
     async def logout(self, token: str) -> dict:
         """

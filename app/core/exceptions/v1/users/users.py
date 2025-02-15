@@ -11,6 +11,7 @@
 
 from app.core.exceptions.v1.base import BaseAPIException
 
+
 class UserInactiveError(BaseAPIException):
     """
     Пользователь не активен.
@@ -19,13 +20,12 @@ class UserInactiveError(BaseAPIException):
         message (str): Сообщение об ошибке.
         extra (dict): Дополнительные данные об ошибке.
     """
+
     def __init__(self, message: str, extra: dict = None):
         super().__init__(
-            status_code=403,
-            detail=message,
-            error_type="user_inactive",
-            extra=extra
+            status_code=403, detail=message, error_type="user_inactive", extra=extra
         )
+
 
 class UserNotFoundError(BaseAPIException):
     """

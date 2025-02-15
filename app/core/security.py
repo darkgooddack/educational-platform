@@ -23,8 +23,12 @@ from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
 
 from app.core.config import config
-from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
-                                 TokenInvalidError, TokenMissingError)
+from app.core.exceptions import (
+    InvalidCredentialsError,
+    TokenExpiredError,
+    TokenInvalidError,
+    TokenMissingError,
+)
 from app.schemas import UserCredentialsSchema
 
 pwd_context = CryptContext(
@@ -121,10 +125,10 @@ class TokenMixin:
                 key=TokenMixin.get_token_key(),
                 algorithms=[config.token_algorithm],
             )
-        except ExpiredSignatureError as e:
-            raise TokenExpiredError() from e
-        except JWTError:
-            raise TokenInvalidError() from e
+        except ExpiredSignatureError as error:
+            raise TokenExpiredError() from error
+        except JWTError as error:
+            raise TokenInvalidError() from error
 
     @staticmethod
     def create_payload(user: UserCredentialsSchema) -> dict:
@@ -137,11 +141,11 @@ class TokenMixin:
         Returns:
             Payload для JWT
         """
-        expires_at = int(datetime.now(timezone.utc).timestamp()) + TokenMixin.get_token_expiration()
-        return {
-            "sub": user.email,
-            "expires_at": expires_at
-        }
+        expires_at = (
+            int(datetime.now(timezone.utc).timestamp())
+            + TokenMixin.get_token_expiration()
+        )
+        return {"sub": user.email, "expires_at": expires_at}
 
     @staticmethod
     def get_token_key() -> str:
@@ -207,7 +211,10 @@ class TokenMixin:
         Returns:
             email: Email пользователя.
         """
-        expires_at = int(datetime.now(timezone.utc).timestamp()) + TokenMixin.get_token_expiration()
+        expires_at = (
+            int(datetime.now(timezone.utc).timestamp())
+            + TokenMixin.get_token_expiration()
+        )
 
         email = payload.get("sub")
         expires_at = payload.get("expires_at")

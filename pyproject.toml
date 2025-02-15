@@ -23,6 +23,7 @@ dependencies = [
     "redis>=5.2.1",
     "sqlalchemy>=2.0.36",
     "tenacity>=9.0.0",
+    "types-pytz>=2025.1.0.20250204",
     "uvicorn>=0.34.0",
 ]
 
@@ -67,6 +68,14 @@ filterwarnings = [
 markers = [
     "integration: marks tests as integration tests"
 ]
+
+[tool.mypy]
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+[[tool.mypy.overrides]]
+module = "app.core.migrations.*"
+ignore_errors = true
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"

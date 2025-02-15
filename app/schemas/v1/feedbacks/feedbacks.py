@@ -3,10 +3,12 @@
 """
 
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
+
 from pydantic import EmailStr, Field
 
-from app.schemas.v1.base import BaseInputSchema, BaseSchema
+from app.schemas.v1.base import BaseInputSchema, BaseResponseSchema, BaseSchema
+from app.schemas.v1.pagination import Page
 
 
 class FeedbackStatus(str, Enum):
@@ -36,12 +38,13 @@ class FeedbackSchema(BaseSchema):
         phone (str | None): Телефон пользователя
         email (EmailStr): Электронная почта пользователя
         status (FeedbackStatus): Статус обратной связи
-    
+
     Наследует:
         id: Optional[int] = None
         created_at: Optional[datetime] = None
         updated_at: Optional[datetime] = None
     """
+
     manager_id: Optional[int] = None
     name: str = Field(min_length=0, max_length=50, description="Имя пользователя")
     phone: Optional[str] = Field(
@@ -100,23 +103,59 @@ class FeedbackUpdateSchema(BaseInputSchema):
     status: FeedbackStatus
 
 
-class FeedbackResponse(BaseInputSchema):
+class FeedbackCreateResponse(BaseResponseSchema):
     """
-    Схема ответа на создание обратной связи.
+    Схема ответа при создании обратной связи
 
     Attributes:
-        id (int | None): Идентификатор обратной связи.
-        manager_id (int | None): ID менеджера, которому адресована обратная связь.
-        message (str): Сообщение об успешном создании обратной связи.
+        item: FeedbackSchema
+        success: Признак успешного создания
+        message: Сообщение о создании
     """
 
-    id: Optional[int] = None
+    item: FeedbackSchema
+    success: bool = True
+    message: str = "Обратная связь успешно создана"
+
+
+class FeedbackUpdateResponse(BaseResponseSchema):
+    """
+    Схема ответа при обновлении обратной связи
+
+    Attributes:
+        id: ID обратной связи
+        success: Признак успешного обновления
+        message: Сообщение об обновлении
+    """
+
+    id: int
+    status: FeedbackStatus
+    success: bool = True
+    message: str = "Обратная связь успешно обновлена"
+
+
+class FeedbackDeleteResponse(BaseResponseSchema):
+    """
+    Схема ответа при удалении обратной связи
+
+    Attributes:
+        id: ID обратной связи
+        success: Признак успешного удаления
+        message: Сообщение об удалении
+    """
+
+    id: int
     manager_id: Optional[int] = None
-    message: str = Field(
-        default="Обратная связь успешно отправлена!",
-        description="Сообщение, отправляемое после совершенной работы с обратной связью (создание, обновление, удаление)",
-        examples=[
-            "Обратная связь успешно отправлена!",
-            "Обратная связь успешно удалена!",
-        ],
-    )
+    success: bool = True
+    message: str = "Обратная связь успешно удалена"
+
+
+class FeedbackListResponse(Page[FeedbackSchema]):
+    """
+    Схема для возврата списка обратной связи с пагинацией
+
+    Наследуется от Page[VideoLectureSchema] и добавляет поля success и message
+    """
+
+    success: bool = True
+    message: str = "Список обратной связи успешно получен"

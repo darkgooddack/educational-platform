@@ -9,6 +9,10 @@ API_MODULES - с префиксом api/v1:
 - register (регистрация)
 - oauth (OAuth)
 - feedbacks (отзывы)
+- users (пользователи)
+- videos (видео)
+- themes (темы)
+- tests (тесты)
 
 """
 
@@ -19,9 +23,10 @@ from app.core.config import config
 from . import main
 from .auth import auth_router, oauth_router, register_router
 from .feedbacks import feedbacks_router
+from .tests import tests_router
+from .themes import themes_router
 from .users import users_router
 from .videos import videos_router
-from .themes import themes_router
 
 router_main = APIRouter(**config.SERVICES["main"].to_dict())
 main.setup_routes(router_main)
@@ -31,14 +36,15 @@ BASE_MODULES = {
     "main": router_main,
 }
 
-VERSIONS_MODULES = { # Здесь же порядок отображения в Swagger
+VERSIONS_MODULES = {  # Здесь же порядок отображения в Swagger
     "auth": auth_router,
     "oauth": oauth_router,
     "register": register_router,
     "users": users_router,
-    "feedbacks": feedbacks_router,
+    "themes": themes_router,
+    "tests": tests_router,
     "videos": videos_router,
-    "themes": themes_router
+    "feedbacks": feedbacks_router,
 }
 
 

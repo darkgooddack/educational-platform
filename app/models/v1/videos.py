@@ -5,9 +5,10 @@ from app.models import BaseModel
 from app.models.v1 import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.models.v1.users import UserModel
-    from app.models.v1.themes import ThemeModel
     from app.models.v1.tests import TestModel
+    from app.models.v1.themes import ThemeModel
+    from app.models.v1.users import UserModel
+
 
 class VideoLectureModel(BaseModel):
     """
@@ -34,12 +35,20 @@ class VideoLectureModel(BaseModel):
     title: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
     theme_id: Mapped[int] = mapped_column(ForeignKey("themes.id"), nullable=False)
-    views: Mapped[int] = mapped_column(default=0, nullable=False)  # По умолчанию 0 просмотров
+    views: Mapped[int] = mapped_column(
+        default=0, nullable=False
+    )  # По умолчанию 0 просмотров
     video_url: Mapped[str] = mapped_column(nullable=False)
     duration: Mapped[int] = mapped_column(nullable=False)  # Длительность в секундах
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     thumbnail_url: Mapped[str] = mapped_column(nullable=True)
 
-    author: Mapped["UserModel"] = relationship("UserModel", back_populates="video_lectures", lazy="joined")
-    theme: Mapped["ThemeModel"] = relationship("ThemeModel", back_populates="video_lectures", lazy="joined")
-    tests: Mapped[list["TestModel"]] = relationship("TestModel", back_populates="video_lecture", lazy="dynamic")
+    author: Mapped["UserModel"] = relationship(
+        "UserModel", back_populates="video_lectures", lazy="joined"
+    )
+    theme: Mapped["ThemeModel"] = relationship(
+        "ThemeModel", back_populates="video_lectures", lazy="joined"
+    )
+    tests: Mapped[list["TestModel"]] = relationship(
+        "TestModel", back_populates="video_lecture", lazy="dynamic"
+    )

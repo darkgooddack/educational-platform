@@ -101,7 +101,7 @@ class ErrorResponseSchema(BaseResponseSchema):
     error_details: Optional[dict] = None
 
 
-class ItemResponseSchema(BaseResponseSchema):
+class ItemResponseSchema(BaseResponseSchema, Generic[T]):
     """
     Схема для ответов, содержащих один элемент.
 

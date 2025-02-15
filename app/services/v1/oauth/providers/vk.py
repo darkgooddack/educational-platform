@@ -7,20 +7,20 @@ from fastapi.responses import RedirectResponse
 
 from app.core.exceptions import OAuthTokenError, OAuthUserDataError
 from app.schemas import (OAuthProvider, OAuthProviderResponse, VKOAuthParams,
-                         VKUserData, VKOAuthTokenParams, VKTokenData)
+                         VKOAuthTokenParams, VKTokenData, VKUserData)
 from app.services.v1.oauth.base import BaseOAuthProvider
 
 
 class VKOAuthProvider(BaseOAuthProvider):
     """
     OAuth провайдер для VK.
-    
+
     Особенности:
     - Использует PKCE (Proof Key for Code Exchange) для безопасности
     - Email может отсутствовать в ответе от API
     - Требует code_verifier для получения токена
     - Использует state для CSRF защиты
-    
+
     Flow:
     1. Генерация code_verifier и code_challenge для PKCE
     2. Сохранение code_verifier в Redis с привязкой к state
@@ -34,7 +34,7 @@ class VKOAuthProvider(BaseOAuthProvider):
     def __init__(self, session):
         """
         Инициализация VK OAuth провайдера.
-    
+
         Args:
             session: Сессия базы данных
         """
@@ -43,9 +43,9 @@ class VKOAuthProvider(BaseOAuthProvider):
     async def get_auth_url(self) -> RedirectResponse:
         """
         Формирование URL для OAuth авторизации через VK с PKCE.
-        
+
         Генерирует code_verifier, создает code_challenge и сохраняет verifier в Redis.
-        
+
         Returns:
             RedirectResponse: URL для перенаправления на страницу входа VK
         """
@@ -57,29 +57,27 @@ class VKOAuthProvider(BaseOAuthProvider):
             code_challenge=self._generate_code_challenge(code_verifier),
             scope=self.config.scope,
         )
- 
+
         redis_key = f"vk_verifier_{params.state}"
-        await self._redis_storage.set(
-            key=redis_key,
-            value=code_verifier,
-            expires=300
-        )
+        await self._redis_storage.set(key=redis_key, value=code_verifier, expires=300)
 
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"
         return RedirectResponse(url=auth_url)
 
-    async def get_token(self, code: str, state: str = None, device_id: str = None) -> VKTokenData:
+    async def get_token(
+        self, code: str, state: str = None, device_id: str = None
+    ) -> VKTokenData:
         """
         Получение токена от VK по коду авторизации.
-        
+
         Args:
             code: Код авторизации от VK
             state: Параметр state для проверки CSRF
             device_id: ID устройства для VK API
-            
+
         Returns:
             VKTokenData: Токен доступа и связанные данные
-            
+
         Raises:
             OAuthTokenError: При отсутствии кода или ошибке от VK API
         """
@@ -89,7 +87,7 @@ class VKOAuthProvider(BaseOAuthProvider):
         token_params = VKOAuthTokenParams(
             redirect_uri=str(await self._get_callback_url()),
             code=code,
-            client_id=str(self.config.client_id), # да, пиздец, но так надо
+            client_id=str(self.config.client_id),  # да, пиздец, но так надо
             device_id=device_id,
             state=state,
         )
@@ -99,21 +97,20 @@ class VKOAuthProvider(BaseOAuthProvider):
             verifier = await self._redis_storage.get(redis_key)
 
             if isinstance(verifier, bytes):
-                verifier = verifier.decode('utf-8')
+                verifier = verifier.decode("utf-8")
 
             if verifier:
                 token_params.code_verifier = verifier
                 await self._redis_storage.delete(redis_key)
 
         token_data = await self.http_client.get_token(
-            self.config.token_url,
-            token_params.to_dict()
+            self.config.token_url, token_params.to_dict()
         )
 
         if "error" in token_data:
             raise OAuthTokenError(
                 self.provider,
-                f"Ошибка получения токена: {token_data.get('error_description', token_data['error'])}"
+                f"Ошибка получения токена: {token_data.get('error_description', token_data['error'])}",
             )
 
         return VKTokenData(
@@ -123,29 +120,29 @@ class VKOAuthProvider(BaseOAuthProvider):
             user_id=token_data["user_id"],
             email=token_data.get("email"),
             state=state,
-            scope=token_data.get("scope")
+            scope=token_data.get("scope"),
         )
 
     async def get_user_info(self, token: str) -> VKUserData:
         """
         Получение данных пользователя через VK API.
-        
-        Использует стандартный эндпоинт VK для получения 
+
+        Использует стандартный эндпоинт VK для получения
         информации о пользователе. Возвращает данные в формате VKUserData.
-        
+
         Args:
             token: Токен доступа от VK
-            
+
         Returns:
             VKUserData: Данные пользователя в унифицированном формате
         """
         return await super().get_user_info(token, client_id=self.config.client_id)
-    
+
     def _get_email(self, user_data: VKUserData) -> str:
         """
         Получение email пользователя.
         VK может не предоставить email если пользователь не разрешил доступ.
-        
+
         Raises:
             OAuthUserDataError: Если email отсутствует
         """
@@ -156,10 +153,10 @@ class VKOAuthProvider(BaseOAuthProvider):
     def _generate_code_challenge(self, verifier: str) -> str:
         """
         Генерация code_challenge для PKCE.
-        
+
         Args:
             verifier: Сгенерированный code_verifier
-            
+
         Returns:
             str: code_challenge в формате base64url(sha256(verifier))
         """

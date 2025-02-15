@@ -3,20 +3,21 @@ from urllib.parse import urlencode
 
 from fastapi.responses import RedirectResponse
 
-from app.schemas import (GoogleUserData, OAuthParams, OAuthProvider,
-                         OAuthProviderResponse, GoogleTokenData)
-from app.services.v1.oauth.base import BaseOAuthProvider
 from app.core.exceptions import OAuthTokenError
+from app.schemas import (GoogleTokenData, GoogleUserData, OAuthParams,
+                         OAuthProvider, OAuthProviderResponse)
+from app.services.v1.oauth.base import BaseOAuthProvider
+
 
 class GoogleOAuthProvider(BaseOAuthProvider):
     """
     OAuth провайдер для Google.
-    
+
     Особенности:
     - Использует строковый формат ID пользователя
     - Поддерживает OpenID Connect (id_token)
     - Стандартный OAuth2 flow с state для CSRF защиты
-    
+
     Flow:
     1. Получение auth_url с state параметром
     2. Редирект пользователя на страницу входа Google
@@ -28,7 +29,7 @@ class GoogleOAuthProvider(BaseOAuthProvider):
     def __init__(self, session):
         """
         Инициализация Google OAuth провайдера.
-    
+
         Args:
             session: Сессия базы данных
         """
@@ -37,10 +38,10 @@ class GoogleOAuthProvider(BaseOAuthProvider):
     async def get_auth_url(self) -> RedirectResponse:
         """
         Формирование URL для OAuth авторизации через Google.
-        
+
         Генерирует случайный state для CSRF защиты и сохраняет в Redis.
         Добавляет необходимые OAuth параметры в URL.
-        
+
         Returns:
             RedirectResponse: URL для перенаправления на страницу входа Google
         """
@@ -57,7 +58,9 @@ class GoogleOAuthProvider(BaseOAuthProvider):
         auth_url = f"{self.config.auth_url}?{urlencode(params.model_dump())}"
         return RedirectResponse(url=auth_url)
 
-    async def get_token(self, code: str, state: str = None, device_id: str = None) -> GoogleTokenData:
+    async def get_token(
+        self, code: str, state: str = None, device_id: str = None
+    ) -> GoogleTokenData:
         """
         Получение токена от Google по коду авторизации.
 
@@ -85,18 +88,19 @@ class GoogleOAuthProvider(BaseOAuthProvider):
             token_type=token_data.get("token_type", "bearer"),
             expires_in=token_data["expires_in"],
             id_token=token_data["id_token"],
-            scope=token_data["scope"]
+            scope=token_data["scope"],
         )
+
     async def get_user_info(self, token: str) -> GoogleUserData:
         """
         Получение данных пользователя через Google API.
-        
-        Использует стандартный эндпоинт Google для получения 
+
+        Использует стандартный эндпоинт Google для получения
         информации о пользователе. Возвращает данные в формате GoogleUserData.
-        
+
         Args:
             token: Токен доступа от Google
-            
+
         Returns:
             GoogleUserData: Данные пользователя в унифицированном формате
         """

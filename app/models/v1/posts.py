@@ -1,12 +1,15 @@
 from enum import Enum
+
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.models.v1.base import BaseModel
+
 from app.models.v1 import TYPE_CHECKING
+from app.models.v1.base import BaseModel
 from app.schemas import ContentType, PostStatus
 
 if TYPE_CHECKING:
     from app.models.v1.users import UserModel
+
 
 class PostModel(BaseModel):
     """
@@ -21,12 +24,13 @@ class PostModel(BaseModel):
         content_blocks (list[PostContentBlockModel]): Список блоков контента поста.
         author (UserModel): Автор поста.
         tags (list[TagModel]): Список тегов, связанных с постом.
-    
+
     Relationships:
         content_blocks (list[PostContentBlockModel]): Связь с блоками контента поста.
         author (UserModel): Связь с автором поста.
         tags (list[TagModel]): Связь с тегами, связанными с постом.
     """
+
     __tablename__ = "posts"
 
     title: Mapped[str] = mapped_column(nullable=False)
@@ -35,13 +39,16 @@ class PostModel(BaseModel):
     status: Mapped[PostStatus] = mapped_column(default=PostStatus.DRAFT)
     views: Mapped[int] = mapped_column(default=0, nullable=False)
     content_blocks: Mapped[list["PostContentBlockModel"]] = relationship(
-        "PostContentBlockModel", 
+        "PostContentBlockModel",
         back_populates="post",
         order_by="PostContentBlockModel.order",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
     author: Mapped["UserModel"] = relationship("UserModel", back_populates="posts")
-    tags: Mapped[list["TagModel"]] = relationship(secondary="post_tags", back_populates="posts")
+    tags: Mapped[list["TagModel"]] = relationship(
+        secondary="post_tags", back_populates="posts"
+    )
+
 
 class TagModel(BaseModel):
     """
@@ -49,14 +56,18 @@ class TagModel(BaseModel):
 
     Attributes:
         name (str): Название тега.
-    
+
     Relationships:
         posts (list[PostModel]): Связь с постами, связанными с тегом.
     """
+
     __tablename__ = "tags"
-    
+
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
-    posts: Mapped[list["PostModel"]] = relationship(secondary="post_tags", back_populates="tags")
+    posts: Mapped[list["PostModel"]] = relationship(
+        secondary="post_tags", back_populates="tags"
+    )
+
 
 class PostTagModel(BaseModel):
     """
@@ -70,12 +81,18 @@ class PostTagModel(BaseModel):
         post (PostModel): Связь с постом.
         tag (TagModel): Связь с тегом.
     """
+
     __tablename__ = "post_tags"
-    
-    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True)
-    tag_id: Mapped[int] = mapped_column(ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
-    
+
+    post_id: Mapped[int] = mapped_column(
+        ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True
+    )
+    tag_id: Mapped[int] = mapped_column(
+        ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True
+    )
+
     __table_args__ = (UniqueConstraint("post_id", "tag_id", name="uq_post_tag"),)
+
 
 class PostContentBlockModel(BaseModel):
     """
@@ -87,10 +104,11 @@ class PostContentBlockModel(BaseModel):
         content (str): Контент блока.
         order (int): Порядковый номер блока.
         caption (str): Подпись к блоку.
-    
+
     Relationships:
         post (PostModel): Связь с постом, к которому относится блок контента.
     """
+
     __tablename__ = "post_content_blocks"
 
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), nullable=False)
@@ -98,5 +116,7 @@ class PostContentBlockModel(BaseModel):
     content: Mapped[str] = mapped_column(nullable=False)
     order: Mapped[int] = mapped_column(nullable=False)
     caption: Mapped[str] = mapped_column(nullable=True)
-    
-    post: Mapped["PostModel"] = relationship("PostModel", back_populates="content_blocks")
+
+    post: Mapped["PostModel"] = relationship(
+        "PostModel", back_populates="content_blocks"
+    )

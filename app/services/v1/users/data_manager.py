@@ -55,7 +55,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         if not found_user_model:
             raise UserNotFoundError(
                 message=f"Пользователь с id {user_id} не найден",
-                extra={"user_id": user_id}
+                extra={"user_id": user_id},
             )
 
         updated_user = found_user_model
@@ -78,7 +78,7 @@ class UserDataManager(BaseEntityManager[UserSchema]):
         if not found_user_model:
             raise UserNotFoundError(
                 message=f"Пользователь с id {user_id} не найден",
-                extra={"user_id": user_id}
+                extra={"user_id": user_id},
             )
 
         updated_user = found_user_model

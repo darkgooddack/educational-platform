@@ -4,28 +4,45 @@
 Предоставляет единую точку доступа ко всем Pydantic схемам.
 """
 
-from .v1.auth.auth import AuthSchema, TokenSchema
+from .v1.auth.auth import AuthSchema, TokenResponseSchema, TokenSchema
 from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema
 from .v1.base import (BaseInputSchema, BaseResponseSchema, BaseSchema,
                       CommonBaseSchema, ErrorResponseSchema,
                       ItemResponseSchema, ListResponseSchema)
-from .v1.feedbacks.feedbacks import (FeedbackCreateSchema, FeedbackResponse,
-                                     FeedbackSchema, FeedbackStatus,
-                                     FeedbackUpdateSchema)
-from .v1.oauth.oauth import (GoogleUserData, OAuthConfig, OAuthParams,
-                             OAuthProvider, OAuthProviderResponse,
-                             OAuthResponse, OAuthTokenParams, OAuthUserData,
-                             OAuthUserSchema, VKOAuthParams, VKUserData,
-                             YandexUserData, VKOAuthTokenParams, VKTokenData, GoogleTokenData, YandexTokenData)
-from .v1.pagination import Page, PaginationParams
 from .v1.content import ContentType
+from .v1.feedbacks.feedbacks import (FeedbackCreateResponse,
+                                     FeedbackCreateSchema,
+                                     FeedbackDeleteResponse,
+                                     FeedbackListResponse, FeedbackSchema,
+                                     FeedbackStatus, FeedbackUpdateResponse,
+                                     FeedbackUpdateSchema)
+from .v1.oauth.oauth import (GoogleTokenData, GoogleUserData, OAuthConfig,
+                             OAuthParams, OAuthProvider, OAuthProviderResponse,
+                             OAuthResponse, OAuthTokenParams, OAuthUserData,
+                             OAuthUserSchema, VKOAuthParams,
+                             VKOAuthTokenParams, VKTokenData, VKUserData,
+                             YandexTokenData, YandexUserData)
+from .v1.pagination import Page, PaginationParams
+from .v1.posts.posts import PostStatus
+from .v1.tests.tests import (AnswerCreateSchema, AnswerSchema,
+                             QuestionCreateSchema, QuestionSchema,
+                             QuestionType, TestAnswerSchema, TestCatalogSchema,
+                             TestCompleteResponse, TestCreateResponse,
+                             TestCreateSchema, TestDeleteResponse, TestSchema,
+                             TestUpdateResponse)
+from .v1.themes.themes import (ThemeBase, ThemeCreateResponse,
+                               ThemeCreateSchema, ThemeDeleteResponse,
+                               ThemeListResponse, ThemeSchema,
+                               ThemeSelectResponse, ThemeTreeResponse,
+                               ThemeUpdateResponse)
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
                              UserUpdateSchema)
-from .v1.videos.videos import VideoLectureResponseSchema, VideoLectureSchema, VideoLectureCreateSchema
-from .v1.tests.tests import QuestionType
-from .v1.posts.posts import PostStatus
-from .v1.themes.themes import ThemeBase, ThemeCreateSchema, ThemeSchema, ThemeListResponse
+from .v1.videos.videos import (VideoLectureCreateResponse,
+                               VideoLectureCreateSchema,
+                               VideoLectureDeleteResponse,
+                               VideoLectureListResponse, VideoLectureSchema,
+                               VideoLectureUpdateResponse)
 
 __all__ = [
     "BaseSchema",
@@ -53,6 +70,7 @@ __all__ = [
     "ManagerSelectSchema",
     "UserResponseSchema",
     "TokenSchema",
+    "TokenResponseSchema",
     "UserRole",
     "AuthSchema",
     "OAuthUserData",
@@ -63,19 +81,41 @@ __all__ = [
     "FeedbackSchema",
     "FeedbackCreateSchema",
     "FeedbackUpdateSchema",
-    "FeedbackResponse",
+    "FeedbackCreateResponse",
+    "FeedbackUpdateResponse",
+    "FeedbackDeleteResponse",
+    "FeedbackListResponse",
     "VideoLectureSchema",
     "VideoLectureCreateSchema",
-    "VideoLectureResponseSchema",
+    "VideoLectureCreateResponse",
+    "VideoLectureUpdateResponse",
+    "VideoLectureDeleteResponse",
+    "VideoLectureListResponse",
     "ContentType",
     "PostStatus",
     "QuestionType",
-    "ThemeBase", 
-    "ThemeCreateSchema", 
-    "ThemeSchema", 
-    "ThemeListResponse",
+    "ThemeBase",
+    "ThemeCreateSchema",
+    "ThemeSchema",
+    "ThemeCreateResponse",
+    "ThemeUpdateResponse",
+    "ThemeDeleteResponse",
+    "ThemeSelectResponse",
+    "ThemeTreeResponse",
     "VKOAuthTokenParams",
     "VKTokenData",
-    "GoogleTokenData", 
-    "YandexTokenData"
+    "GoogleTokenData",
+    "YandexTokenData",
+    "TestCreateSchema",
+    "TestUpdateResponse",
+    "TestDeleteResponse",
+    "TestCreateResponse",
+    "TestCompleteResponse",
+    "TestSchema",
+    "TestCatalogSchema",
+    "QuestionCreateSchema",
+    "QuestionSchema",
+    "AnswerCreateSchema",
+    "AnswerSchema",
+    "TestAnswerSchema",
 ]

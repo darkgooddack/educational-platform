@@ -1,13 +1,15 @@
 import logging
 from typing import Callable, Dict, TypeVar
+
 from app.core.exceptions import OAuthUserDataError
 from app.schemas import GoogleUserData, VKUserData, YandexUserData
 
-T = TypeVar('T', YandexUserData, GoogleUserData, VKUserData)
+T = TypeVar("T", YandexUserData, GoogleUserData, VKUserData)
+
 
 class BaseOAuthHandler:
     """Базовый обработчик данных от OAuth провайдеров"""
-    
+
     def __init__(self, provider: str):
         self.provider = provider
         self.logger = logging.getLogger(f"{self.__class__.__name__}_{provider}")
@@ -17,8 +19,7 @@ class BaseOAuthHandler:
         missing = [f for f in fields if not data.get(f)]
         if missing:
             raise OAuthUserDataError(
-                self.provider,
-                f"Отсутствуют обязательные поля: {', '.join(missing)}"
+                self.provider, f"Отсутствуют обязательные поля: {', '.join(missing)}"
             )
 
     def clean_name(self, name: str | None) -> str | None:
@@ -26,6 +27,7 @@ class BaseOAuthHandler:
         if not name:
             return None
         return name.strip()[:50]  # Ограничение из RegistrationSchema
+
 
 class YandexHandler(BaseOAuthHandler):
     async def __call__(self, data: dict) -> YandexUserData:
@@ -53,7 +55,7 @@ class YandexHandler(BaseOAuthHandler):
             OAuthUserDataError: Если отсутствует default_email
         """
         self.validate_required_fields(data, ["id", "default_email"])
-        
+
         return YandexUserData(
             id=str(data["id"]),
             email=data["default_email"],
@@ -63,7 +65,7 @@ class YandexHandler(BaseOAuthHandler):
             default_email=data["default_email"],
             login=data.get("login"),
             emails=data.get("emails", []),
-            psuid=data.get("psuid")
+            psuid=data.get("psuid"),
         )
 
 
@@ -77,7 +79,7 @@ class GoogleHandler(BaseOAuthHandler):
 
         Args:
             user_data: Словарь с данными от Google API
-                - id: Идентификатор пользователя  
+                - id: Идентификатор пользователя
                 - email: Email пользователя
                 - verified_email: Флаг верификации email
                 - given_name: Имя
@@ -90,7 +92,7 @@ class GoogleHandler(BaseOAuthHandler):
         self.validate_required_fields(data, ["id", "email"])
 
         return GoogleUserData(
-            id=str(data["id"]), 
+            id=str(data["id"]),
             email=data.get("email"),
             first_name=self.clean_name(data.get("given_name")),
             last_name=self.clean_name(data.get("family_name")),
@@ -98,7 +100,7 @@ class GoogleHandler(BaseOAuthHandler):
             verified_email=bool(data.get("verified_email")),
             given_name=data.get("given_name"),
             family_name=data.get("family_name"),
-            picture=data.get("picture")
+            picture=data.get("picture"),
         )
 
 
@@ -137,13 +139,13 @@ class VKHandler(BaseOAuthHandler):
             last_name=self.clean_name(user.get("last_name")),
             avatar=user.get("avatar"),
             phone=user.get("phone"),
-            user_id=str(user["user_id"])
+            user_id=str(user["user_id"]),
         )
 
 
 # Маппинг провайдеров к функциям
 PROVIDER_HANDLERS: Dict[str, BaseOAuthHandler] = {
     "yandex": YandexHandler("yandex"),
-    "google": GoogleHandler("google"), 
-    "vk": VKHandler("vk")
+    "google": GoogleHandler("google"),
+    "vk": VKHandler("vk"),
 }

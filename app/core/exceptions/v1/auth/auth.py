@@ -19,13 +19,16 @@ from app.core.exceptions.v1.base import BaseAPIException
 
 
 class AuthenticationError(BaseAPIException):
-    """Ошибка аутентификации"""
+    """
+    Ошибка аутентификации/авторизации
+    """
 
-    def __init__(
-        self, detail: str, error_type: str = "authentication_error", extra: dict = None
-    ):
+    def __init__(self, message: str, extra: dict = None):
         super().__init__(
-            status_code=401, detail=detail, error_type=error_type, extra=extra or {}
+            status_code=401,
+            detail=f"Ошибка авторизации: {message}",
+            error_type="auth_error",
+            extra=extra,
         )
 
 

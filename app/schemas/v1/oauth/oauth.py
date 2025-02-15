@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.schemas.v1.auth.auth import TokenSchema
+from app.schemas.v1.auth.auth import TokenResponseSchema
 from app.schemas.v1.auth.register import RegistrationSchema
 
 from ..base import BaseInputSchema, CommonBaseSchema
@@ -41,7 +41,7 @@ class OAuthConfig(CommonBaseSchema):
         callback_url: URL для перенаправления после авторизации (для провайдера)
     """
 
-    client_id: str | int # VK: client_id = id приложения >_<
+    client_id: str | int  # VK: client_id = id приложения >_<
     client_secret: str
     auth_url: str
     token_url: str
@@ -59,13 +59,13 @@ class OAuthParams(BaseModel):
         client_id: Идентификатор приложения
         redirect_uri: Путь для перенаправления после авторизации (для пользователя)
         scope: Область доступа
-        
+
     """
+
     response_type: str = "code"
-    client_id: str | int # VK: client_id = id приложения >_<
+    client_id: str | int  # VK: client_id = id приложения >_<
     redirect_uri: str
     scope: str = ""
-    
 
 
 class VKOAuthParams(OAuthParams):
@@ -74,14 +74,16 @@ class VKOAuthParams(OAuthParams):
 
     Attributes:
         state: Строка состояния в виде случайного набора символов
-        code_challenge: Значение code_verifier, преобразованное с помощью code_challenge_method и закодированное в base64
+        code_challenge: Значение code_verifier,
+            преобразованное с помощью code_challenge_method и закодированное в base64
     """
+
     state: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
     code_challenge: str
     code_challenge_method: str = "S256"
 
 
-class OAuthResponse(TokenSchema):
+class OAuthResponse(TokenResponseSchema):
     """
     Схема ответа OAuth авторизации.
 
@@ -173,12 +175,13 @@ class OAuthTokenParams(CommonBaseSchema):
         client_id: Идентификатор приложения
         client_secret: Секретное слово приложения
     """
+
     grant_type: str = "authorization_code"
     redirect_uri: str
     code: str
     client_id: str
     client_secret: str | None = None
-    
+
 
 class VKOAuthTokenParams(OAuthTokenParams):
     """
@@ -194,10 +197,11 @@ class VKOAuthTokenParams(OAuthTokenParams):
         device_id: ID устройства (для получения токена из callback)
         state: Состояние для CSRF защиты (произвольная строка состояния)
     """
+
     code_verifier: str | None = None
     device_id: str
     state: str | None = None
-    
+
 
 class OAuthProviderResponse(BaseInputSchema):
     """
@@ -263,6 +267,7 @@ class OAuthUserSchema(RegistrationSchema):
 
     см. в RegistrationSchema
     """
+
     avatar: Optional[str] = None
     vk_id: Optional[int] = None
     google_id: Optional[str] = None
