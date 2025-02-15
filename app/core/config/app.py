@@ -83,36 +83,45 @@ class LogConfig:
     Конфигурация логирования.
 
     Attributes:
+        LOG_FORMAT (str): Формат логов ("json" или "pretty")
         LEVEL (str): Уровень логирования
-        FORMAT (str): Формат сообщений
         FILE (str): Имя файла логов
         MAX_BYTES (int): Максимальный размер файла
         BACKUP_COUNT (int): Количество файлов ротации
         ENCODING (str): Кодировка файла
         FILE_MODE (str): Режим открытия файла
-        DATE_FORMAT (str): Формат даты
+        PRETTY_FORMAT (str): Формат для человекочитаемых логов
+        JSON_FORMAT (dict): Структура JSON лога
     """
 
+    LOG_FORMAT = "pretty" # Используется log_format из settings
     LEVEL = "DEBUG"
-    FORMAT = "\033[1;36m%(asctime)s\033[0m - \033[1;32m%(name)s\033\
-        [0m - \033[1;34m%(levelname)s\033[0m - %(message)s"
-    FILE = "app.log"
+    FILE = "logs/app.log"
     MAX_BYTES = 10485760  # 10MB
     BACKUP_COUNT = 5
     ENCODING = "utf-8"
     FILE_MODE = "a"
-    DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+    PRETTY_FORMAT = "\033[1;36m%(asctime)s\033[0m - \033[1;32m%(name)s\033[0m - %(levelname)s - %(message)s"
+
+    JSON_FORMAT = {
+        "timestamp": "%(asctime)s",
+        "level": "%(levelname)s",
+        "module": "%(module)s",
+        "function": "%(funcName)s",
+        "message": "%(message)s"
+    }
 
     def to_dict(self) -> dict:
         return {
             "level": self.LEVEL,
-            "format": self.FORMAT,
             "filename": self.FILE,
             "maxBytes": self.MAX_BYTES,
             "backupCount": self.BACKUP_COUNT,
             "encoding": self.ENCODING,
             "filemode": self.FILE_MODE,
-            "datefmt": self.DATE_FORMAT,
+            "format": self.PRETTY_FORMAT if self.LOG_FORMAT == "pretty" else None,
+            "json_format": self.JSON_FORMAT if self.LOG_FORMAT == "json" else None,
             "force": True,
         }
 

@@ -52,6 +52,7 @@ class Settings(BaseSettings):
             'allow_headers': ['*']
         }
     """
+    log_format: str = Field(default="pretty", description="Формат логов (pretty/json)")
 
     aws_service_name: str = Field(default="s3", description="Сервис AWS")
 

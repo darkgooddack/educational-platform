@@ -1,0 +1,47 @@
+{
+    "title": "Production Monitoring",
+    "panels": [
+      {
+        "title": "Critical Services Status",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "count_over_time({app=\"educational-platform\", env=\"prod\"} | json | level=\"ERROR\" [1h])"
+          }
+        ]
+      },
+      {
+        "title": "User Activity",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "rate({app=\"educational-platform\", env=\"prod\"} | json | module=\"auth\" [5m])"
+          }
+        ]
+      },
+      {
+        "title": "Error Rate",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "rate({app=\"educational-platform\", env=\"prod\"} | json | level=\"ERROR\" [5m])"
+          }
+        ]
+      },
+      {
+        "title": "Security Events",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "{app=\"educational-platform\", env=\"prod\"} | json | level=~\"WARNING|ERROR\" | module=~\"auth|users|oauth\""
+          }
+        ]
+      }
+    ],
+    "refresh": "1m",
+    "tags": ["production", "monitoring"]
+  }

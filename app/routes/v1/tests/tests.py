@@ -33,7 +33,7 @@ def setup_routes(router: APIRouter):
     @router.post("/", response_model=TestCreateResponse)
     async def create_test(
         test: TestCreateSchema,
-        # current_user: UserCredentialsSchema = Depends(get_current_user),
+        current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestCreateResponse:
         """
@@ -48,7 +48,7 @@ def setup_routes(router: APIRouter):
         * Созданный тест в виде списка с одним элементом
         """
         service = TestService(db_session)
-        result = await service.create_test(test, author_id=1)  # current_user.id)
+        result = await service.create_test(test, current_user.id)
         return result
 
     @router.get("/all", response_model=Page[TestSchema])

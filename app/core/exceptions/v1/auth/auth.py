@@ -36,10 +36,10 @@ class InvalidCredentialsError(AuthenticationError):
     """Неверные учетные данные"""
 
     def __init__(self):
-        super().__init__(detail="🔐 Неверный email или пароль")
+        super().__init__(message="🔐 Неверный email или пароль")
 
 
-class InvalidEmailFormatError(BaseAPIException):
+class InvalidEmailFormatError(AuthenticationError):
     """
     Исключение, которое вызывается, когда формат email недействителен.
 
@@ -49,28 +49,23 @@ class InvalidEmailFormatError(BaseAPIException):
 
     def __init__(self, email: str):
         super().__init__(
-            status_code=400,
-            detail=f"Неверный формат email: {email}",
-            error_type="invalid_email_format",
-            extra={"email": email},
+            message=f"Неверный формат email: {email}",
+            extra={"email": email}
         )
 
 
-class InvalidPasswordError(BaseAPIException):
+class InvalidPasswordError(AuthenticationError):
     """
     Исключение при неверном пароле во время входа
     """
 
     def __init__(self):
         super().__init__(
-            status_code=401,
-            detail="Неверный пароль",
-            error_type="invalid_password",
-            extra={},
+            message="Неверный пароль"
         )
 
 
-class WeakPasswordError(BaseAPIException):
+class WeakPasswordError(AuthenticationError):
     """
     Исключение, которое вызывается, когда пароль является слабым.
 
@@ -79,12 +74,10 @@ class WeakPasswordError(BaseAPIException):
     """
 
     def __init__(self):
-        super().__init__(
-            status_code=400,
-            detail="Пароль должен быть минимум 8 символов!",
-            error_type="weak_password",
-            extra={},
-        )
+        def __init__(self):
+            super().__init__(
+                message="Пароль должен быть минимум 8 символов!"
+            )
 
 
 class TokenError(AuthenticationError):
@@ -94,7 +87,8 @@ class TokenError(AuthenticationError):
         self, detail: str, error_type: str = "token_error", extra: dict = None
     ):
         super().__init__(
-            detail=detail, error_type=error_type, extra=extra or {"token_error": True}
+            message=detail,
+            extra=extra or {"token_error": True}
         )
 
 

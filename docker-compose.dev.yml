@@ -7,8 +7,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-guest}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-admin}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-admin}
       - RABBITMQ_DEFAULT_VHOST=/
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
@@ -29,46 +29,49 @@ services:
       - "5434:5432"
     env_file:
       - ./.env.dev
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - dev-network
 
-  # pgadmin:
-  #   image: dpage/pgadmin4:8.12.0
-  #   env_file:
-  #     - ./.env.dev
-  #   volumes:
-  #     - pgadmin-data:/var/lib/pgadmin
-  #   ports:
-  #     - "5050:80"
-  #   restart: unless-stopped
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.5'
-  #         memory: 1G
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - dev-network
+  pgadmin:
+    image: dpage/pgadmin4:8.12.0
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dev-network
 
-  # redis-commander:
-  #   image: rediscommander/redis-commander:latest
-  #   env_file:
-  #     - ./.env.dev
-  #   ports:
-  #     - "8081:8081"
-  #   restart: unless-stopped
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.2'
-  #         memory: 512M
-  #   depends_on:
-  #     redis:
-  #       condition: service_healthy
-  #   networks:
-  #     - dev-network
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    env_file:
+      - ./.env.dev
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 512M
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - dev-network
 
   redis:
     image: redis:latest
@@ -80,6 +83,53 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --requirepass ${REDIS_AUTH_PASSWORD:-default}
+    volumes:
+      - redis-data:/data
+    networks:
+      - dev-network
+  loki:
+    image: grafana/loki:2.9.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/tmp/loki
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - dev-network
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      - ./logs:/var/log:ro
+      - ./promtail/promtail-config.dev.yaml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      loki:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9080/ready || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - dev-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3333:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
     networks:
       - dev-network
 
@@ -88,4 +138,8 @@ networks:
     driver: bridge
 
 volumes:
+  postgres-data:
+  redis-data:
   pgadmin-data:
+  grafana-data:
+  loki-data:

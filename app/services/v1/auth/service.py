@@ -59,12 +59,31 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             - Добавить эксепшены (подумать какие)
 
         """
+
+
+
         user_model = await self._data_manager.get_user_by_credentials(credentials.email)
 
+        logger.info(
+            "Начало аутентификации",
+            extra={
+                "email": credentials.email,
+                "user_found": bool(user_model)
+            }
+        )
+
         if not user_model:
+            logger.warning(
+                "Пользователь не найден",
+                extra={"email": credentials.email}
+            )
             raise InvalidCredentialsError()
 
         if not user_model.is_active:
+            logger.warning(
+                "Попытка входа в неактивный аккаунт",
+                extra={"email": credentials.email, "user_id": user_model.id}
+            )
             raise UserInactiveError(
                 message="Аккаунт деактивирован", extra={"email": credentials.email}
             )
@@ -72,9 +91,22 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         if not user_model or not self.verify(
             user_model.hashed_password, credentials.password
         ):
+            logger.warning(
+                "Неверный пароль",
+                extra={"email": credentials.email, "user_id": user_model.id}
+            )
             raise InvalidCredentialsError()
 
         user_schema = UserCredentialsSchema.model_validate(user_model)
+
+        logger.info(
+            "Аутентификация успешна",
+            extra={
+                "user_id": user_schema.id,
+                "email": user_schema.email,
+                **({"role": user_schema.role} if hasattr(user_schema, "role") else {})
+            }
+        )
 
         return await self.create_token(user_schema)
 
@@ -91,11 +123,19 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             TokenResponseSchema: Схема с access_token и token_type
         """
         payload = TokenMixin.create_payload(user_schema)
-        logger.info("Token payload", extra={"payload": payload})
+        logger.debug("Создан payload токена", extra={"payload": payload})
+
         token = TokenMixin.generate_token(payload)
-        logger.info("Token generated", extra={"token": token})
+        logger.debug("Сгенерирован токен", extra={"token_length": len(token)})
+
         await self._redis_storage.save_token(user_schema, token)
-        logger.info("Token saved to redis", extra={"token": token})
+        logger.info(
+            "Токен сохранен в Redis",
+            extra={
+                "user_id": user_schema.id,
+                "token_length": len(token)
+            }
+        )
 
         return TokenResponseSchema(
             item=TokenSchema(access_token=token, token_type="bearer")
