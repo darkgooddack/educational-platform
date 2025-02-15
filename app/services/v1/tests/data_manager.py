@@ -7,8 +7,8 @@ from sqlalchemy.orm import noload, selectinload
 
 from app.core.exceptions import (BaseAPIException, DatabaseError,
                                  QuestionNotFoundError, TestDeleteError,
-                                 TestGetError, TestUpdateError)
-from app.models import AnswerModel, QuestionModel, TestModel
+                                 TestNotFoundError, TestUpdateError)
+from app.models import AnswerModel, QuestionModel, TestModel, ThemeModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCatalogSchema,
                          TestCompleteResponse, TestCreateResponse,
