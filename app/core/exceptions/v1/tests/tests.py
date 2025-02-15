@@ -22,9 +22,7 @@ class TestGetError(DatabaseError):
     """
 
     def __init__(self, message: str, extra: dict = None):
-        super().__init__(
-            message=f"Ошибка при получении теста: {message}", extra=extra
-        )
+        super().__init__(message=f"Ошибка при получении теста: {message}", extra=extra)
 
 
 class TestExistsError(BaseAPIException):

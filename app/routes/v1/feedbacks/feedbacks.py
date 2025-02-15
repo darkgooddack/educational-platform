@@ -4,10 +4,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
-from app.schemas import (FeedbackCreateSchema, FeedbackCreateResponse, 
-                        FeedbackUpdateResponse, FeedbackDeleteResponse,
-                        FeedbackSchema, FeedbackStatus, FeedbackListResponse,
-                        Page, PaginationParams)
 from app.schemas import (FeedbackCreateResponse, FeedbackCreateSchema,
                          FeedbackDeleteResponse, FeedbackListResponse,
                          FeedbackSchema, FeedbackStatus,

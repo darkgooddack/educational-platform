@@ -2,6 +2,7 @@
 Модуль для работы с пользователями.
 В данном модуле реализованы функции для работы с пользователями.
 """
+
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +17,7 @@ from app.services.v1.base import BaseService
 from .data_manager import AuthDataManager
 
 logger = logging.getLogger(__name__)
+
 
 class AuthService(HashingMixin, TokenMixin, BaseService):
     """

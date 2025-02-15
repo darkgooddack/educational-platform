@@ -5,9 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import TestGetError
 from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
-                         QuestionCreateSchema, TestCreateResponse, TestCatalogSchema,
-                         TestCreateSchema, TestDeleteResponse, TestSchema,
-                         TestUpdateResponse, TestCompleteResponse, TestAnswerSchema)
+                         QuestionCreateSchema, TestAnswerSchema,
+                         TestCatalogSchema, TestCompleteResponse,
+                         TestCreateResponse, TestCreateSchema,
+                         TestDeleteResponse, TestSchema, TestUpdateResponse)
 from app.services import BaseService
 
 from .data_manager import TestDataManager
@@ -61,6 +62,35 @@ class TestService(BaseService):
             author_id=author_id,
         )
         return await self.test_manager.create_test(test, test_data.questions)
+
+    async def get_tests_with_all_data(
+        self,
+        pagination: PaginationParams,
+        theme_ids: Optional[List[int]] = None,
+        video_lecture_id: Optional[int] = None,
+        lecture_id: Optional[int] = None,
+        search: Optional[str] = None,
+    ) -> Tuple[List[TestSchema], int]:
+        """
+        Получает список тестов со всеми данными с фильтрацией.
+
+        Args:
+            pagination: Параметры пагинации
+            theme_ids: Фильтр по темам
+            video_lecture_id: Фильтр по видео-лекции
+            lecture_id: Фильтр по лекции
+            search: Поисковый запрос
+
+        Returns:
+            Tuple[List[TestSchema], int]: Список тестов и общее количество
+        """
+        return await self.test_manager.get_tests_with_all_data_paginated(
+            pagination=pagination,
+            theme_ids=theme_ids,
+            video_lecture_id=video_lecture_id,
+            lecture_id=lecture_id,
+            search=search,
+        )
 
     async def get_tests(
         self,
@@ -164,12 +194,8 @@ class TestService(BaseService):
         """
         return await self.test_manager.delete_test(test_id)
 
-
     async def complete_test_with_answers(
-        self,
-        test_id: int,
-        user_id: int,
-        answers: List[TestAnswerSchema]
+        self, test_id: int, user_id: int, answers: List[TestAnswerSchema]
     ) -> TestCompleteResponse:
         """
         Обрабатывает завершение теста пользователем.
@@ -182,7 +208,7 @@ class TestService(BaseService):
         Returns:
             TestCompleteResponse: Результаты прохождения теста
         """
-        # TODO: 
+        # TODO:
         # 1. Получить тест с правильными ответами
         # 2. Проверить ответы пользователя
         # 3. Подсчитать баллы
@@ -190,6 +216,6 @@ class TestService(BaseService):
         # 5. Обновить статистику пользователя
         # 6. Сгенерировать сертификат если нужно
         # 7. Отправить уведомление
-    
+
         # Пока просто увеличиваем счетчик
         return await self.test_manager.increment_popularity(test_id)

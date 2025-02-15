@@ -22,9 +22,13 @@ from .v1.base import BaseAPIException, DatabaseError, ValueNotFoundError
 from .v1.feedback.feedback import (FeedbackAddError, FeedbackDeleteError,
                                    FeedbackGetError, FeedbackUpdateError)
 from .v1.tests.tests import (QuestionNotFoundError, TestDeleteError,
-                             TestExistsError, TestGetError,
-                             TestUpdateError)
-from .v1.themes.themes import ThemeExistsError, ThemeNotFoundError
+                             TestExistsError, TestGetError, TestUpdateError)
+from .v1.themes.themes import (
+    ThemeExistsError,
+    ThemeNotFoundError,
+    ThemeUpdateError,
+    ThemeDeleteError
+)
 from .v1.users.users import (UserCreationError, UserExistsError,
                              UserInactiveError, UserNotFoundError)
 
@@ -59,8 +63,11 @@ __all__ = [
     "FeedbackUpdateError",
     "ThemeNotFoundError",
     "ThemeExistsError",
+    "ThemeUpdateError",
+    "ThemeDeleteError",
     "TestGetError",
     "TestExistsError",
     "TestUpdateError",
+    "TestDeleteError",
     "QuestionNotFoundError",
 ]

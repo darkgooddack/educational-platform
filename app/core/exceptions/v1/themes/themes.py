@@ -9,7 +9,7 @@
 - ThemeExistsError: Исключение при попытке создать существующую тему
 """
 
-from app.core.exceptions.v1.base import BaseAPIException
+from app.core.exceptions.v1.base import BaseAPIException, DatabaseError
 
 
 class ThemeNotFoundError(BaseAPIException):
@@ -45,3 +45,22 @@ class ThemeExistsError(BaseAPIException):
             error_type="theme_exists",
             extra={"theme_name": name},
         )
+
+class ThemeUpdateError(DatabaseError):
+    """
+    Ошибка при обновлении темы в базе данных.
+    """
+
+    def __init__(self, message: str, extra: dict = None):
+        super().__init__(message=f"Ошибка при обновлении темы: {message}", extra=extra)
+
+class ThemeDeleteError(DatabaseError):
+    """
+    Ошибка при удалении темы из базы данных.
+
+    Attributes:
+        message (str): Сообщение об ошибке.
+    """
+
+    def __init__(self, message: str, extra: dict = None):
+        super().__init__(message=f"Ошибка при удалении темы: {message}", extra=extra)

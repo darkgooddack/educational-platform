@@ -26,12 +26,15 @@ from .v1.pagination import Page, PaginationParams
 from .v1.posts.posts import PostStatus
 from .v1.tests.tests import (AnswerCreateSchema, AnswerSchema,
                              QuestionCreateSchema, QuestionSchema,
-                             QuestionType, TestCreateResponse, TestCatalogSchema,
+                             QuestionType, TestAnswerSchema, TestCatalogSchema,
+                             TestCompleteResponse, TestCreateResponse,
                              TestCreateSchema, TestDeleteResponse, TestSchema,
-                             TestUpdateResponse, TestCompleteResponse, TestAnswerSchema)
-from .v1.themes.themes import (ThemeBase, ThemeSchema, ThemeCreateSchema, 
-                            ThemeListResponse, ThemeSelectResponse, ThemeTreeResponse,
-                            ThemeCreateResponse, ThemeUpdateResponse, ThemeDeleteResponse)
+                             TestUpdateResponse)
+from .v1.themes.themes import (ThemeBase, ThemeCreateResponse,
+                               ThemeCreateSchema, ThemeDeleteResponse,
+                               ThemeListResponse, ThemeSchema,
+                               ThemeSelectResponse, ThemeTreeResponse,
+                               ThemeUpdateResponse)
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
                              UserUpdateSchema)
@@ -114,5 +117,5 @@ __all__ = [
     "QuestionSchema",
     "AnswerCreateSchema",
     "AnswerSchema",
-    "TestAnswerSchema"
+    "TestAnswerSchema",
 ]

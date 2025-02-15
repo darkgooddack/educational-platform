@@ -10,16 +10,18 @@
 """
 
 import logging
-from typing import Optional, List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_current_user, get_db_session
 from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
-                         QuestionCreateSchema, TestCreateResponse, TestUpdateResponse,
-                         TestDeleteResponse, TestCreateSchema, TestSchema, TestCatalogSchema,
-                         UserCredentialsSchema, TestCompleteResponse, TestAnswerSchema)
+                         QuestionCreateSchema, TestAnswerSchema,
+                         TestCatalogSchema, TestCompleteResponse,
+                         TestCreateResponse, TestCreateSchema,
+                         TestDeleteResponse, TestSchema, TestUpdateResponse,
+                         UserCredentialsSchema)
 from app.services import TestService
 
 logger = logging.getLogger(__name__)
@@ -31,7 +33,7 @@ def setup_routes(router: APIRouter):
     @router.post("/", response_model=TestCreateResponse)
     async def create_test(
         test: TestCreateSchema,
-        #current_user: UserCredentialsSchema = Depends(get_current_user),
+        # current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestCreateResponse:
         """
@@ -46,15 +48,54 @@ def setup_routes(router: APIRouter):
         * Созданный тест в виде списка с одним элементом
         """
         service = TestService(db_session)
-        result = await service.create_test(test, author_id=1)#current_user.id)
+        result = await service.create_test(test, author_id=1)  # current_user.id)
         return result
+
+    @router.get("/all", response_model=Page[TestSchema])
+    async def get_tests_with_all_data(
+        pagination: PaginationParams = Depends(),
+        theme_ids: Optional[List[int]] = Query(None, description="Фильтр по темам"),
+        video_lecture_id: Optional[int] = Query(
+            None, description="Фильтр по видео-лекции"
+        ),
+        lecture_id: Optional[int] = Query(None, description="Фильтр по лекции"),
+        search: str = Query(None, description="Поиск по названию и описанию"),
+        db_session: AsyncSession = Depends(get_db_session),
+    ) -> Page[TestSchema]:
+        """
+        # Получение списка тестов с пагинацией и фильтрацией
+
+        ## Args
+        * **pagination** - параметры пагинации (пропуск, лимит, сортировка)
+        * **theme_ids** - фильтр по ID темы
+        * **video_lecture_id** - фильтр по ID видео-лекции
+        * **lecture_id** - фильтр по ID лекции
+        * **search** - поисковый запрос по названию и описанию
+        * **db_session** - сессия базы данных
+
+        ## Сортировка
+        * **sort_by** - по какому полю сортировать (updated_at, popularity_count)
+        * **sort_desc** - сортировка по убыванию (по умолчанию сортировка по убыванию - true)
+
+        ## Returns
+        * Страница с тестами и всеми параметрами и метаданными пагинации
+        """
+        service = TestService(db_session)
+        tests, total = await service.get_tests_with_all_data(
+            pagination=pagination,
+            theme_ids=theme_ids,
+            video_lecture_id=video_lecture_id,
+            lecture_id=lecture_id,
+            search=search,
+        )
+        return Page(
+            items=tests, total=total, page=pagination.page, size=pagination.limit
+        )
 
     @router.get("/", response_model=Page[TestCatalogSchema])
     async def get_tests(
         pagination: PaginationParams = Depends(),
-        theme_ids: Optional[List[int]] = Query(
-            None, description="Фильтр по темам"
-        ),
+        theme_ids: Optional[List[int]] = Query(None, description="Фильтр по темам"),
         video_lecture_id: Optional[int] = Query(
             None, description="Фильтр по видео-лекции"
         ),
@@ -188,12 +229,11 @@ def setup_routes(router: APIRouter):
         service = TestService(db_session)
         return await service.delete_test(test_id)
 
-
     @router.patch("/{test_id}/complete")
     async def complete_test(
         test_id: int,
         answers: List[TestAnswerSchema],
-        #current_user: UserCredentialsSchema = Depends(get_current_user),
+        # current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestCompleteResponse:
         """
@@ -216,12 +256,11 @@ def setup_routes(router: APIRouter):
         # 5. Обновление статистики пользователя
         # 6. Отправку уведомления о завершении
         # 7. Выдачу сертификата/бейджа при успешном прохождении
-        
+
         service = TestService(db_session)
         return await service.complete_test_with_answers(
-            test_id=test_id,
-            user_id=1, #current_user.id,
-            answers=answers
+            test_id=test_id, user_id=1, answers=answers  # current_user.id,
         )
+
 
 __all__ = ["setup_routes"]

@@ -1,17 +1,19 @@
-from typing import List, Optional, Tuple
 import traceback
+from typing import List, Optional, Tuple
+
 from sqlalchemy import delete, or_, select
-from sqlalchemy.orm import selectinload, noload
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload, selectinload
 
 from app.core.exceptions import (BaseAPIException, DatabaseError,
                                  QuestionNotFoundError, TestDeleteError,
                                  TestGetError, TestUpdateError)
 from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
-                         QuestionCreateSchema, TestCreateResponse,
-                         TestCreateSchema, TestDeleteResponse, TestSchema, TestCatalogSchema,
-                         TestUpdateResponse, TestCompleteResponse)
+                         QuestionCreateSchema, TestCatalogSchema,
+                         TestCompleteResponse, TestCreateResponse,
+                         TestCreateSchema, TestDeleteResponse, TestSchema,
+                         TestUpdateResponse)
 from app.services import BaseEntityManager
 
 
@@ -76,8 +78,52 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             dict: Словарь с данными теста и количеством вопросов
         """
         data = item.__dict__
-        data['questions_count'] = len(item.questions)
+        data["questions_count"] = len(item.questions)
         return data
+
+    async def get_tests_with_all_data_paginated(
+        self,
+        pagination: PaginationParams,
+        theme_ids: Optional[List[int]] = None,
+        video_lecture_id: Optional[int] = None,
+        lecture_id: Optional[int] = None,
+        search: Optional[str] = None,
+    ) -> Tuple[List[TestSchema], int]:
+        """
+        Получает список тестов с фильтрацией
+
+        Args:
+            pagination (PaginationParams): Параметры пагинации
+            theme_ids (List[int], optional): ID темы
+            video_lecture_id (int, optional): ID видеолекции
+            lecture_id (int, optional): ID лекции
+            search (str, optional): Строка поиска
+
+        Returns:
+            Tuple[List[TestSchema], int]: Список тестов и общее количество
+        """
+        query = select(self.model)
+
+        query = query.options(selectinload(TestModel.questions))
+
+        if theme_ids:
+            query = query.filter(self.model.theme_id.in_(theme_ids))
+        if video_lecture_id:
+            query = query.filter(self.model.video_lecture_id == video_lecture_id)
+        if lecture_id:
+            query = query.filter(self.model.lecture_id == lecture_id)
+        if search:
+            query = query.filter(
+                or_(
+                    self.model.title.ilike(f"%{search}%"),
+                    self.model.description.ilike(f"%{search}%"),
+                )
+            )
+        items, total = await self.get_paginated(
+            query,
+            pagination,
+        )
+        return items, total
 
     async def get_tests_paginated(
         self,
@@ -102,9 +148,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         """
         query = select(self.model)
 
-        query = query.options(
-            selectinload(TestModel.questions)
-        )
+        query = query.options(selectinload(TestModel.questions))
 
         if theme_ids:
             query = query.filter(self.model.theme_id.in_(theme_ids))
@@ -123,7 +167,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             query,
             pagination,
             schema=TestCatalogSchema,
-            transform_func=self._transform_test
+            transform_func=self._transform_test,
         )
         return items, total
 
@@ -223,8 +267,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
 
             if not found_test_model:
                 raise TestGetError(
-                    message=f"Тест с id {test_id} не найден",
-                    extra={"test_id": test_id}
+                    message=f"Тест с id {test_id} не найден", extra={"test_id": test_id}
                 )
 
             for field, value in test_data.model_dump().items():
@@ -301,7 +344,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             statement = (
                 select(self.model)
                 .where(self.model.id == test_id)
-                .options(noload('*')) # Отключаем загрузку связанных объектов
+                .options(noload("*"))  # Отключаем загрузку связанных объектов
             )
             found_test = await self.get_one(statement)
 
@@ -311,8 +354,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             found_test.popularity_count += 1
 
             updated_test = await self.update_one(
-                model_to_update=found_test,
-                updated_model=found_test
+                model_to_update=found_test, updated_model=found_test
             )
 
             return TestCompleteResponse(item=updated_test)
@@ -323,9 +365,9 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 extra={
                     "context": "Ошибка при обновлении популярности теста",
                     "test_id": test_id,
-                    "current_popularity": getattr(found_test, 'popularity_count', None),
-                    "error_details": str(db_error)
-                }
+                    "current_popularity": getattr(found_test, "popularity_count", None),
+                    "error_details": str(db_error),
+                },
             ) from db_error
         except Exception as e:
             raise BaseAPIException(
@@ -336,6 +378,6 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                     "test_id": test_id,
                     "error_class": e.__class__.__name__,
                     "error_details": str(e),
-                    "traceback": traceback.format_exc()
-                }
+                    "traceback": traceback.format_exc(),
+                },
             ) from e

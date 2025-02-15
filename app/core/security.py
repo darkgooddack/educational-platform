@@ -23,8 +23,12 @@ from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
 
 from app.core.config import config
-from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
-                                 TokenInvalidError, TokenMissingError)
+from app.core.exceptions import (
+    InvalidCredentialsError,
+    TokenExpiredError,
+    TokenInvalidError,
+    TokenMissingError,
+)
 from app.schemas import UserCredentialsSchema
 
 pwd_context = CryptContext(

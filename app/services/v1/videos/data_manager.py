@@ -1,6 +1,6 @@
-from typing import Optional, List
+from typing import List, Optional
 
-from sqlalchemy import select, or_
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import VideoLectureModel
@@ -59,9 +59,7 @@ class VideoLectureDataManager(BaseEntityManager[VideoLectureSchema]):
             query = query.filter(self.model.theme_id.in_(theme_ids))
 
         items, total = await self.get_paginated(
-            query,
-            pagination,
-            schema=VideoLectureSchema
+            query, pagination, schema=VideoLectureSchema
         )
 
         return items, total

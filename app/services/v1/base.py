@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Generic, List, Optional, Type, TypeVar, Callable
+from typing import Any, Callable, Generic, List, Optional, Type, TypeVar
 
 from sqlalchemy import asc, delete, desc, func, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -107,10 +107,12 @@ class BaseDataManager(SessionMixin, Generic[T]):
             raise
 
     async def get_all(
-        self, 
+        self,
         select_statement: Executable,
         schema: Type[T] = None,
-        transform_func: Optional[Callable] = None # для преобразования данных перед возвратом
+        transform_func: Optional[
+            Callable
+        ] = None,  # для преобразования данных перед возвратом
     ) -> List[Any]:
         """
         Получает все записи из базы данных.
@@ -159,7 +161,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
         select_statement: Executable,
         pagination: PaginationParams,
         schema: Type[T] = None,
-        transform_func: Optional[Callable] = None
+        transform_func: Optional[Callable] = None,
     ) -> tuple[List[T], int]:
         """
         Получает пагинированные записи из базы данных.
@@ -191,9 +193,9 @@ class BaseDataManager(SessionMixin, Generic[T]):
             )
 
             items = await self.get_all(
-                select_statement, 
+                select_statement,
                 schema=schema or self.schema,
-                transform_func=transform_func
+                transform_func=transform_func,
             )
 
             return items, total

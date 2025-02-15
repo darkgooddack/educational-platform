@@ -47,12 +47,13 @@ class TestBase(CommonBaseSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
 
-    @field_validator('title')
+    @field_validator("title")
     @classmethod
     def validate_title(cls, v):
         if not v:
-            return 'Без названия'
+            return "Без названия"
         return v
+
 
 class TestCatalogSchema(CommonBaseSchema):
     """
@@ -65,6 +66,7 @@ class TestCatalogSchema(CommonBaseSchema):
         theme_id: ID темы теста
         author_id: ID автора теста
     """
+
     id: int
     title: str = Field(max_length=150, description="Название теста")
     duration: int
@@ -72,12 +74,13 @@ class TestCatalogSchema(CommonBaseSchema):
     theme_id: int
     author_id: int = Field(description="ID автора теста")
 
-    @field_validator('title')
+    @field_validator("title")
     @classmethod
     def validate_title(cls, v):
         if not v:
-            return 'Без названия'
+            return "Без названия"
         return v
+
 
 class AnswerBase(CommonBaseSchema):
     """
@@ -154,9 +157,7 @@ class TestCreateSchema(BaseInputSchema):
     """
 
     title: str = Field(min_length=10, max_length=150, description="Название теста")
-    description: str = Field(
-        min_length=0, max_length=250, description="Описание теста"
-    )
+    description: str = Field(min_length=0, max_length=250, description="Описание теста")
     duration: int
     passing_score: int = 60
     max_attempts: int = 3
@@ -164,6 +165,7 @@ class TestCreateSchema(BaseInputSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
     questions: List[QuestionCreateSchema]
+
 
 # Схемы для ответов
 class AnswerSchema(AnswerBase):
@@ -262,6 +264,7 @@ class TestListResponse(BaseResponseSchema):
     success: bool = True
     message: str = "Тест успешно добавлен"
 
+
 class TestCompleteResponse(BaseResponseSchema):
     """
     Схема ответа при завершении теста
@@ -271,6 +274,7 @@ class TestCompleteResponse(BaseResponseSchema):
         success: Признак успешного завершения
         message: Сообщение о завершении
     """
+
     item: TestSchema
     success: bool = True
     message: str = "Тест успешно пройден"
@@ -285,6 +289,7 @@ class TestAnswerSchema(BaseInputSchema):
         answer_ids: Список ID выбранных ответов
         time_spent: Время потраченное на ответ в секундах
     """
+
     question_id: int
     answer_ids: List[int]
     time_spent: Optional[int] = None

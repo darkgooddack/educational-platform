@@ -1,12 +1,13 @@
 from typing import List, Optional
 
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import ThemeExistsError, ThemeNotFoundError
+from app.core.exceptions import BaseAPIException, DatabaseError,ThemeExistsError, ThemeNotFoundError, ThemeDeleteError, ThemeUpdateError
 from app.models import ThemeModel
-from app.schemas import (PaginationParams, ThemeSchema, ThemeCreateSchema, 
-                        ThemeCreateResponse, ThemeUpdateResponse, ThemeDeleteResponse)
+from app.schemas import (PaginationParams, ThemeCreateResponse,
+                         ThemeCreateSchema, ThemeDeleteResponse, ThemeSchema,
+                         ThemeUpdateResponse)
 from app.services import BaseDataManager
 
 
@@ -145,14 +146,67 @@ class ThemeDataManager(BaseDataManager):
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def update_theme(self, theme_id: int, theme_data: ThemeCreateSchema) -> ThemeUpdateResponse:
+    async def update_theme(
+        self, theme_id: int, theme_data: ThemeCreateSchema
+    ) -> ThemeUpdateResponse:
         """Обновляет тему в базе данных"""
-        theme = await self.get_theme(theme_id)
-        updated = await self.update_one(theme_id, theme_data)
-        return ThemeUpdateResponse(id=theme_id)
+
+        try:
+            statement = select(self.model).where(self.model.id == theme_id)
+            found_theme_model = await self.get_one(statement)
+
+            if not found_theme_model:
+                raise ThemeNotFoundError(
+                    message=f"Тема с ID {theme_id} не найдена",
+                    theme_id=theme_id
+                )
+
+            for field, value in theme_data.model_dump().items():
+                setattr(found_theme_model, field, value)
+
+            updated_theme_model = self.model(**theme_data.model_dump())
+
+            updated_theme = await self.update_one(
+                model_to_update=found_theme_model, updated_model=updated_theme_model
+            )
+
+            return ThemeUpdateResponse(id=updated_theme.id)
+
+        except DatabaseError as db_error:
+            raise ThemeUpdateError(
+                message=str(db_error),
+                extra={"context": "Ошибка при обновлении темы в базе данных"},
+            ) from db_error
+        except Exception as e:
+            raise BaseAPIException(
+                status_code=500,
+                detail="Произошла непредвиденная ошибка",
+                error_type="unknown_error",
+                extra={
+                    "context": "Неизвестная ошибка при обновлении темы",
+                    "error": str(e),
+                },
+            ) from e
 
     async def delete_theme(self, theme_id: int) -> ThemeDeleteResponse:
         """Удаляет тему из базы данных"""
-        theme = await self.get_theme(theme_id)
-        await self.delete_one(theme_id)
-        return ThemeDeleteResponse(id=theme_id)
+        try:
+            statement = select(self.model).where(self.model.id == theme_id)
+            found_theme_model = await self.get_one(statement)
+
+            if not found_theme_model:
+                raise ThemeNotFoundError(f"Тема с ID {theme_id} не найдена",    theme_id)
+            statement = delete(self.model).where(self.model.id == theme_id)
+            if not await self.delete(statement):
+                    raise ThemeDeleteError(message="Не удалось удалить тему")
+            return ThemeDeleteResponse(id=theme_id)
+        except Exception as e:
+            raise BaseAPIException(
+                status_code=500,
+                detail="Произошла непредвиденная ошибка.",
+                error_type="unknown_error",
+                extra={
+                    "context": "Неизвестная ошибка при удалении темы.",
+                    "error": str(e),
+                },
+            ) from e

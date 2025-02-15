@@ -245,7 +245,6 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                 updated_model=found_feedback_model,
             )
 
-
             return FeedbackUpdateResponse(
                 id=updated_feedback.id,
                 status=updated_feedback.status,
@@ -294,8 +293,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
                 raise FeedbackDeleteError(message="Не удалось удалить обратную  связь")
 
             return FeedbackDeleteResponse(
-                id=found_feedback.id,
-                manager_id=found_feedback.manager_id
+                id=found_feedback.id, manager_id=found_feedback.manager_id
             )
         except Exception as e:
             raise BaseAPIException(

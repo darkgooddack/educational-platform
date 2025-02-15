@@ -5,9 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
 from app.schemas import (ListResponseSchema, Page, PaginationParams,
-                         ThemeCreateSchema, ThemeSchema, ThemeCreateResponse,
-                         ThemeUpdateResponse, ThemeDeleteResponse, ThemeListResponse,
-                         ThemeSelectResponse, ThemeTreeResponse)
+                         ThemeCreateResponse, ThemeCreateSchema,
+                         ThemeDeleteResponse, ThemeListResponse, ThemeSchema,
+                         ThemeSelectResponse, ThemeTreeResponse,
+                         ThemeUpdateResponse)
 from app.services import ThemeService
 
 
@@ -32,9 +33,7 @@ def setup_routes(router: APIRouter):
         """Получение списка тем с фильтрацией"""
         service = ThemeService(db_session)
         page = await service.get_themes_paginated(
-            pagination=pagination,
-            parent_id=parent_id,
-            search=search
+            pagination=pagination, parent_id=parent_id, search=search
         )
         return ThemeListResponse(
             items=page.items,
@@ -68,5 +67,44 @@ def setup_routes(router: APIRouter):
         service = ThemeService(db_session)
         theme = await service.get_theme_by_id(theme_id)
         return theme
-        
+
+    @router.put("/{theme_id}", response_model=ThemeUpdateResponse)
+    async def update_theme(
+        theme_id: int,
+        theme: ThemeCreateSchema,
+        db_session: AsyncSession = Depends(get_db_session),
+    ) -> ThemeUpdateResponse:
+        """
+        # Обновление существующей темы
+
+        ## Args
+        * **theme_id** - ID обновляемой темы
+        * **theme** - новые данные темы
+        * **db_session** - сессия базы данных
+
+        ## Returns
+        * Обновленная тема
+        """
+        service = ThemeService(db_session)
+        return await service.update_theme(theme_id, theme)
+
+    @router.delete("/{theme_id}", response_model=ThemeDeleteResponse)
+    async def delete_theme(
+        theme_id: int,
+        db_session: AsyncSession = Depends(get_db_session),
+    ) -> ThemeDeleteResponse:
+        """
+        # Удаление темы
+
+        ## Args
+        * **theme_id** - ID удаляемой темы
+        * **db_session** - сессия базы данных
+
+        ## Returns
+        * Удаленная тема
+        """
+        service = ThemeService(db_session)
+        return await service.delete_theme(theme_id)
+
+
 __all__ = ["setup_routes"]

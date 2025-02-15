@@ -4,9 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ThemeNotFoundError
 from app.models import ThemeModel
-from app.schemas import (PaginationParams, ThemeCreateSchema, ThemeSchema, 
-                        ThemeCreateResponse, ThemeUpdateResponse, ThemeDeleteResponse, 
-                        ThemeListResponse, ThemeSelectResponse, ThemeTreeResponse)
+from app.schemas import (PaginationParams, ThemeCreateResponse,
+                         ThemeCreateSchema, ThemeDeleteResponse,
+                         ThemeListResponse, ThemeSchema, ThemeSelectResponse,
+                         ThemeTreeResponse, ThemeUpdateResponse)
 from app.services import BaseService
 
 from .data_manager import ThemeDataManager
@@ -68,10 +69,7 @@ class ThemeService(BaseService):
             search=search,
         )
         return ThemeListResponse(
-            items=themes,
-            total=total,
-            page=pagination.page,
-            size=pagination.limit
+            items=themes, total=total, page=pagination.page, size=pagination.limit
         )
 
     async def get_theme_by_id(self, theme_id: int) -> ThemeSchema:
@@ -102,7 +100,9 @@ class ThemeService(BaseService):
         themes = await self.theme_manager.get_themes_tree()
         return ThemeTreeResponse(items=themes)
 
-    async def update_theme(self, theme_id: int, theme: ThemeCreateSchema) -> ThemeUpdateResponse:
+    async def update_theme(
+        self, theme_id: int, theme: ThemeCreateSchema
+    ) -> ThemeUpdateResponse:
         """
         Обновляет тему.
 

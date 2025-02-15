@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,7 +40,7 @@ def setup_routes(router: APIRouter):
             content_type=["image/jpeg", "image/png", "image/gif"],
             max_size=10_000_000,  # 10MB
         ),
-        #current_user: UserCredentialsSchema = Depends(get_current_user),
+        # current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
         s3_session: S3Session = Depends(get_s3_session),
     ) -> VideoLectureCreateResponse:
@@ -70,7 +70,7 @@ def setup_routes(router: APIRouter):
                 video_file=video_file,
                 thumbnail_file=thumbnail_file,
             ),
-            author_id=1#current_user.id,
+            author_id=1,  # current_user.id,
         )
 
         return result
@@ -78,12 +78,8 @@ def setup_routes(router: APIRouter):
     @router.get("/", response_model=VideoLectureListResponse)
     async def get_videos(
         pagination: PaginationParams = Depends(),
-        theme_ids: Optional[List[int]] = Query(
-            None, description="Фильтр по темам"
-        ),
-        search: str = Query(
-            None, description="Поиск по названию и описанию"
-        ),
+        theme_ids: Optional[List[int]] = Query(None, description="Фильтр по темам"),
+        search: str = Query(None, description="Поиск по названию и описанию"),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> VideoLectureListResponse:
         """
@@ -101,9 +97,7 @@ def setup_routes(router: APIRouter):
         """
         service = VideoLectureService(db_session)
         videos, total = await service.get_videos(
-            pagination=pagination,
-            theme_ids=theme_ids,
-            search=search
+            pagination=pagination, theme_ids=theme_ids, search=search
         )
         return VideoLectureListResponse(
             items=videos, total=total, page=pagination.page, size=pagination.limit
