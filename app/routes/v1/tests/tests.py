@@ -233,7 +233,7 @@ def setup_routes(router: APIRouter):
     async def complete_test(
         test_id: int,
         answers: List[TestAnswerSchema],
-        # current_user: UserCredentialsSchema = Depends(get_current_user),
+        current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestCompleteResponse:
         """
@@ -259,7 +259,7 @@ def setup_routes(router: APIRouter):
 
         service = TestService(db_session)
         return await service.complete_test_with_answers(
-            test_id=test_id, user_id=1, answers=answers  # current_user.id,
+            test_id=test_id, user_id=current_user.id, answers=answers
         )
 
 
