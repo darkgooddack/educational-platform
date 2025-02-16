@@ -40,12 +40,22 @@ class TokenResponseSchema(BaseResponseSchema):
     """
     Схема ответа с токеном доступа
 
+    Swagger UI ожидает строго определенный формат ответа для OAuth2 password flow (access_token и token_type обязательны, другие поля игнорируются)
+
+    Docs:
+        https://swagger.io/docs/specification/authentication/oauth2/
+        (Из РФ зайти можно только через VPN - санкции)
+
+        https://developer.zendesk.com/api-reference/sales-crm/authentication/requests/#token-request
+
     Attributes:
-        item: TokenSchema
+        access_token: Токен доступа.
+        token_type: Тип токена.
         success: Признак успешной авторизации
         message: Сообщение об успешной авторизации
     """
 
-    item: TokenSchema
+    access_token: str
+    token_type: str = "bearer"
     success: bool = True
     message: str = "Авторизация успешна"

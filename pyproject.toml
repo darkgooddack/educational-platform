@@ -55,6 +55,9 @@ infra-down = "scripts.commands:infra_down"
 infra-build = "scripts.commands:infra_build"
 infra-logs = "scripts.commands:infra_logs"
 infra-restart = "scripts.commands:infra_restart"
+grafana-restart = "scripts.commands:grafana_restart"
+grafana-logs = "scripts.commands:grafana_logs"
+grafana-rebuild = "scripts.commands:grafana_rebuild"
 
 [tool.setuptools]
 packages = ["app", "scripts"]

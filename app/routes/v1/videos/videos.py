@@ -40,7 +40,7 @@ def setup_routes(router: APIRouter):
             content_type=["image/jpeg", "image/png", "image/gif"],
             max_size=10_000_000,  # 10MB
         ),
-        # current_user: UserCredentialsSchema = Depends(get_current_user),
+        current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
         s3_session: S3Session = Depends(get_s3_session),
     ) -> VideoLectureCreateResponse:
@@ -70,7 +70,7 @@ def setup_routes(router: APIRouter):
                 video_file=video_file,
                 thumbnail_file=thumbnail_file,
             ),
-            author_id=1,  # current_user.id,
+            author_id=current_user.id,
         )
 
         return result

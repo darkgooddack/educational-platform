@@ -11,22 +11,22 @@
 
 from app.core.exceptions.v1.base import BaseAPIException, DatabaseError
 
-
-class ThemeNotFoundError(BaseAPIException):
-    """
-    Тема не найдена.
-
-    Attributes:
-        message (str): Сообщение об ошибке
-        theme_id (int): ID темы, которая не найдена
-    """
-
-    def __init__(self, message: str, theme_id: int = None):
+class ThemeError(BaseAPIException):
+    def __init__(self, message: str, error_type: str, status_code: int = 400, extra: dict = None):
         super().__init__(
-            status_code=404,
+            status_code=status_code,
             detail=message,
+            error_type=error_type,
+            extra=extra
+        )
+
+class ThemeNotFoundError(ThemeError):
+    def __init__(self, theme_id: int = None):
+        super().__init__(
+            message="Тема не найдена",
             error_type="theme_not_found",
-            extra={"theme_id": theme_id} if theme_id else None,
+            status_code=404,
+            extra={"theme_id": theme_id} if theme_id else None
         )
 
 

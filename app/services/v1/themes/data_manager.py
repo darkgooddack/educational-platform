@@ -99,7 +99,7 @@ class ThemeDataManager(BaseDataManager):
         """
         theme = await self.get_one(select(self.model).filter(self.model.id == theme_id))
         if not theme:
-            raise ThemeNotFoundError(f"Тема с ID {theme_id} не найдена", theme_id)
+            raise ThemeNotFoundError(theme_id)
         return theme
 
     async def get_themes_tree(self) -> List[ThemeSchema]:
@@ -156,10 +156,7 @@ class ThemeDataManager(BaseDataManager):
             found_theme_model = await self.get_one(statement)
 
             if not found_theme_model:
-                raise ThemeNotFoundError(
-                    message=f"Тема с ID {theme_id} не найдена",
-                    theme_id=theme_id
-                )
+                raise ThemeNotFoundError(theme_id)
 
             for field, value in theme_data.model_dump().items():
                 setattr(found_theme_model, field, value)
@@ -195,7 +192,7 @@ class ThemeDataManager(BaseDataManager):
             found_theme_model = await self.get_one(statement)
 
             if not found_theme_model:
-                raise ThemeNotFoundError(f"Тема с ID {theme_id} не найдена",    theme_id)
+                raise ThemeNotFoundError(theme_id)
             statement = delete(self.model).where(self.model.id == theme_id)
             if not await self.delete(statement):
                     raise ThemeDeleteError(message="Не удалось удалить тему")

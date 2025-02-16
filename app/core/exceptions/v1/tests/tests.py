@@ -5,7 +5,7 @@
 которые могут быть вызваны при работе с тестами.
 
 Включают в себя:
-- TestGetError: Исключение при отсутствии теста
+- TestNotFoundError: Исключение при отсутствии теста
 - TestExistsError: Исключение при попытке создать существующий тест
 - QuestionNotFoundError: Исключение при отсутствии вопроса
 """
@@ -13,16 +13,23 @@
 from app.core.exceptions.v1.base import BaseAPIException, DatabaseError
 
 
-class TestGetError(DatabaseError):
-    """
-    Ошибка при получении теста из базы данных.
+class TestError(BaseAPIException):
+    def __init__(self, message: str, error_type: str, status_code: int = 400, extra: dict = None):
+        super().__init__(
+            status_code=status_code,
+            detail=message,
+            error_type=error_type,
+            extra=extra
+        )
 
-    Attributes:
-        message (str): Сообщение об ошибке.
-    """
-
-    def __init__(self, message: str, extra: dict = None):
-        super().__init__(message=f"Ошибка при получении теста: {message}", extra=extra)
+class TestNotFoundError(TestError):
+    def __init__(self, test_id: int = None):
+        super().__init__(
+            message="Тест не найден",
+            error_type="test_not_found",
+            status_code=404,
+            extra={"test_id": test_id} if test_id else None
+        )
 
 
 class TestExistsError(BaseAPIException):

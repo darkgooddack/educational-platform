@@ -7,7 +7,7 @@ from sqlalchemy.orm import noload, selectinload
 
 from app.core.exceptions import (BaseAPIException, DatabaseError,
                                  QuestionNotFoundError, TestDeleteError,
-                                 TestGetError, TestUpdateError)
+                                 TestNotFoundError, TestUpdateError)
 from app.models import AnswerModel, QuestionModel, TestModel, ThemeModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCatalogSchema,
@@ -184,7 +184,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         """
         test = await self.get_item(test_id)
         if not test:
-            raise TestGetError(f"Тест с ID {test_id} не найден")
+            raise TestNotFoundError(test_id)
         return test
 
     async def add_question(
@@ -258,7 +258,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             TestUpdateResponse: Обновленный тест (ID).
 
         Raises:
-            TestGetError: Если тест с указанным ID не найден.
+            TestNotFoundError: Если тест с указанным ID не найден.
             TestUpdateError: Если возникла ошибка при обновлении теста.
         """
 
@@ -267,9 +267,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             found_test_model = await self.get_one(statement)
 
             if not found_test_model:
-                raise TestGetError(
-                    message=f"Тест с id {test_id} не найден", extra={"test_id": test_id}
-                )
+                raise TestNotFoundError(test_id)
 
             for field, value in test_data.model_dump().items():
                 setattr(found_test_model, field, value)
@@ -350,7 +348,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             found_test = await self.get_one(statement)
 
             if not found_test:
-                raise TestGetError(f"Тест с ID {test_id} не найден")
+                raise TestNotFoundError(test_id)
 
             found_test.popularity_count += 1
 

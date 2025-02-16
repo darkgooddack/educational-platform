@@ -59,6 +59,18 @@ def infra_nuke():
     # Поднимаем
     run_compose_command(["up", "-d"])
 
+def grafana_restart():
+    """Перезапуск Grafana и связанных сервисов"""
+    run_compose_command(["restart", "grafana", "loki", "promtail"], COMPOSE_FILE_WITHOUT_BACKEND)
+
+def grafana_logs():
+    """Просмотр логов Grafana и связанных сервисов"""
+    run_compose_command(["logs", "-f", "grafana", "loki", "promtail"], COMPOSE_FILE_WITHOUT_BACKEND)
+
+def grafana_rebuild():
+    """Пересборка Grafana и связанных сервисов"""
+    run_compose_command(["up", "-d", "--build", "grafana", "loki", "promtail"], COMPOSE_FILE_WITHOUT_BACKEND)
+
 def find_free_port(start_port: int = 8000) -> int:
     """Ищет свободный порт, начиная с указанного"""
     port = start_port
@@ -112,6 +124,32 @@ def check_postgres():
             time.sleep(3)
     return False
 
+def check_grafana():
+    """Проверяет доступность Grafana"""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    for _ in range(5):
+        try:
+            sock.connect(('localhost', 3333))
+            sock.close()
+            return True
+        except:
+            print("⏳ Ждём Grafana...")
+            time.sleep(2)
+    return False
+
+def check_loki():
+    """Проверяет доступность Loki"""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    for _ in range(5):
+        try:
+            sock.connect(('localhost', 3100))
+            sock.close()
+            return True
+        except:
+            print("⏳ Ждём Loki...")
+            time.sleep(2)
+    return False
+
 def start_infrastructure(port: Optional[int] = 8000):
     """Запускает только Redis и RabbitMQ"""
     print("🚀 Запускаем инфраструктуру...")
@@ -130,6 +168,14 @@ def start_infrastructure(port: Optional[int] = 8000):
         print("❌ PostgreSQL не доступен!")
         return False
 
+    if not check_grafana():
+        print("❌ Grafana не доступна!")
+        return False
+
+    if not check_loki():
+        print("❌ Loki не доступен!")
+        return False
+
     # Запускаем миграции после успешного поднятия PostgreSQL
     print("📦 Запускаем миграции...")
     migrate()
@@ -142,7 +188,9 @@ def start_infrastructure(port: Optional[int] = 8000):
     print(f"🗄️ PostgreSQL:        localhost:5432")
     print(f"📦 Redis:             localhost:6379")
     print(f"🔍 PgAdmin:           http://localhost:5050")
-    print(f"📊 Redis Commander:    http://localhost:8081\n")
+    print(f"📊 Redis Commander:    http://localhost:8081")
+    print(f"📊 Grafana:           http://localhost:3333")
+    print(f"📈 Loki:              http://localhost:3100\n")
 
     print("✅ Инфраструктура готова!")
     return True
@@ -279,8 +327,8 @@ def check():
         print("❌ Найдены ошибки mypy:")
         print(e.stdout)
         mypy_success = False
-    
-    # Проверка flake8     
+
+    # Проверка flake8
     try:
         result = subprocess.run(
             ["flake8", "app/"],

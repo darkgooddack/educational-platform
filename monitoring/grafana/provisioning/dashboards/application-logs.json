@@ -1,0 +1,16 @@
+{
+    "title": "Application Logs",
+    "panels": [
+      {
+        "title": "Logs by Level",
+        "type": "logs",
+        "datasource": "Loki",
+        "targets": [
+          {
+            "expr": "{app=\"educational-platform\", env=\"dev\"} |~ \"DEBUG|INFO|WARNING|ERROR|CRITICAL\"",
+            "refId": "A"
+          }
+        ]
+      }
+    ]
+  }

@@ -5,7 +5,7 @@
 - Аутентификации пользователей
 - Выхода из системы
 """
-
+import logging
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +14,7 @@ from app.core.dependencies import get_db_session, oauth2_schema
 from app.schemas import AuthSchema, TokenResponseSchema
 from app.services import AuthService
 
+logger = logging.getLogger(__name__)
 
 def setup_routes(router: APIRouter):
     """
@@ -43,6 +44,13 @@ def setup_routes(router: APIRouter):
         **Returns**:
         - **TokenResponseSchema**: Токен доступа с access_token и token_type
         """
+        logger.info(
+            "Попытка аутентификации",
+            extra={
+                "email": form_data.username,
+                "has_password": bool(form_data.password)
+            }
+        )
         return await AuthService(db_session).authenticate(
             AuthSchema(email=form_data.username, password=form_data.password)
         )
