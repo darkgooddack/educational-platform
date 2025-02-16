@@ -112,6 +112,8 @@ services:
     command: -config.file=/etc/promtail/config.yml
     ports:
       - "9080:9080"
+    environment:
+      - APP_ENV=dev
     depends_on:
       loki:
         condition: service_healthy
