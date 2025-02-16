@@ -53,7 +53,7 @@ services:
       - ./monitoring/grafana/config/grafana.ini:/etc/grafana/grafana.ini
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/grafana-entrypoint.sh:/grafana-entrypoint.sh:ro
+      - ./monitoring/grafana/grafana-entrypoint.sh:/grafana-entrypoint.sh
     entrypoint: ["/bin/sh", "-c", "chmod +x /grafana-entrypoint.sh && /grafana-entrypoint.sh"]
     networks:
       - dokploy-network
