@@ -138,7 +138,8 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         )
 
         return TokenResponseSchema(
-            item=TokenSchema(access_token=token, token_type="bearer")
+            access_token=token,
+            token_type="bearer",
         )
 
     async def logout(self, token: str) -> dict:
