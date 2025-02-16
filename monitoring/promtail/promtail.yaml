@@ -14,7 +14,7 @@ scrape_configs:
           - localhost
         labels:
           app: educational-platform
-          env: dev
+          env: ${APP_ENV:-dev}
           __path__: /var/log/app.log
     pipeline_stages:
       - json:
