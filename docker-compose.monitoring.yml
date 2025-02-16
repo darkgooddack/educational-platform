@@ -40,12 +40,13 @@ services:
       - dokploy-network
 
   grafana:
+    grafana:
     user: "root"
     image: grafana/grafana:latest
-    entrypoint: >
-      sh -c "mkdir -p /etc/grafana/provisioning/dashboards
-      && mkdir -p /etc/grafana/provisioning/datasources
-      && /run.sh"
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      mkdir -p /etc/grafana/provisioning/dashboards /etc/grafana/provisioning/datasources &&
+      /run.sh
     ports:
       - "3334:3000"
     env_file:
