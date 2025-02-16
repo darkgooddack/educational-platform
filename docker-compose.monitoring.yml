@@ -19,6 +19,7 @@ services:
       - dokploy-network
 
   promtail:
+    user: "root"
     image: grafana/promtail:2.9.0
     volumes:
       - ./monitoring/logs:/var/log:ro
@@ -36,6 +37,7 @@ services:
       - dokploy-network
 
   grafana:
+    user: "root"
     image: grafana/grafana:latest
     ports:
       - "3334:3000"
