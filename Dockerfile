@@ -11,7 +11,7 @@ RUN apk add --no-cache --virtual .build-deps \
     gcc \
     python3-dev \
     musl-dev \
-    postgresql16-dev
+    postgresql-dev
 
 RUN apk add --no-cache \
     postgresql16-client \
