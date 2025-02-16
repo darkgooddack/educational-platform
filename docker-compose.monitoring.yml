@@ -44,7 +44,7 @@ services:
     image: grafana/grafana:latest
     entrypoint: ["/bin/sh", "-c"]
     command: |
-      mkdir -p /etc/grafana/provisioning/dashboards /etc/grafana/provisioning/datasources &&
+      mkdir -p -m 755 /etc/grafana/provisioning/dashboards /etc/grafana/provisioning/datasources &&
       /run.sh
     ports:
       - "3334:3000"
