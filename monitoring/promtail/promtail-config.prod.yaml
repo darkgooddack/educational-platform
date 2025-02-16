@@ -12,7 +12,7 @@ scrape_configs:
     static_configs:
       - targets:
           - localhost
-      - labels:
+        labels:
           app: educational-platform
           env: prod
           __path__: /var/log/app.log

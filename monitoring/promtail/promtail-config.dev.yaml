@@ -8,11 +8,11 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  - job_name: system
+  - job_name: app_logs
     static_configs:
       - targets:
           - localhost
-      - labels:
+        labels:
           app: educational-platform
           env: dev
           __path__: /var/log/app.log
