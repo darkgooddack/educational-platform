@@ -22,9 +22,10 @@ services:
     user: "root"
     image: grafana/promtail:2.9.0
     volumes:
-      - ./monitoring/logs:/var/log:ro
+      - ./monitoring/promtail/promtail-entrypoint.sh:/promtail-entrypoint.sh
+      - ./monitoring/logs:/var/log
       - ./monitoring/promtail/promtail.yaml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
+    entrypoint: ["/bin/sh", "-c", "chmod +x /promtail-entrypoint.sh && /promtail-entrypoint.sh"]
     ports:
       - "9080:9080"
     depends_on:
