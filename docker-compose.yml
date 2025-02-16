@@ -7,13 +7,15 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./.env
+    environment:
+      - LOG_FILE=/monitoring/logs/app.log
     ports:
       - "8000:8000"
     restart: unless-stopped
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-      - ./monitoring/logs:/app/logs
+      - ./monitoring/logs:/monitoring/logs
     networks:
       - dokploy-network
 

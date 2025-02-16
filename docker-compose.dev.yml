@@ -88,6 +88,7 @@ services:
     networks:
       - dev-network
   loki:
+    user: "root"
     image: grafana/loki:2.9.0
     ports:
       - "3100:3100"
