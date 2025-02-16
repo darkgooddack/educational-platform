@@ -3,12 +3,13 @@ version: "3.8"
 services:
   loki:
     user: "root"
-    image: grafana/loki:2.9.0
+    container_name: loki_container
+    build: ./monitoring/loki
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./monitoring/loki/config.yaml:/etc/loki/local-config.yaml
+      - ./monitoring/loki/configs/config.yaml:/etc/loki/local-config.yaml
       - loki-data:/tmp/loki
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
@@ -20,12 +21,11 @@ services:
 
   promtail:
     user: "root"
-    image: grafana/promtail:2.9.0
+    container_name: promtail_container
+    build: ./monitoring/promtail
     volumes:
-      - ./monitoring/promtail/promtail-entrypoint.sh:/promtail-entrypoint.sh
-      - ./monitoring/logs:/var/log
-      - ./monitoring/promtail/promtail.yaml:/etc/promtail/config.yml
-    entrypoint: ["/bin/sh", "-c", "chmod +x /promtail-entrypoint.sh && /promtail-entrypoint.sh"]
+      - /var/log:/var/log
+      - ./monitoring/promtail/configs/config.yml:/etc/promtail/config.yml
     ports:
       - "9080:9080"
     depends_on:
@@ -42,7 +42,8 @@ services:
 
   grafana:
     user: "root"
-    image: grafana/grafana:latest
+    container_name: grafana_container
+    build: ./monitoring/grafana
     ports:
       - "3334:3000"
     env_file:
@@ -51,10 +52,9 @@ services:
       - GF_METRICS_USERNAME=${GF_METRICS_USERNAME}
       - GF_METRICS_PASSWORD=${GF_METRICS_PASSWORD}
     volumes:
-      - ./monitoring/grafana/config/grafana.ini:/etc/grafana/grafana.ini
-      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/configs/grafana.ini:/etc/grafana/grafana.ini
       - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/configs:/etc/grafana/provisioning
     networks:
       - dokploy-network
 

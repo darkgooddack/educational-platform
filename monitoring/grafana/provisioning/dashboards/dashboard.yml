@@ -1,12 +1,7 @@
 apiVersion: 1
-
 providers:
-  - name: "Logs Dashboard"
-    orgId: 1
+  - name: "Default"
     folder: ""
     type: file
-    disableDeletion: false
-    editable: true
     options:
-      path: /etc/grafana/provisioning/dashboards
-      foldersFromFilesStructure: true
+      path: /var/lib/grafana/dashboards
