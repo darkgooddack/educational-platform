@@ -4,7 +4,7 @@
 Этот модуль содержит функцию жизненного цикла приложения,
 которая инициализирует и закрывает подключения к Redis и RabbitMQ.
 """
-
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -26,11 +26,19 @@ async def lifespan(_app: FastAPI):
     from app.core.dependencies.rabbitmq import RabbitMQClient
     from app.core.dependencies.redis import RedisClient
 
-    await RedisClient.get_instance()
-    await RabbitMQClient.get_instance()
+    for attempt in range(RabbitMQClient._max_retries):
+        await RedisClient.get_instance()
+        await RabbitMQClient.get_instance()
 
-    if not RabbitMQClient.is_connected():
-        logging.warning("RabbitMQ: ошибка подключения!")
+        if await RabbitMQClient.health_check():
+            break
+
+        if attempt == RabbitMQClient._max_retries - 1:
+            logging.warning("RabbitMQ: ошибка подключения после всех попыток!")
+        else:
+            logging.info(f"RabbitMQ: попытка подключения {attempt + 1}")
+            await asyncio.sleep(RabbitMQClient._retry_delay)
+
 
     yield
 
