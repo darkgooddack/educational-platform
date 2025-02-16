@@ -25,7 +25,7 @@ services:
     build: ./monitoring/promtail
     volumes:
       - /var/log:/var/log
-      - ./monitoring/promtail/configs/config.yml:/etc/promtail/config.yml
+      - ./monitoring/promtail/configs/config.yaml:/etc/promtail/config.yaml
     ports:
       - "9080:9080"
     depends_on:
