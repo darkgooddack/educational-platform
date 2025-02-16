@@ -52,10 +52,9 @@ services:
       - GF_METRICS_PASSWORD=${GF_METRICS_PASSWORD}
     volumes:
       - ./monitoring/grafana/config/grafana.ini:/etc/grafana/grafana.ini
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/grafana-entrypoint.sh:/grafana-entrypoint.sh
-    entrypoint: ["/bin/sh", "-c", "chmod +x /grafana-entrypoint.sh && /grafana-entrypoint.sh"]
     networks:
       - dokploy-network
 
