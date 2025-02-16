@@ -15,7 +15,7 @@ scrape_configs:
         labels:
           app: educational-platform
           env: prod
-          __path__: /var/log/*.log
+          __path__: /var/log/**/*.log
     pipeline_stages:
       - json:
           expressions:
