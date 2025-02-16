@@ -42,8 +42,6 @@ services:
   grafana:
     user: "root"
     image: grafana/grafana:latest
-    entrypoint: ["/bin/sh", "-c"]
-    command: "mkdir -p /etc/grafana/provisioning/dashboards /etc/grafana/provisioning/datasources && /run.sh"
     ports:
       - "3334:3000"
     env_file:
@@ -55,6 +53,8 @@ services:
       - ./monitoring/grafana/config/grafana.ini:/etc/grafana/grafana.ini
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/grafana-entrypoint.sh:/grafana-entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "-c", "chmod +x /entrypoint.sh && /entrypoint.sh"]
     networks:
       - dokploy-network
 
