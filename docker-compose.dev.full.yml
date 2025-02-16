@@ -105,8 +105,8 @@ services:
   promtail:
     image: grafana/promtail:2.9.0
     volumes:
-      - ./logs:/var/log
-      - ./promtail/promtail-config.dev.yaml:/etc/promtail/config.yml
+      - ./monitoring/logs:/var/log
+      - ./monitoring/promtail/promtail-config.dev.yaml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
     networks:
       - dev-network
@@ -120,7 +120,7 @@ services:
     networks:
       - dev-network
     volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
 
 networks:
