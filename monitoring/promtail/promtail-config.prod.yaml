@@ -21,9 +21,11 @@ scrape_configs:
           expressions:
             timestamp: timestamp
             level: level
-            message: message
             module: module
-            function: function
+            message: message
       - timestamp:
           source: timestamp
-          format: "2006-01-02 15:04:05.000"
+          format: RFC3339
+      - labels:
+          level:
+          module:
