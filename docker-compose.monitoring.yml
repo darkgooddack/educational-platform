@@ -40,7 +40,6 @@ services:
       - dokploy-network
 
   grafana:
-    grafana:
     user: "root"
     image: grafana/grafana:latest
     entrypoint: ["/bin/sh", "-c"]
