@@ -1,4 +1,4 @@
-FROM grafana/grafana-oss:11.3.0+security-01
+FROM grafana/grafana:latest
 
 USER root
 
