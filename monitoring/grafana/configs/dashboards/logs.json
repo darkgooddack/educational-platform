@@ -66,7 +66,7 @@
       "type": "piechart",
       "title": "Распределение по уровням",
       "targets": [{
-        "expr": "topk(10, sum by (level) (rate({filename=\"/var/log/app.log\"} | json [1h])))"
+        "expr": "sum by (level) (rate({filename=\"/var/log/app.log\"} | json | __error__=\"\" [1h]))"
       }]
     },
     {
@@ -80,7 +80,7 @@
       "type": "timeseries",
       "title": "Ошибки по времени",
       "targets": [{
-        "expr": "rate({filename=\"/var/log/app.log\"} | json | level=\"ERROR\" [5m])"
+        "expr": "rate({filename=\"/var/log/app.log\"} | json | __error__=\"\" | level=\"ERROR\" [5m])"
       }]
     },
     {
@@ -94,7 +94,7 @@
       "type": "table",
       "title": "Последние ошибки",
       "targets": [{
-        "expr": "{filename=\"/var/log/app.log\"} | json | level=\"ERROR\" | line_format \"{{.message}}\""
+        "expr": "{filename=\"/var/log/app.log\"} | json | __error__=\"\" | level=\"ERROR\" | line_format \"{{.message}}\""
       }]
     }
   ],
