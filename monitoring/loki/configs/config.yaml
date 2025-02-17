@@ -17,18 +17,16 @@ common:
 schema_config:
   configs:
     - from: 2020-10-24
-      store: tsdb
+      store: boltdb-shipper
       object_store: filesystem
-      schema: v13
+      schema: v11
       index:
         prefix: index_
         period: 24h
 
 storage_config:
-  tsdb:
-    dir: /loki/index
+  boltdb_shipper:
+    active_index_directory: /loki/index
+    cache_location: /loki/cache
   filesystem:
     directory: /loki/chunks
-
-limits_config:
-  allow_structured_metadata: true
