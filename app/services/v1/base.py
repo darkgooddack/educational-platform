@@ -390,6 +390,33 @@ class BaseEntityManager(BaseDataManager[T]):
         schema: T = await self.update_one(old_item, updated_item)
         return schema
 
+    async def update_fields(self, item_id: int, fields: dict) -> bool:
+        """
+        Обновляет указанные поля записи.
+    
+        Args:
+            item_id: ID записи
+            fields: Словарь полей для обновления {field_name: new_value}
+    
+        Returns:
+            bool: True если успешно обновлено
+        """
+        try:
+            item = await self.get_item(item_id)
+            if not item:
+                return False
+                
+            for field, value in fields.items():
+                setattr(item, field, value)
+                
+            await self.session.commit()
+            return True
+            
+        except SQLAlchemyError as e:
+            await self.session.rollback()
+            self.logger.error("❌ Ошибка при обновлении полей: %s", e)
+            return False
+
     async def delete_item(self, item_id: int) -> bool:
         """
         Удаляет элемент по ID.

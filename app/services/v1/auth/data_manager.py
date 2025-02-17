@@ -58,20 +58,6 @@ class AuthDataManager(BaseEntityManager[UserSchema]):
         )
 
 # TODO: Добавить методы для работы с данными пользователей, ниже приведены примеры методов
-# async def update_last_login(self, user_id: int) -> None:
-#     """
-#     Обновление времени последнего входа
-
-#     Args:
-#         user_id: Идентификатор пользователя.
-
-#     Returns:
-#         None
-#     """
-#     await self.update_fields(
-#         user_id,
-#         {"last_login": datetime.now(timezone.utc)}
-#     )
 
 # async def increment_login_attempts(self, user_id: int) -> int:
 #     """
