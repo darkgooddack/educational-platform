@@ -6,20 +6,46 @@ import time
 import socket
 import uvicorn
 
+ENV_FILE=".env.dev"
 # Получаем путь к корню проекта
 ROOT_DIR = Path(__file__).parents[1]
 COMPOSE_FILE_FULL = "docker-compose.dev.full.yml"
 COMPOSE_FILE_WITHOUT_BACKEND = "docker-compose.dev.yml"
 
-def run_compose_command(command: str | list, compose_file: str = COMPOSE_FILE_FULL) -> None:
+DEFAULT_PORTS = {
+    'FASTAPI': 8000,
+    'RABBITMQ': 15672,
+    'POSTGRES': 5432,
+    'REDIS': 6379,
+    'PGADMIN': 5050,
+    'REDIS_COMMANDER': 8081,
+    'GRAFANA': 3334,
+    'LOKI': 3100
+}
+
+def run_compose_command(command: str | list, compose_file: str = COMPOSE_FILE_FULL, env: dict = None) -> None:
     """Запускает docker-compose команду в корне проекта"""
     if isinstance(command, str):
         command = command.split()
 
+    # Обновляем переменные окружения
+    environment = os.environ.copy()
+    # Добавляем переменные из ENV_FILE по умолчанию
+    env_file = os.path.join(ROOT_DIR, ENV_FILE)
+    if os.path.exists(env_file):
+        with open(env_file) as f:
+            for line in f:
+                if line.strip() and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
+                    environment[key] = value
+    if env:
+        environment.update(env)
+
     subprocess.run(
         ["docker-compose", "-f", compose_file] + command,
         cwd=ROOT_DIR,
-        check=True
+        check=True,
+        env=environment
     )
 
 def infra_up():
@@ -83,117 +109,100 @@ def find_free_port(start_port: int = 8000) -> int:
             port += 1
     raise RuntimeError("Нет свободных портов! Ахуеть!")
 
-def check_rabbitmq():
-    """Проверяет доступность RabbitMQ"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    for _ in range(5):  # 5 попыток
+def get_available_port(default_port: int) -> int:
+    port = default_port
+    while port < 65535:
         try:
-            sock.connect(('localhost', 5672))
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('', port))
+                return port
+        except OSError:
+            port += 1
+    raise RuntimeError(f"Не могу найти свободный порт после {default_port}")
+
+def get_port(service: str) -> int:
+    """Получает порт из переменных окружения или использует значение по умолчанию"""
+    service_upper = service.upper().replace('_PORT', '')
+    return int(os.getenv(service, DEFAULT_PORTS[service_upper]))
+
+def check_service(name: str, port: int, retries: int = 5, delay: int = 2) -> bool:
+    """Базовая функция проверки сервиса"""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    for _ in range(retries):
+        try:
+            sock.connect(('localhost', port))
             sock.close()
             return True
         except:
-            print("⏳ Ждём RabbitMQ...")
-            subprocess.run(["net", "start", "RabbitMQ"])
-            time.sleep(2)
+            print(f"⏳ Ждём {name} на порту {port}...")
+            time.sleep(delay)
     return False
 
-def check_redis():
-    """Проверяет доступность Redis"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    for _ in range(5):
-        try:
-            sock.connect(('localhost', 6379))
-            sock.close()
-            return True
-        except:
-            print("⏳ Ждём Redis...")
-            time.sleep(2)
-    return False
+def check_services():
+    """Проверяет доступность всех сервисов"""
+    services_config = {
+        'Redis': ('REDIS_PORT', 5),
+        'RabbitMQ': ('RABBITMQ_PORT', 5),
+        'PostgreSQL': ('POSTGRES_PORT', 30),
+        'Grafana': ('GRAFANA_PORT', 5),
+        'Loki': ('LOKI_PORT', 5)
+    }
 
-def check_postgres():
-    """Проверяет доступность PostgreSQL"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    for _ in range(30):
-        try:
-            sock.connect(('localhost', 5434))
-            sock.close()
-            return True
-        except:
-            print("⏳ Ждём PostgreSQL...")
-            time.sleep(3)
-    return False
-
-def check_grafana():
-    """Проверяет доступность Grafana"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    for _ in range(5):
-        try:
-            sock.connect(('localhost', 3334))
-            sock.close()
-            return True
-        except:
-            print("⏳ Ждём Grafana...")
-            time.sleep(2)
-    return False
-
-def check_loki():
-    """Проверяет доступность Loki"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    for _ in range(5):
-        try:
-            sock.connect(('localhost', 3100))
-            sock.close()
-            return True
-        except:
-            print("⏳ Ждём Loki...")
-            time.sleep(2)
-    return False
-
-def start_infrastructure(port: Optional[int] = 8000):
-    """Запускает только Redis и RabbitMQ"""
-    print("🚀 Запускаем инфраструктуру...")
-    run_compose_command(["up", "-d"], COMPOSE_FILE_WITHOUT_BACKEND)
-
-    # Ждем доступности сервисов
-    if not check_redis():
-        print("❌ Redis не доступен!")
-        return False
-
-    if not check_rabbitmq():
-        print("❌ RabbitMQ не доступен!")
-        return False
-
-    if not check_postgres():
-        print("❌ PostgreSQL не доступен!")
-        return False
-
-    if not check_grafana():
-        print("❌ Grafana не доступна!")
-        return False
-
-    if not check_loki():
-        print("❌ Loki не доступен!")
-        return False
-
-    # Запускаем миграции после успешного поднятия PostgreSQL
-    print("📦 Запускаем миграции...")
-    migrate()
-    print("✅ Миграции выполнены!")
-
-
-    print("\n🔗 Доступные адреса:")
-    print(f"📊 FastAPI Swagger:    http://localhost:{port}/docs")
-    print(f"🐰 RabbitMQ UI:       http://localhost:15672")
-    print(f"🗄️ PostgreSQL:        localhost:5432")
-    print(f"📦 Redis:             localhost:6379")
-    print(f"🔍 PgAdmin:           http://localhost:5050")
-    print(f"📊 Redis Commander:    http://localhost:8081")
-    print(f"📊 Grafana:           http://localhost:3333")
-    print(f"📈 Loki:              http://localhost:3100\n")
-
-    print("✅ Инфраструктура готова!")
+    for service_name, (port_key, retries) in services_config.items():
+        port = get_port(port_key)
+        if not check_service(service_name, port, retries):
+            print(f"❌ {service_name} не доступен на порту {port}!")
+            return False
     return True
+
+def start_infrastructure():
+    print("🚀 Запускаем инфраструктуру...")
+    try:
+
+        # Сначала убиваем все контейнеры
+        run_compose_command("down --remove-orphans")
+
+        # Очищаем тома
+        subprocess.run(["docker", "volume", "prune", "-f"], check=True)
+
+        # Получаем свободные порты
+        ports = {
+            service: get_available_port(default_port)
+            for service, default_port in DEFAULT_PORTS.items()
+        }
+
+        # Используем порты в docker-compose через переменные окружения
+        env = {
+            f"{service}_PORT": str(port)
+            for service, port in ports.items()
+        }
+
+        run_compose_command(["up", "-d"], COMPOSE_FILE_WITHOUT_BACKEND, env=env)
+
+        # Ждем доступности сервисов
+        check_services()
+        time.sleep(30)
+        # Запускаем миграции после успешного поднятия PostgreSQL
+        print("📦 Запускаем миграции...")
+        migrate()
+        print("✅ Миграции выполнены!")
+
+
+        print("\n🔗 Доступные адреса:")
+        print(f"📊 FastAPI Swagger:    http://localhost:{ports['FASTAPI']}/docs")
+        print(f"🐰 RabbitMQ UI:       http://localhost:{ports['RABBITMQ']}")
+        print(f"🗄️ PostgreSQL:        localhost:{ports['POSTGRES']}")
+        print(f"📦 Redis:             localhost:{ports['REDIS']}")
+        print(f"🔍 PgAdmin:           http://localhost:{ports['PGADMIN']}")
+        print(f"📊 Redis Commander:    http://localhost:{ports['REDIS_COMMANDER']}")
+        print(f"📊 Grafana:           http://localhost:{ports['GRAFANA']}")
+        print(f"📈 Loki:              http://localhost:{ports['LOKI']}\n")
+
+        print("✅ Инфраструктура готова!")
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка при запуске инфраструктуры: {e}")
+        return False
 
 def dev(port: Optional[int] = None):
     """

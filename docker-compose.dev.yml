@@ -4,8 +4,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_UI_PORT:-15672}:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-admin}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-admin}
@@ -26,7 +26,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-      - "5434:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     env_file:
       - ./.env.dev
     volumes:
@@ -42,7 +42,7 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     ports:
-      - "5050:80"
+      - "${PGADMIN_PORT:-5050}:80"
     restart: unless-stopped
     deploy:
       resources:
@@ -60,7 +60,7 @@ services:
     env_file:
       - ./.env.dev
     ports:
-      - "8081:8081"
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
     restart: unless-stopped
     deploy:
       resources:
@@ -81,7 +81,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     command: redis-server --requirepass ${REDIS_AUTH_PASSWORD:-default}
     volumes:
       - redis-data:/data
@@ -92,7 +92,7 @@ services:
     container_name: loki_container
     build: ./monitoring/loki
     ports:
-      - "3100:3100"
+      - "${LOKI_PORT:-3100}:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./monitoring/loki/config.yaml:/etc/loki/local-config.yaml
@@ -113,7 +113,7 @@ services:
       - ./logs:/var/log
       - ./monitoring/promtail/config.yaml:/etc/promtail/config.yaml
     ports:
-      - "9080:9080"
+      - "${PROMTAIL_PORT:-9080}:9080"
     depends_on:
       loki:
         condition: service_healthy
@@ -131,7 +131,7 @@ services:
     container_name: grafana_container
     build: ./monitoring/grafana
     ports:
-      - "3334:3000"
+      - "${GRAFANA_PORT:-3334}:3000"
     env_file:
       - ./.env.dev
     environment:

@@ -98,7 +98,7 @@ class Settings(BaseSettings):
     )
 
     rabbitmq_dsn: AmqpDsn = Field(
-        default="amqp://admin:admin@rabbitmq:5672/",
+        default="amqp://admin:admin@localhost:5672/",
         description="URL подключения к RabbitMQ",
     )
 
