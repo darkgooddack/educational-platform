@@ -1,4 +1,4 @@
-FROM grafana/promtail:2.9.0
+FROM grafana/promtail:3.4.1
 
 COPY configs/config.yaml /etc/promtail/config.yaml
 
