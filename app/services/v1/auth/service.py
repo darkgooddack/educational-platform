@@ -7,7 +7,10 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import InvalidCredentialsError, UserInactiveError
+from app.core.exceptions import (
+    InvalidCredentialsError, UserInactiveError, 
+    TokenExpiredError, TokenInvalidError
+)
 from app.core.security import HashingMixin, TokenMixin
 from app.core.storages.redis.auth import AuthRedisStorage
 from app.schemas import (AuthSchema, TokenResponseSchema, TokenSchema,
@@ -108,6 +111,12 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             }
         )
 
+        # Обновляем статус при входе
+        await self._data_manager.update_online_status(
+            user_id=user_model.id, 
+            is_online=True
+        )
+
         return await self.create_token(user_schema)
 
     async def create_token(
@@ -154,5 +163,49 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             Сообщение об успешном завершении.
         """
 
-        await self._redis_storage.remove_token(token)
-        return {"message": "Выход выполнен успешно!"}
+        try:
+            # Получаем данные из токена
+            payload = TokenMixin.decode_token(token)
+
+            # Получаем email пользователя
+            user_email = payload.get("sub")
+
+            # Получаем пользователя
+            user = await self._data_manager.get_user_by_credentials(user_email)
+
+            if user:
+                # Обновляем статус
+                await self._data_manager.update_online_status(
+                    user_id=user.id, 
+                    is_online=False
+                )
+
+            # Удаляем токен из Redis
+            await self._redis_storage.remove_token(token)
+
+            return {"message": "Выход выполнен успешно!"}
+        
+        except (TokenExpiredError, TokenInvalidError):
+            # Даже если токен невалидный, все равно пытаемся его удалить
+            await self._redis_storage.remove_token(token)
+            return {"message": "Выход выполнен успешно!"}
+
+    async def check_expired_sessions(self):
+        """
+        Проверяет истекшие сессии и обновляет статус пользователей
+        """
+        # Получаем все активные токены из Redis
+        active_tokens = await self._redis_storage.get_all_tokens()
+
+        for token in active_tokens:
+            try:
+                payload = TokenMixin.decode_token(token)
+                # Если токен валидный - пропускаем
+                continue
+            except TokenExpiredError:
+                # Токен истек
+                user_email = payload.get("sub")
+                user = await self._data_manager.get_user_by_credentials(user_email)
+                if user:
+                    await self._data_manager.update_online_status(user.id, False)
+                await self._redis_storage.remove_token(token)

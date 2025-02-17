@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,6 +34,28 @@ class AuthDataManager(BaseEntityManager[UserSchema]):
         """
         return await self.get_user_by_field("email", email)
 
+    async def update_online_status(self, user_id: int, is_online: bool) -> None:
+        """
+        Обновляет онлайн статус пользователя
+        """
+        await self.update_fields(
+            user_id,
+            {
+                "is_online": is_online,
+                "last_seen": datetime.now(timezone.utc) if not is_online else None
+            }
+        )
+
+    async def update_last_seen(self, user_id: int) -> None:
+        """
+        Обновляет время последнего визита
+        """
+        await self.update_fields(
+            user_id,
+            {
+                "last_seen": datetime.now(timezone.utc)
+            }
+        )
 
 # TODO: Добавить методы для работы с данными пользователей, ниже приведены примеры методов
 # async def update_last_login(self, user_id: int) -> None:

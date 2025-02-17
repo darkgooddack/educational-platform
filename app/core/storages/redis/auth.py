@@ -146,3 +146,18 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         except Exception as e:
             logger.debug("Ошибка при верификации: %s", str(e))
             raise
+    
+    async def get_all_tokens(self) -> list[str]:
+        """
+        Получает все активные токены из Redis
+        
+        Returns:
+            list[str]: Список активных токенов
+        """
+        # Получаем все ключи по паттерну token:*
+        keys = await self.keys("token:*") 
+        
+        # Убираем префикс token: из ключей
+        tokens = [key.decode().split(":")[-1] for key in keys]
+        
+        return tokens
