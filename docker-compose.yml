@@ -8,7 +8,7 @@ services:
     env_file:
       - ./.env
     environment:
-      - LOG_FILE=./app.log
+      - LOG_FILE=/var/log/app.log
     ports:
       - "8000:8000"
     restart: unless-stopped

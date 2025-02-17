@@ -96,7 +96,7 @@ class LogConfig:
 
     LOG_FORMAT = "pretty" # Используется log_format из settings
     LEVEL = "DEBUG"
-    LOG_FILE = "./app.log"
+    LOG_FILE = "/var/log/app.log"
     MAX_BYTES = 10485760  # 10MB
     BACKUP_COUNT = 5
     ENCODING = "utf-8"

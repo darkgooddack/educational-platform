@@ -107,7 +107,7 @@ services:
   promtail:
     image: grafana/promtail:2.9.0
     volumes:
-      - ./app.log:/var/log
+      - /var/log/app.log:/var/log
       - ./monitoring/promtail/promtail.yaml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
     ports:
