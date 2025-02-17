@@ -1,31 +1,38 @@
+# Настройки HTTP сервера Promtail
 server:
-  http_listen_port: 9080
+  http_listen_port: 9080  # Порт на котором будет работать HTTP сервер
 
+# Файл для хранения позиций чтения логов
 positions:
-  filename: /tmp/positions.yaml
+  filename: /tmp/positions.yaml  # Путь к файлу с позициями, чтобы не читать одни и те же логи повторно
 
+# Список Loki серверов, куда отправляются логи
 clients:
-  - url: http://loki:3100/loki/api/v1/push
+  - url: http://loki:3100/loki/api/v1/push  # URL эндпоинта Loki для отправки логов
 
+# Конфигурация сбора логов
 scrape_configs:
-  - job_name: app_logs
+  - job_name: app_logs  # Уникальное имя задачи
     static_configs:
       - targets:
-          - localhost
-        labels:
-          app: educational-platform
-          env: prod
-          __path__: /var/log/app.log
-    pipeline_stages:
-      - json:
-          expressions:
-            timestamp: timestamp
-            level: level
-            module: module
-            message: message
-      - timestamp:
-          source: timestamp
-          format: RFC3339
-      - labels:
-          level:
-          module:
+          - localhost  # Целевой хост для сбора логов
+        labels:  # Статические метки, добавляемые к каждой записи лога
+          app: educational-platform  # Метка приложения
+          env: prod  # Метка окружения
+          __path__: /var/log/app.log  # Путь к файлу логов
+
+    pipeline_stages:  # Конвейер обработки логов
+      - json:  # Парсинг JSON
+          expressions:  # Извлечение полей из JSON
+            timestamp: timestamp  # Поле времени
+            level: level  # Уровень лога
+            module: module  # Модуль
+            message: message  # Сообщение
+
+      - timestamp:  # Обработка временной метки
+          source: timestamp  # Исходное поле
+          format: RFC3339  # Формат времени
+
+      - labels:  # Динамические метки из значений полей
+          level:  # Уровень лога как метка
+          module:  # Модуль как метка

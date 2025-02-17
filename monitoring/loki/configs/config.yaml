@@ -1,35 +1,41 @@
-auth_enabled: false
+# Отключение аутентификации
+auth_enabled: false  # Можно ходить без авторизации
 
+# Настройки HTTP сервера
 server:
-  http_listen_port: 3100
+  http_listen_port: 3100  # Порт HTTP сервера Loki
 
+# Общие настройки
 common:
-  path_prefix: /loki
+  path_prefix: /loki  # Базовый путь для хранения данных
   storage:
     filesystem:
-      chunks_directory: /loki/chunks
-      rules_directory: /loki/rules
-  replication_factor: 1
+      chunks_directory: /loki/chunks  # Директория для чанков данных
+      rules_directory: /loki/rules    # Директория для правил
+  replication_factor: 1  # Фактор репликации (1 для single-node)
   ring:
     kvstore:
-      store: inmemory
+      store: inmemory  # Хранение метаданных в памяти
 
+# Конфигурация схемы данных
 schema_config:
   configs:
-    - from: 2020-10-24
-      store: boltdb-shipper
-      object_store: filesystem
-      schema: v11
+    - from: 2020-10-24  # Дата начала действия схемы
+      store: boltdb-shipper  # Тип хранилища
+      object_store: filesystem  # Тип объектного хранилища
+      schema: v11  # Версия схемы
       index:
-        prefix: index_
-        period: 24h
+        prefix: index_  # Префикс индексов
+        period: 24h     # Период индексации
 
+# Конфигурация хранилища
 storage_config:
-  boltdb_shipper:
-    active_index_directory: /loki/index
-    cache_location: /loki/cache
+  boltdb_shipper:  # Настройки boltdb
+    active_index_directory: /loki/index  # Директория активных индексов
+    cache_location: /loki/cache          # Директория кэша
   filesystem:
-    directory: /loki/chunks
+    directory: /loki/chunks  # Директория для чанков
 
+# Ограничения
 limits_config:
-  allow_structured_metadata: false
+  allow_structured_metadata: false  # Отключаем структурные метаданные
