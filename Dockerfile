@@ -5,18 +5,15 @@ WORKDIR /usr/src/app/
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apk update && apk list --available
-
-RUN apk add --no-cache --virtual .build-deps \
-    gcc \
-    python3-dev \
-    musl-dev \
-    postgresql-dev
-
-RUN apk add --no-cache \
-    postgresql16-client \
-    libpq \
-    poppler-utils
+RUN apk update && \
+    apk add --no-cache \
+        gcc \
+        python3-dev \
+        musl-dev \
+        postgresql16-dev \
+        postgresql16-client \
+        libpq \
+        poppler-utils
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
