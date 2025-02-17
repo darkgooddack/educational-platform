@@ -18,11 +18,15 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
+  "id": 7,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "datasource": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
       "gridPos": {
         "h": 8,
         "w": 24,
@@ -33,13 +37,14 @@
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
-        "prettifyLogMessage": false,
+        "prettifyLogMessage": true,
         "showCommonLabels": false,
         "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
+        "showTime": false,
+        "sortOrder": "Ascending",
         "wrapLogMessage": false
       },
+      "pluginVersion": "11.3.0",
       "targets": [
         {
           "datasource": {
@@ -47,7 +52,7 @@
             "uid": "loki"
           },
           "editorMode": "builder",
-          "expr": "{filename=\"/var/log/app.log\"}",
+          "expr": "{filename=\"/var/log/app.log\"} | json | line_format \"{{.timestamp}} [{{.level}}] {{.message}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -56,50 +61,203 @@
       "type": "logs"
     },
     {
-      "id": 2,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
         "y": 8
       },
-      "type": "piechart",
+      "id": 2,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "expr": "sum by (level) (rate({filename=\"/var/log/app.log\"} | json | __error__=\"\" [1h]))",
+          "refId": "A"
+        }
+      ],
       "title": "Распределение по уровням",
-      "targets": [{
-        "expr": "sum by (level) (rate({filename=\"/var/log/app.log\"} | json | __error__=\"\" [1h]))"
-      }]
+      "type": "piechart"
     },
     {
-      "id": 3, 
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
         "y": 8
       },
-      "type": "timeseries",
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "expr": "rate({filename=\"/var/log/app.log\"} | json | __error__=\"\" | level=\"ERROR\" [5m])",
+          "refId": "A"
+        }
+      ],
       "title": "Ошибки по времени",
-      "targets": [{
-        "expr": "rate({filename=\"/var/log/app.log\"} | json | __error__=\"\" | level=\"ERROR\" [5m])"
-      }]
+      "type": "timeseries"
     },
     {
-      "id": 4,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 8,
         "w": 24,
         "x": 0,
         "y": 16
       },
-      "type": "table",
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "expr": "{filename=\"/var/log/app.log\"} | json | level=\"ERROR\" | line_format \"{{.timestamp}} - {{.logger}} - {{.message}}\"",
+          "refId": "A"
+        }
+      ],
       "title": "Последние ошибки",
-      "targets": [{
-        "expr": "{filename=\"/var/log/app.log\"} | json | __error__=\"\" | level=\"ERROR\" | line_format \"{{.message}}\""
-      }]
+      "type": "table"
     }
   ],
+  "preload": false,
   "refresh": "5s",
-  "schemaVersion": 38,
+  "schemaVersion": 40,
   "tags": [],
   "templating": {
     "list": []
@@ -112,6 +270,6 @@
   "timezone": "",
   "title": "Логи",
   "uid": "application-logs",
-  "version": 1,
+  "version": 5,
   "weekStart": ""
 }
