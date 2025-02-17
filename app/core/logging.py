@@ -78,29 +78,26 @@ def setup_logging():
 
     log_config = config.LOGGING.to_dict()
 
-    formatter = JsonFormatter() if config.log_format == "json" else PrettyFormatter()
-
-    # Консольный хендлер
+    # Консольный хендлер с pretty/json форматом из конфига
+    console_formatter = JsonFormatter() if config.LOGGING.LOG_FORMAT == "json" else PrettyFormatter()
     console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
+    console_handler.setFormatter(console_formatter)
     root.addHandler(console_handler)
 
-    # Файловый хендлер с созданием директории
+   # Файловый хендлер всегда с JSON форматом
     if log_config.get("filename"):
         log_path = Path(log_config["filename"])
-        
+
         # Создаем директорию с нужными правами
         if not log_path.parent.exists():
-            os.makedirs(str(log_path.parent), mode=0o766, exist_ok=True)
-            # Устанавливаем владельца текущего процесса
-            os.chown(str(log_path.parent), os.getuid(), os.getgid())
+            os.makedirs(str(log_path.parent), exist_ok=True)
 
         file_handler = logging.FileHandler(
             filename=log_config["filename"],
             mode=log_config.get("filemode", "a"),
             encoding=log_config.get("encoding", "utf-8")
         )
-        file_handler.setFormatter(formatter)
+        file_handler.setFormatter(JsonFormatter())
         root.addHandler(file_handler)
 
     root.setLevel(log_config.get("level", logging.INFO))

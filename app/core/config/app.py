@@ -93,24 +93,24 @@ class LogConfig:
         PRETTY_FORMAT (str): Формат для человекочитаемых логов
         JSON_FORMAT (dict): Структура JSON лога
     """
+    def __init__(self, settings):
+        self.LOG_FORMAT = settings.log_format
+        self.LOG_FILE = settings.log_file
+        self.LEVEL = "DEBUG"
+        self.MAX_BYTES = 10485760  # 10MB
+        self.BACKUP_COUNT = 5
+        self.ENCODING = "utf-8"
+        self.FILE_MODE = "a"
+        self.FILE_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        self.PRETTY_FORMAT = "\033[1;36m%(asctime)s\033[0m - \033[1;32m%(name)s\033[0m - %(levelname)s - %(message)s"
 
-    LOG_FORMAT = "pretty" # Используется log_format из settings
-    LEVEL = "DEBUG"
-    LOG_FILE = "/var/log/app.log"
-    MAX_BYTES = 10485760  # 10MB
-    BACKUP_COUNT = 5
-    ENCODING = "utf-8"
-    FILE_MODE = "a"
-
-    PRETTY_FORMAT = "\033[1;36m%(asctime)s\033[0m - \033[1;32m%(name)s\033[0m - %(levelname)s - %(message)s"
-
-    JSON_FORMAT = {
-        "timestamp": "%(asctime)s",
-        "level": "%(levelname)s",
-        "module": "%(module)s",
-        "function": "%(funcName)s",
-        "message": "%(message)s"
-    }
+        self.JSON_FORMAT = {
+            "timestamp": "%(asctime)s",
+            "level": "%(levelname)s",
+            "module": "%(module)s",
+            "function": "%(funcName)s",
+            "message": "%(message)s"
+        }
 
     def to_dict(self) -> dict:
         return {
@@ -123,6 +123,7 @@ class LogConfig:
             "format": self.PRETTY_FORMAT if self.LOG_FORMAT == "pretty" else None,
             "json_format": self.JSON_FORMAT if self.LOG_FORMAT == "json" else None,
             "force": True,
+            "file_json": True
         }
 
 
@@ -173,8 +174,6 @@ class AppConfig:
     }
 
     PATHS = PathConfig()
-
-    LOGGING = LogConfig()
 
     oauth_success_redirect_uri: str = "https://ebtest.ru"
 

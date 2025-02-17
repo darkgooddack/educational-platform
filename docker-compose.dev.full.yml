@@ -117,7 +117,7 @@ services:
     container_name: promtail_container
     build: ./monitoring/promtail
     volumes:
-      - /var/log:/var/log
+      - ./logs:/var/log
       - ./monitoring/promtail/config.yaml:/etc/promtail/config.yaml
     ports:
       - "9080:9080"

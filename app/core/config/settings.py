@@ -7,7 +7,7 @@
 - Конфигурацию CORS политик
 - Управление доступом к документации API
 """
-
+import os
 import logging
 import secrets
 from typing import Any, Dict, List
@@ -53,8 +53,11 @@ class Settings(BaseSettings):
         }
     """
     log_format: str = Field(default="pretty", description="Формат логов (pretty/json)")
-    
-    log_file: str = Field(default="/var/log/app.log", description="Путь к файлу логов")
+
+    log_file: str = Field(
+        default="./logs/app.log" if os.name == 'nt' else "/var/log/app.log",
+        description="Путь к файлу логов"
+    )
 
     aws_service_name: str = Field(default="s3", description="Сервис AWS")
 
@@ -95,7 +98,7 @@ class Settings(BaseSettings):
     )
 
     rabbitmq_dsn: AmqpDsn = Field(
-        default="amqp://admin:admin@localhost:5672/",
+        default="amqp://admin:admin@rabbitmq:5672/",
         description="URL подключения к RabbitMQ",
     )
 

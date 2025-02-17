@@ -22,7 +22,7 @@ Example:
 import logging
 from functools import lru_cache
 
-from .app import AppConfig
+from .app import AppConfig, LogConfig
 from .settings import Settings
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,9 @@ class Config(Settings, AppConfig):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        Settings.__init__(self, **kwargs)
+        AppConfig.__init__(self)
+        self.LOGGING = LogConfig(self)
         print("\n⚙️  Параметры конфигурации:")
         print(f"🔌 DATABASE_DSN: {self.database_dsn}")
         print(f"🔗 REDIS_URL: {self.redis_url}")
