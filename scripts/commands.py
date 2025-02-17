@@ -14,7 +14,8 @@ COMPOSE_FILE_WITHOUT_BACKEND = "docker-compose.dev.yml"
 
 DEFAULT_PORTS = {
     'FASTAPI': 8000,
-    'RABBITMQ': 15672,
+    'RABBITMQ': 5672,      # Порт для AMQP
+    'RABBITMQ_UI': 15672,  # Порт для веб-интерфейса
     'POSTGRES': 5432,
     'REDIS': 6379,
     'PGADMIN': 5050,
@@ -142,7 +143,7 @@ def check_services():
     """Проверяет доступность всех сервисов"""
     services_config = {
         'Redis': ('REDIS_PORT', 5),
-        'RabbitMQ': ('RABBITMQ_PORT', 5),
+        'RabbitMQ': ('RABBITMQ_UI_PORT', 5),
         'PostgreSQL': ('POSTGRES_PORT', 30),
         'Grafana': ('GRAFANA_PORT', 5),
         'Loki': ('LOKI_PORT', 5)
@@ -181,7 +182,7 @@ def start_infrastructure():
 
         # Ждем доступности сервисов
         check_services()
-        time.sleep(30)
+
         # Запускаем миграции после успешного поднятия PostgreSQL
         print("📦 Запускаем миграции...")
         migrate()
@@ -190,7 +191,7 @@ def start_infrastructure():
 
         print("\n🔗 Доступные адреса:")
         print(f"📊 FastAPI Swagger:    http://localhost:{ports['FASTAPI']}/docs")
-        print(f"🐰 RabbitMQ UI:       http://localhost:{ports['RABBITMQ']}")
+        print(f"🐰 RabbitMQ UI:       http://localhost:{ports['RABBITMQ_UI']}")
         print(f"🗄️ PostgreSQL:        localhost:{ports['POSTGRES']}")
         print(f"📦 Redis:             localhost:{ports['REDIS']}")
         print(f"🔍 PgAdmin:           http://localhost:{ports['PGADMIN']}")

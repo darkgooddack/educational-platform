@@ -10,7 +10,7 @@
 import os
 import logging
 import secrets
-from typing import Any, Dict, List
+from typing import Any, Dict, List, ClassVar
 
 from pydantic import AmqpDsn, Field, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -52,6 +52,8 @@ class Settings(BaseSettings):
             'allow_headers': ['*']
         }
     """
+    app_env: str = Field(default="dev", description="Окружение приложения")
+
     log_format: str = Field(default="pretty", description="Формат логов (pretty/json)")
 
     log_file: str = Field(
@@ -97,8 +99,9 @@ class Settings(BaseSettings):
         description="Ссылка для подключения к базе данных",
     )
 
+    rabbitmq_host: ClassVar[str] = 'localhost'
     rabbitmq_dsn: AmqpDsn = Field(
-        default="amqp://admin:admin@localhost:5672/",
+        default=f"amqp://guest:guest@{rabbitmq_host}:5672/",
         description="URL подключения к RabbitMQ",
     )
 
