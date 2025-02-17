@@ -30,3 +30,6 @@ storage_config:
     cache_location: /loki/cache
   filesystem:
     directory: /loki/chunks
+
+limits_config:
+  allow_structured_metadata: false
