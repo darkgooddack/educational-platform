@@ -53,6 +53,8 @@ class Settings(BaseSettings):
         }
     """
     log_format: str = Field(default="pretty", description="Формат логов (pretty/json)")
+    
+    log_file: str = Field(default="/app.log", description="Путь к файлу логов")
 
     aws_service_name: str = Field(default="s3", description="Сервис AWS")
 

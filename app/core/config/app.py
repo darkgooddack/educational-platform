@@ -96,7 +96,7 @@ class LogConfig:
 
     LOG_FORMAT = "pretty" # Используется log_format из settings
     LEVEL = "DEBUG"
-    FILE = "/monitoring/logs/app.log"
+    LOG_FILE = "/app.log"
     MAX_BYTES = 10485760  # 10MB
     BACKUP_COUNT = 5
     ENCODING = "utf-8"
@@ -115,7 +115,7 @@ class LogConfig:
     def to_dict(self) -> dict:
         return {
             "level": self.LEVEL,
-            "filename": self.FILE,
+            "filename": self.LOG_FILE,
             "maxBytes": self.MAX_BYTES,
             "backupCount": self.BACKUP_COUNT,
             "encoding": self.ENCODING,
