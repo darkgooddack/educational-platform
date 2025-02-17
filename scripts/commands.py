@@ -129,7 +129,7 @@ def check_grafana():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     for _ in range(5):
         try:
-            sock.connect(('localhost', 3333))
+            sock.connect(('localhost', 3334))
             sock.close()
             return True
         except:

@@ -96,36 +96,66 @@ services:
     networks:
       - dev-network
   loki:
-    image: grafana/loki:2.9.0
+    user: "root"
+    container_name: loki_container
+    build: ./monitoring/loki
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./monitoring/loki/config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
     networks:
       - dev-network
   promtail:
-    image: grafana/promtail:2.9.0
+    user: "root"
+    container_name: promtail_container
+    build: ./monitoring/promtail
     volumes:
-      - /var/log/app.log:/var/log
-      - ./monitoring/promtail/promtail.yaml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
+      - /var/log:/var/log
+      - ./monitoring/promtail/config.yaml:/etc/promtail/config.yaml
+    ports:
+      - "9080:9080"
+    depends_on:
+      loki:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-S", "http://localhost:9080/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
     networks:
       - dev-network
   grafana:
-    image: grafana/grafana:latest
+    user: "root"
+    container_name: grafana_container
+    build: ./monitoring/grafana
     ports:
-      - "3333:3000"
+      - "3334:3000"
+    env_file:
+      - ./.env.dev
     environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_METRICS_USERNAME=${GF_METRICS_USERNAME}
+      - GF_METRICS_PASSWORD=${GF_METRICS_PASSWORD}
+    volumes:
+      - ./monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
     networks:
       - dev-network
-    volumes:
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - grafana-data:/var/lib/grafana
 
 networks:
   dev-network:
     driver: bridge
 volumes:
+  postgres-data:
+  redis-data:
   pgadmin-data:
   grafana-data:
+  loki-data:

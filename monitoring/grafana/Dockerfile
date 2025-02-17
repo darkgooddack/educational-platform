@@ -3,17 +3,17 @@ FROM grafana/grafana:11.3.0
 USER root
 
 # Копируем конфиги для провижининга
-COPY configs/datasources /etc/grafana/provisioning/datasources
-COPY configs/dashboards /etc/grafana/provisioning/dashboards
+COPY datasources /etc/grafana/provisioning/datasources
+COPY dashboards /etc/grafana/provisioning/dashboards
 
 # Копируем дашборды
-COPY configs/dashboards/*.json /var/lib/grafana/dashboards/
+COPY dashboards/*.json /var/lib/grafana/dashboards/
 
 # Скрипт инициализации
-COPY scripts/init.sh /init.sh
+COPY grafana-entrypoint.sh /grafana-entrypoint.sh
 
-RUN chmod +x /init.sh
+RUN chmod +x /grafana-entrypoint.sh
 
 USER grafana
 
-ENTRYPOINT ["/init.sh"]
+ENTRYPOINT ["/grafana-entrypoint.sh"]
