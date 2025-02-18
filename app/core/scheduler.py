@@ -1,16 +1,17 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.v1.auth.service import AuthService
 from app.core.dependencies.database import get_db_session
 
 scheduler = AsyncIOScheduler()
 
 async def check_sessions():
+    from app.services.v1.auth.service import AuthService
     async for session in get_db_session():
         service = AuthService(session)
         await service.check_expired_sessions()
 
 async def sync_statuses_to_db():
+    from app.services.v1.auth.service import AuthService
     async for session in get_db_session():
         service = AuthService(session)
         await service.sync_statuses_to_db()
