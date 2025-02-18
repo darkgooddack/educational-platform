@@ -38,11 +38,11 @@ class Config(Settings, AppConfig):
         Settings.__init__(self, **kwargs)
         AppConfig.__init__(self)
         self.LOGGING = LogConfig(self)
-        print("\n⚙️  Параметры конфигурации:")
-        print(f"🔌 DATABASE_DSN: {self.database_dsn}")
-        print(f"🔗 REDIS_URL: {self.redis_url}")
-        print(f"🐰 RABBITMQ_DSN: {self.rabbitmq_dsn}")
-        print(f"📦 AWS S3: {self.aws_endpoint}")
+        # print("\n⚙️  Параметры конфигурации:")
+        # print(f"🔌 DATABASE_DSN: {self.database_dsn}")
+        # print(f"🔗 REDIS_URL: {self.redis_url}")
+        # print(f"🐰 RABBITMQ_DSN: {self.rabbitmq_dsn}")
+        # print(f"📦 AWS S3: {self.aws_endpoint}")
 
 
 @lru_cache
