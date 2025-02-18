@@ -7,7 +7,7 @@ from typing import Optional
 
 from pydantic import EmailStr, Field
 
-from app.schemas.v1.auth.register import RegistrationSchema
+from app.schemas.v1.auth.register import RegistrationSchema, ListResponseSchema
 
 from ..base import BaseResponseSchema, BaseInputSchema, BaseSchema
 
