@@ -10,7 +10,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-
+from app.core.scheduler import scheduler
+    
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """
@@ -25,6 +26,9 @@ async def lifespan(_app: FastAPI):
     """
     from app.core.dependencies.rabbitmq import RabbitMQClient
     from app.core.dependencies.redis import RedisClient
+    
+    scheduler.start()
+    logging.info("Планировщик успешно запущен")
 
     for attempt in range(RabbitMQClient._max_retries):
         await RedisClient.get_instance()
@@ -44,3 +48,7 @@ async def lifespan(_app: FastAPI):
 
     await RedisClient.close()
     await RabbitMQClient.close()
+
+    scheduler.shutdown()
+    logging.info("Планировщик успешно остановлен")
+    
