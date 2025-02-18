@@ -21,7 +21,7 @@ from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
                          TestCatalogSchema, TestCompleteResponse,
                          TestCreateResponse, TestCreateSchema,
                          TestDeleteResponse, TestSchema, TestUpdateResponse,
-                         UserCredentialsSchema)
+                         UserCredentialsSchema, TestStatus)
 from app.services import TestService
 
 logger = logging.getLogger(__name__)
