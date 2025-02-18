@@ -37,7 +37,7 @@ from .v1.themes.themes import (ThemeBase, ThemeCreateResponse,
                                ThemeUpdateResponse)
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
-                             UserUpdateSchema)
+                             UserUpdateSchema, UserStatusResponseSchema)
 from .v1.videos.videos import (VideoLectureCreateResponse,
                                VideoLectureCreateSchema,
                                VideoLectureDeleteResponse,
@@ -67,6 +67,7 @@ __all__ = [
     "UserSchema",
     "UserCredentialsSchema",
     "UserUpdateSchema",
+    "UserStatusResponseSchema",
     "ManagerSelectSchema",
     "UserResponseSchema",
     "TokenSchema",

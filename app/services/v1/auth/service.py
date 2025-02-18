@@ -4,7 +4,7 @@
 """
 
 import logging
-
+from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (
@@ -16,6 +16,7 @@ from app.core.storages.redis.auth import AuthRedisStorage
 from app.schemas import (AuthSchema, TokenResponseSchema, TokenSchema,
                          UserCredentialsSchema)
 from app.services.v1.base import BaseService
+from app.core.config import config
 
 from .data_manager import AuthDataManager
 
@@ -111,13 +112,18 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             }
         )
 
-        # Обновляем статус при входе
-        await self._data_manager.update_online_status(
-            user_id=user_model.id, 
-            is_online=True
-        )
-
-        return await self.create_token(user_schema)
+        # Обновляем статус при входе через redis, снимая тем самым нагрузку с базы данных
+        # await self._data_manager.update_online_status(
+        #     user_id=user_model.id, 
+        #     is_online=True
+        # )
+        await self._redis_storage.set_online_status(user_model.id, True)
+        
+        token = await self.create_token(user_schema)
+        
+        await self._redis_storage.update_last_activity(token)
+        
+        return token
 
     async def create_token(
         self, user_schema: UserCredentialsSchema
@@ -174,12 +180,14 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             user = await self._data_manager.get_user_by_credentials(user_email)
 
             if user:
-                # Обновляем статус
-                await self._data_manager.update_online_status(
-                    user_id=user.id, 
-                    is_online=False
-                )
-
+                # Обновляем статус через redis, снимая тем самым нагрузку с базы данных
+                # await self._data_manager.update_online_status(
+                #     user_id=user.id, 
+                #     is_online=False
+                # )
+                await self._redis_storage.set_online_status(user.id, False)
+                # Последнюю активность сохраняем в момент выхода
+                await self._redis_storage.update_last_activity(token)
             # Удаляем токен из Redis
             await self._redis_storage.remove_token(token)
 
@@ -196,16 +204,43 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         """
         # Получаем все активные токены из Redis
         active_tokens = await self._redis_storage.get_all_tokens()
+        now = int(datetime.now(timezone.utc).timestamp())
 
         for token in active_tokens:
             try:
                 payload = TokenMixin.decode_token(token)
                 # Если токен валидный - пропускаем
-                continue
+                
+                # Получаем время последней активности
+                last_activity = await self._redis_storage.get_last_activity(token)
+
+                if now - last_activity > config.user_inactive_timeout:
+                    # Неактивен дольше таймаута
+                    user_email = payload.get("sub")
+                    user = await self._data_manager.get_user_by_credentials(user_email)
+                    if user:
+                        # await self._data_manager.update_online_status(user.id, False)
+                        await self._redis_storage.set_online_status(user.id, False)
+                    await self._redis_storage.remove_token(token)
             except TokenExpiredError:
                 # Токен истек
                 user_email = payload.get("sub")
                 user = await self._data_manager.get_user_by_credentials(user_email)
                 if user:
-                    await self._data_manager.update_online_status(user.id, False)
+                    # await self._data_manager.update_online_status(user.id, False)
+                    await self._redis_storage.set_online_status(user.id, False)
                 await self._redis_storage.remove_token(token)
+
+    async def sync_statuses_to_db(self):
+        """Синхронизация статусов из Redis в БД"""
+        users = await self._data_manager.get_all_users()
+        for user in users:
+            is_online = await self._redis_storage.get_online_status(user.id)
+            last_activity = await self._redis_storage.get_last_activity(f"token:{user.id}")
+
+            if last_activity:
+                last_seen = datetime.fromtimestamp(int(last_activity), tz=timezone.utc)
+                await self._data_manager.update_fields(user.id, {
+                    "is_online": is_online,
+                    "last_seen": last_seen
+                })

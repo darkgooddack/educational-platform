@@ -24,6 +24,7 @@ from app.core.handlers import (api_exception_handler, auth_exception_handler,
                                validation_exception_handler,
                                websocket_exception_handler)
 from app.core.logging import setup_logging
+from app.core.middlewares.auth import LastActivityMiddleware
 from app.core.middlewares.docs_auth import DocsAuthMiddleware
 from app.core.middlewares.logging import LoggingMiddleware
 from app.routes import all_routes
@@ -44,6 +45,7 @@ app.add_exception_handler(Exception, internal_exception_handler)
 app.add_middleware(LoggingMiddleware)  # Логирование запросов
 app.add_middleware(DocsAuthMiddleware)  # Защита документации
 app.add_middleware(CORSMiddleware, **config.cors_params)  # CORS политики
+app.add_middleware(LastActivityMiddleware)
 
 # Подключаем все маршруты
 app.include_router(all_routes())

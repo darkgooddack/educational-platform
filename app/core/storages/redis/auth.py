@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from app.core.config import AppConfig
@@ -161,3 +161,26 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         tokens = [key.decode().split(":")[-1] for key in keys]
         
         return tokens
+    
+    async def update_last_activity(self, token: str) -> None:
+        """
+        Обновляет время последней активности пользователя
+        """
+        await self.set(
+            f"last_activity:{token}", 
+            str(int(datetime.now(timezone.utc).timestamp()))
+        )
+
+    async def get_last_activity(self, token: str) -> Optional[int]:
+        """
+        Получает время последней активности пользователя
+        """
+        timestamp = await self.get(f"last_activity:{token}")
+        return int(timestamp) if timestamp else None
+
+    async def set_online_status(self, user_id: int, is_online: bool) -> None:
+        await self.set(f"online:{user_id}", str(is_online))
+
+    async def get_online_status(self, user_id: int) -> bool:
+        status = await self.get(f"online:{user_id}")
+        return status == "True" if status else False

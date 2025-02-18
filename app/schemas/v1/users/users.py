@@ -9,7 +9,7 @@ from pydantic import EmailStr, Field
 
 from app.schemas.v1.auth.register import RegistrationSchema
 
-from ..base import BaseInputSchema, BaseSchema
+from ..base import BaseResponseSchema, BaseInputSchema, BaseSchema
 
 
 class UserRole(str, Enum):
@@ -107,7 +107,7 @@ class UserUpdateSchema(BaseInputSchema):
         extra = "forbid"
 
 
-class ManagerSelectSchema(BaseInputSchema):
+class ManagerSelectSchema(BaseResponseSchema):
     """
     Схема для выбора менеджеров в форме обратной связи.
 
@@ -126,9 +126,10 @@ class ManagerSelectSchema(BaseInputSchema):
     middle_name: Optional[str] = None
     email: Optional[str] = None
     avatar: Optional[str] = None
+    success: bool = True
+    message: str = "Менеджеры успешно получены."
 
-
-class UserResponseSchema(BaseInputSchema):
+class UserResponseSchema(BaseResponseSchema):
     """
     Схема ответа пользователя.
 
@@ -143,8 +144,27 @@ class UserResponseSchema(BaseInputSchema):
     name: str
     email: str
     role: UserRole
-    message: str = Field(
-        default="Пользователь успешно создан!",
-        description="Сообщение, отправляемое после совершенной работы с пользователем",
-        examples=["Пользователь успешно создан!", "Роль успешно назначена!"],
-    )
+    success: bool = True
+    message: str = "Пользовател успешно получен."
+
+class UserStatusResponseSchema(BaseResponseSchema):
+    """
+    Схема ответа статуса пользователя.
+
+    Attributes:
+        success (bool): Успешность запроса
+        message (str): Сообщение о результате
+        is_online (bool): Онлайн ли пользователь
+        last_activity (Optional[int]): Время последней активности в Unix timestamp
+    """
+    success: bool = True
+    message: str = "Статус пользователя успешно получен"
+    is_online: bool
+    last_activity: Optional[int] = None
+
+class UserStatusesListResponseSchema(ListResponseSchema[UserStatusResponseSchema]):
+    """
+    Схема ответа со списком статусов пользователей
+    """
+    success: bool = True 
+    message: str = "Статусы пользователей успешно получены"

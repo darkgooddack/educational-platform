@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
+from app.core.storages.redis.auth import AuthRedisStorage
 from app.schemas import (ManagerSelectSchema, Page, PaginationParams, UserRole,
-                         UserSchema, UserUpdateSchema)
+                         UserSchema, UserUpdateSchema, UserStatusResponseSchema)
 from app.services import UserService
 
 
@@ -94,5 +95,24 @@ def setup_routes(router: APIRouter):
         """
         return await UserService(db_session).get_managers()
 
+
+    @router.get("/users/{user_id}/status", response_model=UserStatusResponseSchema)
+    async def get_user_status(user_id: int) -> UserStatusResponseSchema:
+        """
+        Получение статуса пользователя.
+        **Args**:
+            user_id (int): Идентификатор пользователя.
+
+        **Returns**:
+            UserStatusResponseSchema: Статус пользователя.
+        """
+        redis = AuthRedisStorage()
+        is_online = await redis.get_online_status(user_id)
+        last_activity = await redis.get_last_activity(f"token:{user_id}")
+
+        return UserStatusResponseSchema(
+            is_online=is_online,
+            last_activity=last_activity
+        )
 
 __all__ = ["setup_routes"]

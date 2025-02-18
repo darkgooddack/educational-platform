@@ -188,7 +188,13 @@ class AppConfig:
     )
 
     token_expire_minutes: int = Field(
-        default=1440, description="Время жизни токена в минутах"
+        default=1440, #  24 часа
+        description="Время жизни токена в минутах"
+    )
+
+    user_inactive_timeout: int = Field(
+        default=900,  # 15 минут
+        description="Время в секундах после которого пользователь считается неактивным"
     )
 
     redis_pool_size: int = Field(
