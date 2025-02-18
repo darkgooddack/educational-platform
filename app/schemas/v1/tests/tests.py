@@ -55,7 +55,7 @@ class TestBase(CommonBaseSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
     popularity_count: int
-    # status: TestStatus = TestStatus.DRAFT
+    status: TestStatus = TestStatus.DRAFT
 
     @field_validator("title")
     @classmethod
@@ -87,7 +87,7 @@ class TestCatalogSchema(BaseSchema):
     theme_id: int
     author_id: int = Field(description="ID автора теста")
     popularity_count: int
-    # status: TestStatus = TestStatus.DRAFT
+    status: TestStatus = TestStatus.DRAFT
 
     @field_validator("title")
     @classmethod
@@ -181,7 +181,7 @@ class TestCreateSchema(BaseInputSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
     questions: List[QuestionCreateSchema]
-    # status: TestStatus = TestStatus.DRAFT
+    status: TestStatus = TestStatus.DRAFT
 
 # Схемы для ответов
 class AnswerSchema(AnswerBase):

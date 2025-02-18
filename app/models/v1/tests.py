@@ -41,7 +41,7 @@ class TestModel(BaseModel):
 
     title: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
-    # status: Mapped[TestStatus] = mapped_column(default=TestStatus.DRAFT)
+    status: Mapped[TestStatus] = mapped_column(default=TestStatus.DRAFT)
     duration: Mapped[int] = mapped_column(nullable=False)  # в минутах
     passing_score: Mapped[int] = mapped_column(default=60, nullable=False)
     max_attempts: Mapped[int] = mapped_column(default=3, nullable=False)

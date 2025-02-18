@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (
-    InvalidCredentialsError, UserInactiveError, 
+    InvalidCredentialsError, UserInactiveError,
     TokenExpiredError, TokenInvalidError
 )
 from app.core.security import HashingMixin, TokenMixin
@@ -63,7 +63,13 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             - Добавить эксепшены (подумать какие)
 
         """
-
+        logger.info(
+            "Попытка аутентификации",
+            extra={
+                "email": credentials.email,
+                "has_password": bool(credentials.password),
+            }
+        )
 
 
         user_model = await self._data_manager.get_user_by_credentials(credentials.email)
@@ -114,23 +120,23 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
 
         # Обновляем статус при входе через redis, снимая тем самым нагрузку с базы данных
         # await self._data_manager.update_online_status(
-        #     user_id=user_model.id, 
+        #     user_id=user_model.id,
         #     is_online=True
         # )
         await self._redis_storage.set_online_status(user_schema.id, True)
         logger.info(
-            "Пользователь вошел в систему", 
+            "Пользователь вошел в систему",
             extra={
                 "user_id": user_schema.id,
                 "email": user_schema.email,
                 "is_online": True
             }
         )
-        
+
         token = await self.create_token(user_schema)
-        
+
         await self._redis_storage.update_last_activity(token)
-        
+
         return token
 
     async def create_token(
@@ -190,7 +196,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             if user:
                 # Обновляем статус через redis, снимая тем самым нагрузку с базы данных
                 # await self._data_manager.update_online_status(
-                #     user_id=user.id, 
+                #     user_id=user.id,
                 #     is_online=False
                 # )
                 await self._redis_storage.set_online_status(user.id, False)
@@ -207,7 +213,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             await self._redis_storage.remove_token(token)
 
             return {"message": "Выход выполнен успешно!"}
-        
+
         except (TokenExpiredError, TokenInvalidError):
             # Даже если токен невалидный, все равно пытаемся его удалить
             await self._redis_storage.remove_token(token)
@@ -225,7 +231,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             try:
                 payload = TokenMixin.decode_token(token)
                 # Если токен валидный - пропускаем
-                
+
                 # Получаем время последней активности
                 last_activity = await self._redis_storage.get_last_activity(token)
 

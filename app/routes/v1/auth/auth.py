@@ -44,13 +44,7 @@ def setup_routes(router: APIRouter):
         **Returns**:
         - **TokenResponseSchema**: Токен доступа с access_token и token_type
         """
-        logger.info(
-            "Попытка аутентификации",
-            extra={
-                "email": form_data.username,
-                "has_password": bool(form_data.password)
-            }
-        )
+
         return await AuthService(db_session).authenticate(
             AuthSchema(email=form_data.username, password=form_data.password)
         )
