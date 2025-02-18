@@ -7,9 +7,9 @@ from typing import Optional
 
 from pydantic import EmailStr, Field
 
-from app.schemas.v1.auth.register import RegistrationSchema, ListResponseSchema
+from app.schemas.v1.auth.register import RegistrationSchema
 
-from ..base import BaseResponseSchema, BaseInputSchema, BaseSchema
+from ..base import BaseResponseSchema, BaseInputSchema, BaseSchema, ListResponseSchema
 
 
 class UserRole(str, Enum):
