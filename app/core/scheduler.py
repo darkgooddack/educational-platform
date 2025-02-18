@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 scheduler = AsyncIOScheduler()
 
 async def check_and_schedule():
+    from app.core.storages.redis.auth import AuthRedisStorage
     redis_storage = AuthRedisStorage()
     active_tokens = await redis_storage.get_all_tokens()
     
@@ -19,9 +20,10 @@ async def check_and_schedule():
             scheduler.add_job(sync_statuses_to_db, 'interval', minutes=60, id='sync_statuses')
             logger.info("Планировщик запущен - обнаружены активные пользователи")
     else:
-        scheduler.remove_job('check_sessions')
-        scheduler.remove_job('sync_statuses')
-        logger.info("Планировщик остановлен - нет активных пользователей")
+        if scheduler.get_job('check_sessions'):
+            scheduler.remove_job('check_sessions')
+            scheduler.remove_job('sync_statuses')
+            logger.info("Планировщик остановлен - нет активных пользователей")
 
 
 async def check_sessions():
