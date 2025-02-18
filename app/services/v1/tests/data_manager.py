@@ -16,7 +16,7 @@ from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCatalogSchema,
                          TestCompleteResponse, TestCreateResponse,
                          TestCreateSchema, TestDeleteResponse, TestSchema,
-                         TestUpdateResponse)
+                         TestUpdateResponse, TestStatus)
 from app.services import BaseEntityManager
 
 
