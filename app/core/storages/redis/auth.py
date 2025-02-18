@@ -169,6 +169,12 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
     async def update_last_activity(self, token: str) -> None:
         """
         Обновляет время последней активности пользователя
+
+        Args:
+            token: Токен пользователя
+        
+        Returns:
+            None
         """
         await self.set(
             f"last_activity:{token}", 
@@ -177,25 +183,50 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
 
     async def get_last_activity(self, token: str) -> Optional[int]:
         """
-        Получает время последней активности пользователя
+        Получает время последней активности пользователя 
+
+        Args:
+            token: Токен пользователя
+
+        Returns:
+            int: Время последней активности пользователя в формате timestamp (секунды)
         """
         timestamp = await self.get(f"last_activity:{token}")
         return int(timestamp) if timestamp else 0
 
     async def set_online_status(self, user_id: int, is_online: bool) -> None:
+        """
+        Устанавливает статус онлайн/офлайн пользователя
+        
+        Args:
+            user_id: ID пользователя
+            is_online: Статус онлайн/офлайн
+        
+        Returns:
+            None
+        """
         await self.set(f"online:{user_id}", str(is_online))
 
     async def get_online_status(self, user_id: int) -> bool:
+        """
+        Получает статус онлайн/офлайн пользователя
+
+        Args:
+            user_id: ID пользователя
+
+        Returns:
+            bool: Статус онлайн/офлайн пользователя
+        """
         status = await self.get(f"online:{user_id}")
         return status == "True" if status else False
     
     async def get_user_sessions(self, email: str) -> list[str]:
         """
         Получает все активные сессии пользователя
-        
+
         Args:
             email: Email пользователя
-            
+
         Returns:
             list[str]: Список активных токенов пользователя
         """

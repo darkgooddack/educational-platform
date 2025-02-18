@@ -358,13 +358,12 @@ class UserService(HashingMixin, BaseService):
                 message=f"Пользователь с id {user_id} не найден",
                 extra={"user_id": user_id}
             )
+        
         # Получаем онлайн статус напрямую
         is_online = await redis_storage.get_online_status(user_id)
 
-        # Получаем все токены из сессий пользователя
+        # Получаем последнюю активность из сессий
         tokens = await redis_storage.get_user_sessions(user.email)
-
-        # Находим последнюю активность среди всех токенов
         last_activity = max(
             [await redis_storage.get_last_activity(token) for token in tokens],
             default=0
