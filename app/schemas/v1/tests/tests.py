@@ -63,6 +63,7 @@ class TestCatalogSchema(BaseSchema):
 
     Attributes:
         title: Название теста
+        description: Описание теста
         duration: Длительность в минутах
         questions_count: Количество вопросов в тесте
         theme_id: ID темы теста
@@ -71,6 +72,7 @@ class TestCatalogSchema(BaseSchema):
     """
 
     title: str = Field(max_length=150, description="Название теста")
+    description: str = Field(min_length=0, max_length=250, description="Описание теста")
     duration: int
     questions_count: int = Field(description="Количество вопросов в тесте")
     theme_id: int
