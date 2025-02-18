@@ -117,7 +117,15 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         #     user_id=user_model.id, 
         #     is_online=True
         # )
-        await self._redis_storage.set_online_status(user_model.id, True)
+        await self._redis_storage.set_online_status(user_schema.id, True)
+        logger.info(
+            "Пользователь вошел в систему", 
+            extra={
+                "user_id": user_schema.id,
+                "email": user_schema.email,
+                "is_online": True
+            }
+        )
         
         token = await self.create_token(user_schema)
         
@@ -186,6 +194,13 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
                 #     is_online=False
                 # )
                 await self._redis_storage.set_online_status(user.id, False)
+                logger.debug(
+                    "Пользователь вышел из системы",
+                    extra={
+                        "user_id": user.id,
+                        "is_online": False
+                    }
+                )
                 # Последнюю активность сохраняем в момент выхода
                 await self._redis_storage.update_last_activity(token)
             # Удаляем токен из Redis
@@ -215,12 +230,23 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
                 last_activity = await self._redis_storage.get_last_activity(token)
 
                 if now - last_activity > config.user_inactive_timeout:
+
                     # Неактивен дольше таймаута
                     user_email = payload.get("sub")
                     user = await self._data_manager.get_user_by_credentials(user_email)
                     if user:
                         # await self._data_manager.update_online_status(user.id, False)
                         await self._redis_storage.set_online_status(user.id, False)
+                        logger.debug(
+                            "Пользователь не активен дольше таймаута",
+                            extra={
+                                "user_id": user.id,
+                                "email": user.email,
+                                "last_activity": last_activity,
+                                "now": now,
+                                "timeout": config.user_inactive_timeout,
+                            }
+                        )
                     await self._redis_storage.remove_token(token)
             except TokenExpiredError:
                 # Токен истек
@@ -229,6 +255,15 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
                 if user:
                     # await self._data_manager.update_online_status(user.id, False)
                     await self._redis_storage.set_online_status(user.id, False)
+                    logger.debug(
+                        "Токен пользователя истек",
+                        extra={
+                            "user_id": user.id,
+                            "email": user.email,
+                            "last_activity": last_activity,
+                            "now": now,
+                        }
+                    )
                 await self._redis_storage.remove_token(token)
 
     async def sync_statuses_to_db(self):
