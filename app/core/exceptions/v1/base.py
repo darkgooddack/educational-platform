@@ -76,7 +76,7 @@ class DatabaseError(BaseAPIException):
 
 class ValueNotFoundError(BaseAPIException):
     """
-    Значение поля не найдно.
+    Значение поля не найдено.
 
     Attributes:
         field (str): наименование поля.

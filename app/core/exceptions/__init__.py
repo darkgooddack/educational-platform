@@ -7,7 +7,7 @@ Example:
     >>> from app.core.exceptions import UserNotFoundError, UserExistsError
     >>> raise UserNotFoundError(user_id=42)
 """
-
+from .v1.core.scheduler import SessionCheckError, StatusSyncError
 from .v1.auth.auth import (AuthenticationError, InvalidCredentialsError,
                            InvalidEmailFormatError, InvalidPasswordError,
                            WeakPasswordError)
