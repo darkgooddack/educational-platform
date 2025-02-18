@@ -70,4 +70,6 @@ __all__ = [
     "TestUpdateError",
     "TestDeleteError",
     "QuestionNotFoundError",
+    "SessionCheckError",
+    "StatusSyncError",
 ]

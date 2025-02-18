@@ -1,7 +1,7 @@
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.core.dependencies.database import SessionContextManager
-from app.core.exceptions.v1.scheduler import SessionCheckError, StatusSyncError
+from app.core.exceptions import SessionCheckError, StatusSyncError
 
 logger = logging.getLogger(__name__)
 scheduler = AsyncIOScheduler()
