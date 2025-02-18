@@ -228,7 +228,7 @@ class BaseDataManager(SessionMixin, Generic[T]):
             self.logger.error("❌ Ошибка при удалении: %s", e)
             return False
 
-    async def update_one(self, model_to_update, updated_model: Any) -> T | None:
+    async def update_one(self, model_to_update, updated_model: Any = None) -> T | None:
         """
         Обновляет одну запись в базе данных.
 
@@ -241,14 +241,23 @@ class BaseDataManager(SessionMixin, Generic[T]):
 
         Raises:
             SQLAlchemyError: Если произошла ошибка при обновлении.
+
+        Usage:
+            # Для простых обновлений
+            # (например, обновление только одного поля в менеджере данных)
+            await self.update_one(found_test)
+
+            # Для сложных обновлений с новыми данными
+            await self.update_one(found_test, updated_test)
         """
         try:
             if not model_to_update:
                 return None
 
-            for key, value in updated_model.to_dict().items():
-                if key != "id":
-                    setattr(model_to_update, key, value)
+            if updated_model:
+                for key, value in updated_model.to_dict().items():
+                    if key != "id":
+                        setattr(model_to_update, key, value)
 
             await self.session.commit()
             await self.session.refresh(model_to_update)
@@ -393,11 +402,11 @@ class BaseEntityManager(BaseDataManager[T]):
     async def update_fields(self, item_id: int, fields: dict) -> bool:
         """
         Обновляет указанные поля записи.
-    
+
         Args:
             item_id: ID записи
             fields: Словарь полей для обновления {field_name: new_value}
-    
+
         Returns:
             bool: True если успешно обновлено
         """
@@ -405,13 +414,13 @@ class BaseEntityManager(BaseDataManager[T]):
             item = await self.get_item(item_id)
             if not item:
                 return False
-                
+
             for field, value in fields.items():
                 setattr(item, field, value)
-                
+
             await self.session.commit()
             return True
-            
+
         except SQLAlchemyError as e:
             await self.session.rollback()
             self.logger.error("❌ Ошибка при обновлении полей: %s", e)

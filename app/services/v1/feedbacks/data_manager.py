@@ -241,8 +241,7 @@ class FeedbackDataManager(BaseDataManager[FeedbackSchema]):
             found_feedback_model.status = status
 
             updated_feedback = await self.update_one(
-                model_to_update=found_feedback_model,
-                updated_model=found_feedback_model,
+                model_to_update=found_feedback_model
             )
 
             return FeedbackUpdateResponse(

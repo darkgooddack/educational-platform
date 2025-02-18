@@ -328,18 +328,18 @@ class TestDataManager(BaseEntityManager[TestSchema]):
 
         try:
             statement = select(self.model).where(self.model.id == test_id)
-            found_test_model = await self.get_one(statement)
+            found_test = await self.get_one(statement)
 
-            if not found_test_model:
+            if not found_test:
                 raise TestNotFoundError(test_id)
 
             for field, value in test_data.model_dump().items():
-                setattr(found_test_model, field, value)
+                setattr(found_test, field, value)
 
             updated_test_model = self.model(**test_data.model_dump())
 
             updated_test = await self.update_one(
-                model_to_update=found_test_model, updated_model=updated_test_model
+                model_to_update=found_test, updated_model=updated_test_model
             )
 
             return TestUpdateResponse(id=updated_test.id)
@@ -374,16 +374,16 @@ class TestDataManager(BaseEntityManager[TestSchema]):
         """
         try:
             statement = select(self.model).where(self.model.id == test_id)
-            found_test_model = await self.get_one(statement)
+            found_test = await self.get_one(statement)
 
-            if not found_test_model:
+            if not found_test:
                 raise TestDeleteError(message=f"Тест с id {test_id} не найдена")
 
             statement = delete(self.model).where(self.model.id == test_id)
             if not await self.delete(statement):
                 raise TestDeleteError(message="Не удалось удалить тест")
 
-            return TestDeleteResponse(id=found_test_model.id)
+            return TestDeleteResponse(id=found_test.id)
         except Exception as e:
             raise BaseAPIException(
                 status_code=500,
@@ -419,7 +419,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             found_test.popularity_count += 1
 
             updated_test = await self.update_one(
-                model_to_update=found_test, updated_model=found_test
+                model_to_update=found_test
             )
 
             return TestCompleteResponse(item=updated_test)
@@ -450,21 +450,17 @@ class TestDataManager(BaseEntityManager[TestSchema]):
     async def update_test_status(self, test_id: int, status: TestStatus) -> TestUpdateResponse:
         try:
             statement = select(self.model).where(self.model.id == test_id)
-            found_test_model = await self.get_one(statement)
+            found_test = await self.get_one(statement)
 
-            if not found_test_model:
+            if not found_test:
                 raise TestNotFoundError(test_id)
 
-            found_test_model.status = status
-            updated_test = await self.update_one(
-                    model_to_update=found_test_model,
-                    updated_model=found_test_model,
-                )
+            await self.update_fields(test_id, {"status": status})
 
             return TestUpdateResponse(
-                id=updated_test.id,
-                success=True, 
-                message=f"Статус теста изменен на {status}"
+                id=test_id,
+                success=True,
+                message=f"Статус теста изменен на {status.value}"
             )
         except DatabaseError as db_error:
             raise TestUpdateError(
@@ -472,7 +468,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 extra={
                     "context": "Ошибка при обновлении статуса теста",
                     "test_id": test_id,
-                    "status": getattr(found_test_model, "status", None),
+                    "status": getattr(found_test, "status", None),
                     "error_details": str(db_error),
                 },
             ) from db_error
