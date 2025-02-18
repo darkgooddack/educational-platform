@@ -46,3 +46,17 @@ class BaseRedisStorage:
         """
         redis = await self._get_redis()
         return redis.keys(pattern)
+    
+    async def smembers(self, key: str) -> list[str]:
+        """
+        Получает все элементы множества
+        
+        Args:
+            key: Ключ множества
+            
+        Returns:
+            list[str]: Список элементов множества
+        """
+        redis = await self._get_redis()
+        result = redis.smembers(key)
+        return [member.decode() for member in result] if result else []

@@ -38,6 +38,10 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         )
         await self.sadd(f"sessions:{user.email}", token)
 
+        # Добавляем установку online статуса при входе
+        await self.set_online_status(user.id, True)
+        await self.update_last_activity(token)
+
     async def get_user_by_token(self, token: str) -> Optional[UserCredentialsSchema]:
         """
         Получает пользователя по токену.
@@ -184,3 +188,15 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
     async def get_online_status(self, user_id: int) -> bool:
         status = await self.get(f"online:{user_id}")
         return status == "True" if status else False
+    
+    async def get_user_sessions(self, email: str) -> list[str]:
+        """
+        Получает все активные сессии пользователя
+        
+        Args:
+            email: Email пользователя
+            
+        Returns:
+            list[str]: Список активных токенов пользователя
+        """
+        return await self.smembers(f"sessions:{email}")

@@ -97,7 +97,10 @@ def setup_routes(router: APIRouter):
 
 
     @router.get("/users/{user_id}/status", response_model=UserStatusResponseSchema)
-    async def get_user_status(user_id: int) -> UserStatusResponseSchema:
+    async def get_user_status(
+        user_id: int,
+        db_session: AsyncSession = Depends(get_db_session)
+    ) -> UserStatusResponseSchema:
         """
         Получение статуса пользователя.
         **Args**:
@@ -106,13 +109,7 @@ def setup_routes(router: APIRouter):
         **Returns**:
             UserStatusResponseSchema: Статус пользователя.
         """
-        redis = AuthRedisStorage()
-        is_online = await redis.get_online_status(user_id)
-        last_activity = await redis.get_last_activity(f"token:{user_id}")
-
-        return UserStatusResponseSchema(
-            is_online=is_online,
-            last_activity=last_activity
-        )
+        return await UserService(db_session).get_user_status(user_id)
+        
 
 __all__ = ["setup_routes"]
