@@ -176,7 +176,7 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         Получает время последней активности пользователя
         """
         timestamp = await self.get(f"last_activity:{token}")
-        return int(timestamp) if timestamp else None
+        return int(timestamp) if timestamp else 0
 
     async def set_online_status(self, user_id: int, is_online: bool) -> None:
         await self.set(f"online:{user_id}", str(is_online))
