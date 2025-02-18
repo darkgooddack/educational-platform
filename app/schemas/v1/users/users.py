@@ -4,7 +4,7 @@
 
 from enum import Enum
 from typing import Optional
-
+from datetime import datetime
 from pydantic import EmailStr, Field
 
 from app.schemas.v1.auth.register import RegistrationSchema
@@ -37,21 +37,26 @@ class UserSchema(BaseSchema):
         first_name (str): Имя пользователя.
         last_name (str): Фамилия пользователя.
         middle_name (str): Отчество пользователя.
+        role (UserRole): Роль пользователя.
         email (EmailStr): Email пользователя.
         phone (str): Телефон пользователя.
         avatar (str): Ссылка на аватар пользователя.
         is_active (bool): Флаг активности пользователя.
-        role (UserRole): Роль пользователя.
+        is_online (bool): Флаг онлайн-статуса пользователя.
+        last_seen (datetime): Дата и время последнего визита пользователя.
     """
 
     first_name: str
     last_name: str
     middle_name: Optional[str] = None
+    role: UserRole
     email: EmailStr
     phone: Optional[str] = None
     avatar: Optional[str] = None
     is_active: bool = True
-    role: UserRole
+    is_online: bool = False
+    last_seen: Optional[datetime] = None
+    
 
 
 class UserCredentialsSchema(BaseInputSchema):
