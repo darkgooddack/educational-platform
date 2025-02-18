@@ -23,6 +23,12 @@ class QuestionType(str, Enum):
     MULTIPLE = "multiple"  # несколько правильных ответов
 
 
+class TestStatus(str, Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    ARCHIVED = "archived"
+
+
 class TestBase(CommonBaseSchema):
     """
     Базовая схема теста с общими полями
@@ -37,6 +43,7 @@ class TestBase(CommonBaseSchema):
         video_lecture_id: ID связанной видео-лекции (опционально)
         lecture_id: ID связанной лекции (опционально)
         popularity_count: Количество прохождения теста (популярность)
+        status: Статус теста (draft, published, archived)
     """
 
     title: str = Field(max_length=150, description="Название теста")
@@ -48,6 +55,7 @@ class TestBase(CommonBaseSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
     popularity_count: int
+    # status: TestStatus = TestStatus.DRAFT
 
     @field_validator("title")
     @classmethod
@@ -69,6 +77,7 @@ class TestCatalogSchema(BaseSchema):
         theme_id: ID темы теста
         author_id: ID автора теста
         popularity_count: Количество прохождения теста (популярность)
+        status: Статус теста (draft, published, archived)
     """
 
     title: str = Field(max_length=150, description="Название теста")
@@ -78,6 +87,7 @@ class TestCatalogSchema(BaseSchema):
     theme_id: int
     author_id: int = Field(description="ID автора теста")
     popularity_count: int
+    # status: TestStatus = TestStatus.DRAFT
 
     @field_validator("title")
     @classmethod
@@ -159,6 +169,7 @@ class TestCreateSchema(BaseInputSchema):
         video_lecture_id: ID связанной видео-лекции (опционально)
         lecture_id: ID связанной лекции (опционально)
         questions: Список вопросов теста
+        status: Статус теста (draft, published, archived)
     """
 
     title: str = Field(min_length=10, max_length=150, description="Название теста")
@@ -170,7 +181,7 @@ class TestCreateSchema(BaseInputSchema):
     video_lecture_id: Optional[int] = None
     lecture_id: Optional[int] = None
     questions: List[QuestionCreateSchema]
-
+    # status: TestStatus = TestStatus.DRAFT
 
 # Схемы для ответов
 class AnswerSchema(AnswerBase):

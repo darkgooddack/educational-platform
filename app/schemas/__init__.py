@@ -29,7 +29,7 @@ from .v1.tests.tests import (AnswerCreateSchema, AnswerSchema,
                              QuestionType, TestAnswerSchema, TestCatalogSchema,
                              TestCompleteResponse, TestCreateResponse,
                              TestCreateSchema, TestDeleteResponse, TestSchema,
-                             TestUpdateResponse)
+                             TestUpdateResponse, TestStatus)
 from .v1.themes.themes import (ThemeBase, ThemeCreateResponse,
                                ThemeCreateSchema, ThemeDeleteResponse,
                                ThemeListResponse, ThemeSchema,
@@ -114,6 +114,7 @@ __all__ = [
     "TestCompleteResponse",
     "TestSchema",
     "TestCatalogSchema",
+    "TestStatus",
     "QuestionCreateSchema",
     "QuestionSchema",
     "AnswerCreateSchema",

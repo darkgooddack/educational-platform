@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.v1 import TYPE_CHECKING
 from app.models.v1.base import BaseModel
-from app.schemas import QuestionType
+from app.schemas import QuestionType, TestStatus
 
 if TYPE_CHECKING:
     from app.models.v1.lectures import LectureModel
@@ -21,6 +21,7 @@ class TestModel(BaseModel):
     Attributes:
         title (str): Название теста
         description (str): Описание теста
+        status (TestStatus): Статус теста (draft, published, archived)
         duration (int): Длительность теста в минутах
         passing_score (int): Проходной балл
         max_attempts (int): Максимальное количество попыток
@@ -40,6 +41,7 @@ class TestModel(BaseModel):
 
     title: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
+    # status: Mapped[TestStatus] = mapped_column(default=TestStatus.DRAFT)
     duration: Mapped[int] = mapped_column(nullable=False)  # в минутах
     passing_score: Mapped[int] = mapped_column(default=60, nullable=False)
     max_attempts: Mapped[int] = mapped_column(default=3, nullable=False)
@@ -83,7 +85,7 @@ class QuestionModel(BaseModel):
     Attributes:
         test_id (int): ID теста, к которому относится вопрос
         text (str): Текст вопроса
-        type (QuestionType): Тип вопроса (один правильный ответ или несколько правильных ответов)
+        type (QuestionType): Тип вопроса (single - один правильный ответ или multiple - несколько правильных ответов)
         points (int): Количество баллов за правильный ответ
 
     Relationships:
