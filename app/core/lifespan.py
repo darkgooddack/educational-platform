@@ -10,8 +10,6 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.core.scheduler import scheduler
-    
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """
@@ -26,7 +24,7 @@ async def lifespan(_app: FastAPI):
     """
     from app.core.dependencies.rabbitmq import RabbitMQClient
     from app.core.dependencies.redis import RedisClient
-    
+    from app.core.scheduler import scheduler
     scheduler.start()
     logging.info("Планировщик успешно запущен")
 
