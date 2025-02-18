@@ -1,4 +1,4 @@
-from app.core.exceptions.base import BaseAPIException
+from app.core.exceptions.v1.base import BaseAPIException
 
 class SchedulerError(BaseAPIException):
     """Базовая ошибка планировщика"""
