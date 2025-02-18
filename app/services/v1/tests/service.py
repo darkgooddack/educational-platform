@@ -220,11 +220,13 @@ class TestService(BaseService):
         # Пока просто увеличиваем счетчик
         return await self.test_manager.increment_popularity(test_id)
 
-    async def publish_test(self, test_id: int) -> TestUpdateResponse:
-        return await self.test_manager.update_test_status(test_id, TestStatus.PUBLISHED)
-
-    async def archive_test(self, test_id: int) -> TestUpdateResponse:
-        return await self.test_manager.update_test_status(test_id, TestStatus.ARCHIVED) 
-
-    async def move_to_draft(self, test_id: int) -> TestUpdateResponse:
-        return await self.test_manager.update_test_status(test_id, TestStatus.DRAFT)
+    async def update_test_status(self, test_id: int, status: TestStatus) -> TestUpdateResponse:
+        """
+        Обновляет статус теста.
+        Args:
+            test_id: ID теста
+            status: Новый статус теста
+        Returns:
+            TestUpdateResponse: Схема ответа на обновление теста
+        """
+        return await self.test_manager.update_test_status(test_id, status)

@@ -262,40 +262,17 @@ def setup_routes(router: APIRouter):
             test_id=test_id, user_id=current_user.id, answers=answers
         )
     
-    @router.patch("/{test_id}/publish", response_model=TestUpdateResponse)
-    async def publish_test(
+    @router.patch("/{test_id}/status", response_model=TestUpdateResponse)
+    async def update_test_status(
         test_id: int,
+        status: TestStatus,
         current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ) -> TestUpdateResponse:
         """
-        Публикация теста (изменение статуса на PUBLISHED)
+        Обновление статуса теста (DRAFT/PUBLISHED/ARCHIVED)
         """
         service = TestService(db_session)
-        return await service.publish_test(test_id)
-
-    @router.patch("/{test_id}/archive", response_model=TestUpdateResponse) 
-    async def archive_test(
-        test_id: int,
-        current_user: UserCredentialsSchema = Depends(get_current_user),
-        db_session: AsyncSession = Depends(get_db_session),
-    ) -> TestUpdateResponse:
-        """
-        Архивация теста (изменение статуса на ARCHIVED)
-        """
-        service = TestService(db_session)
-        return await service.archive_test(test_id)
-
-    @router.patch("/{test_id}/draft", response_model=TestUpdateResponse)
-    async def move_to_draft(
-        test_id: int, 
-        current_user: UserCredentialsSchema = Depends(get_current_user),
-        db_session: AsyncSession = Depends(get_db_session),
-    ) -> TestUpdateResponse:
-        """
-        Перевод теста в черновик (изменение статуса на DRAFT)
-        """
-        service = TestService(db_session)
-        return await service.move_to_draft(test_id)
+        return await service.update_test_status(test_id, status)
 
 __all__ = ["setup_routes"]
