@@ -1,3 +1,12 @@
+Перезагрузить конфигурацию pre-commit, чтобы изменения вступили в силу:
+
+```bash
+pre-commit clean
+
+pre-commit install
+```
+
+```yaml
 repos:
   - repo: local
     hooks:
@@ -12,3 +21,4 @@ repos:
         entry: uv run test
         language: system
         pass_filenames: false
+```
