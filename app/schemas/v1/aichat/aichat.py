@@ -108,6 +108,8 @@ class AIChatResponse(BaseResponseSchema):
     Схема ответа AI чата
 
     Attributes:
+        success: Флаг успешности запроса
         result: Результат генерации
     """
+    success: bool = True
     result: Result

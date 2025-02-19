@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, Dict, Optional, Type
 
@@ -47,13 +48,21 @@ class BaseHttpClient:
         headers: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         try:
+            self.logger.debug("POST request body: %s", json.dumps(data, indent=2))
             if data:
                 # Фильтруем None значения из параметров
                 data = {k: v for k, v in data.items() if v is not None}
 
             session = await self._get_session()
             self.logger.debug("POST запрос к %s с данными %s", url, data)
-            async with session.post(url, data=data, headers=headers) as resp:
-                return await resp.json()
+            # Проверяем Content-Type
+            if headers and headers.get("Content-Type") == "application/x-www-form-urlencoded":
+            # Для OAuth используем data как есть
+                async with session.post(url, data=data, headers=headers) as resp:
+                    return await resp.json()
+            else:
+            # Для остальных запросов используем json
+                async with session.post(url, json=data, headers=headers) as resp:
+                    return await resp.json()
         finally:
             await self.close()

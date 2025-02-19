@@ -70,10 +70,9 @@ class Settings(BaseSettings):
         default="https://llm.api.cloud.yandex.net/foundationModels/v1/completion",
         description="URL API Yandex GPT"
     )
+    # Ключ доступа к API Yandex GPT
+    yandex_api_key: SecretStr
 
-    yandex_api_key: SecretStr = Field(
-        description="Ключ доступа к API Yandex GPT"
-    )
 
     yandex_folder_id: str = Field(
         description="ID каталога в Yandex Cloud"
