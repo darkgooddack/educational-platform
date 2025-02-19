@@ -31,6 +31,7 @@ from .v1.themes.themes import (ThemeDeleteError, ThemeExistsError,
                                ThemeNotFoundError, ThemeUpdateError)
 from .v1.users.users import (UserCreationError, UserExistsError,
                              UserInactiveError, UserNotFoundError)
+from .v1.aichat.aichat import (AIChatAuthError, AIChatCompletionError)
 
 __all__ = [
     "BaseAPIException",
@@ -77,4 +78,6 @@ __all__ = [
     "QuestionNotFoundError",
     "SessionCheckError",
     "StatusSyncError",
+    "AIChatAuthError",
+    "AIChatCompletionError",
 ]

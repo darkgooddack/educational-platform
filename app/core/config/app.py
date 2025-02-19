@@ -172,6 +172,7 @@ class AppConfig:
         "videos": ServiceConfig("videos", ["Video Lectures"]),
         "themes": ServiceConfig("themes", ["Themes"]),
         "tests": ServiceConfig("tests", ["Tests"]),
+        "aichat": ServiceConfig("aichat", ["AI Chat"])
     }
 
     PATHS = PathConfig()

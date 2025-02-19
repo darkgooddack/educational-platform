@@ -43,6 +43,7 @@ from .v1.videos.videos import (VideoLectureCreateResponse,
                                VideoLectureDeleteResponse,
                                VideoLectureListResponse, VideoLectureSchema,
                                VideoLectureUpdateResponse)
+from .v1.aichat.aichat import (Message, MessageRole, AIChatRequest, AIChatResponse, CompletionOptions)
 
 __all__ = [
     "BaseSchema",
@@ -120,4 +121,9 @@ __all__ = [
     "AnswerCreateSchema",
     "AnswerSchema",
     "TestAnswerSchema",
+    "AIChatRequest",
+    "AIChatResponse",
+    "Message",
+    "MessageRole",
+    "CompletionOptions"
 ]

@@ -12,6 +12,7 @@ from .v1.tests import TestDataManager, TestService
 from .v1.themes import ThemeService
 from .v1.users import UserDataManager, UserService
 from .v1.videos import VideoLectureDataManager, VideoLectureService
+from .v1.aichat import AIChatService
 
 __all__ = [
     "BaseService",
@@ -28,4 +29,5 @@ __all__ = [
     "ThemeService",
     "TestService",
     "TestDataManager",
+    "AIChatService"
 ]
