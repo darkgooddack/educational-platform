@@ -23,27 +23,24 @@ class AIChatHttpClient(BaseHttpClient):
             HTTPException: При ошибках запроса
         """
         headers = {
-            "Authorization": f"Api-Key {config.api_key}",
+            "Authorization": f"Api-Key {config.yandex_api_key.get_secret_value()}",
             "Content-Type": "application/json"
         }
 
-        if not config.api_key:
+        if not config.yandex_api_key:
             raise AIChatAuthError("API ключ не задан")
 
-        chat_request.modelUri = config.model_uri
+        chat_request.modelUri = config.yandex_model_uri
 
         try:
             response = await self.post(
-                url=config.base_url,
+                url=config.yandex_api_url,
                 headers=headers,
                 data=chat_request.model_dump()
             )
 
-            return AIChatResponse(
-                text=response["result"]["alternatives"][0]["message"]["text"],
-                status="success",
-                success=True
-            )
+            return AIChatResponse(**response)
+
         except Exception as e:
             self.logger.error("Ошибка при запросе к API Yandex: %s", str(e))
             raise AIChatCompletionError(str(e))
