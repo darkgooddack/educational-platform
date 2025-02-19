@@ -9,7 +9,6 @@ def setup_routes(router: APIRouter):
     @router.post("/completion", response_model=AIChatResponse)
     async def get_aichat_completion(
         message: str = Form(...),
-        role: MessageRole = Form(MessageRole.USER),
         db_session: AsyncSession = Depends(get_db_session),
     ):
         """
@@ -48,6 +47,6 @@ def setup_routes(router: APIRouter):
         ```
         """
         aichat_service = AIChatService(db_session)
-        return await aichat_service.get_completion(message, role)
+        return await aichat_service.get_completion(message)
 
 __all__ = ["setup_routes"]

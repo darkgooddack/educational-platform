@@ -10,7 +10,6 @@ class MessageRole(str, Enum):
     USER = "user"
     ASSISTANT = "assistant"
 
-
 class Message(BaseInputSchema):
     """
     Схема сообщения для чата с AI
