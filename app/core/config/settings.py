@@ -56,6 +56,11 @@ class Settings(BaseSettings):
 
     app_env: str = Field(default="dev", description="Окружение приложения")
 
+    smtp_server: str = Field("mail.ebtest.ru", description="SMTP сервер")
+    smtp_port: int = Field(587, description="SMTP порт")
+    sender_email: str = Field("noreply@ebtest.ru", description="Email отправителя")
+    smtp_password: SecretStr
+
     log_format: str = Field(default="pretty", description="Формат логов (pretty/json)")
 
     log_file: str = Field(
