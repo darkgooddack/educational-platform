@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Form
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.dependencies import get_db_session
-from app.schemas import MessageRole, AIChatResponse
+from app.core.dependencies import get_current_user, get_db_session
+from app.schemas import AIChatResponse, UserCredentialsSchema
 from app.services import AIChatService
 
 def setup_routes(router: APIRouter):
@@ -9,10 +9,11 @@ def setup_routes(router: APIRouter):
     @router.post("/completion", response_model=AIChatResponse)
     async def get_aichat_completion(
         message: str = Form(...),
+        current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ):
         """
-        # Получение ответа от AI модели
+        # Получение ответа от AI модели (Данные ниже нужно переписать)
 
         ## Args
         * **request** - Запрос к AI модели с параметрами:
@@ -47,6 +48,6 @@ def setup_routes(router: APIRouter):
         ```
         """
         aichat_service = AIChatService(db_session)
-        return await aichat_service.get_completion(message)
+        return await aichat_service.get_completion(message, current_user.id)
 
 __all__ = ["setup_routes"]

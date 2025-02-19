@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas import Message, MessageRole, AIChatResponse, AIChatRequest, CompletionOptions
 from app.services.v1.base import BaseService
 from app.core.http.aichat import AIChatHttpClient
+from app.core.storages.redis.aichat import AIChatRedisStorage
 
 from app.core.config import config
 
@@ -21,23 +22,12 @@ class AIChatService(BaseService):
         super().__init__()
         self.session = session
         self.http_client = AIChatHttpClient()
-        self.message_history = []
-        self.max_history = 100  # Максимальное количество сообщений в истории
+        self.storage = AIChatRedisStorage()
         self.max_tokens = 4000  # Максимальное количество токенов в сообщении
 
     SYSTEM_MESSAGE = Message(role="system", text="Ты умный ассистент, который помогает пользователям")
 
-    def _add_to_history(self, message: Message):
-        self.message_history.append(message)
-        # Удаляем старые сообщения если превышен лимит
-        while len(self.message_history) > self.max_history:
-            self.message_history.pop(0)
-
-    def _clear_history(self):
-        """Очистка истории"""
-        self.message_history.clear()
-
-    async def get_completion(self, message: str, role: MessageRole = MessageRole.USER) -> AIChatResponse:
+    async def get_completion(self, message: str, user_id: int, role: MessageRole = MessageRole.USER) -> AIChatResponse:
         """
         Получает ответ от модели на основе истории сообщений
 
@@ -48,23 +38,26 @@ class AIChatService(BaseService):
             AIChatResponse: Ответ от модели
         """
         try:
+            # Получаем историю
+            message_history = await self.storage.get_chat_history(user_id)
+
             # Создаем новое сообщение
             new_message = Message(role=role, text=message)
 
-            # Добавляем в историю сообщения user и ассистента
-            self._add_to_history(new_message)
+            # Добавляем новое сообщение в историю
+            message_history.append(new_message)
 
             # Формируем полный список сообщений
-            messages = [self.SYSTEM_MESSAGE] + self.message_history
+            messages = [self.SYSTEM_MESSAGE] + message_history
 
-            full_request = AIChatRequest(
+            request = AIChatRequest(
                 modelUri=config.yandex_model_uri,
                 completionOptions=CompletionOptions(maxTokens=str(self.max_tokens)),
                 messages=messages
             )
 
             async with self.http_client as client:
-                response = await client.get_completion(full_request)
+                response = await client.get_completion(request)
 
                 # Добавляем ответ ассистента в историю
                 if response.success:
@@ -72,10 +65,13 @@ class AIChatService(BaseService):
                         role=MessageRole.ASSISTANT,
                         text=response.result.alternatives[0].message.text
                     )
-                    self._add_to_history(assistant_message)
+                    message_history.append(assistant_message)
+
+                    # Сохраняем обновленную историю
+                    await self.storage.save_chat_history(user_id, message_history)
 
                 return response
         except Exception as e:
             logger.error(f"Error in get_completion: {e}")
-            self._clear_history()  # Очищаем историю при ошибке
+            await self.storage.clear_chat_history(user_id)
             raise
