@@ -189,7 +189,7 @@ class AppConfig:
     )
 
     token_expire_minutes: int = Field(
-        default=1440, description="Время жизни токена в минутах (24 часа)"  
+        default=1440, description="Время жизни токена в минутах (24 часа)"
     )
 
     user_inactive_timeout: int = Field(
