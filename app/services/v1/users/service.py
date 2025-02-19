@@ -20,14 +20,17 @@
 from typing import Any, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.storages.redis.auth import AuthRedisStorage
-from app.core.exceptions import UserCreationError, UserExistsError, UserNotFoundError
+
+from app.core.exceptions import (UserCreationError, UserExistsError,
+                                 UserNotFoundError)
 from app.core.security import HashingMixin
+from app.core.storages.redis.auth import AuthRedisStorage
 from app.models import UserModel
 from app.schemas import (ManagerSelectSchema, OAuthUserSchema, Page,
                          PaginationParams, RegistrationResponseSchema,
                          RegistrationSchema, UserCredentialsSchema, UserRole,
-                         UserSchema, UserUpdateSchema, UserStatusResponseSchema)
+                         UserSchema, UserStatusResponseSchema,
+                         UserUpdateSchema)
 from app.services import BaseService
 
 from .data_manager import UserDataManager
@@ -343,12 +346,11 @@ class UserService(HashingMixin, BaseService):
         """
         return await self._data_manager.delete_user(user_id)
 
-
     async def get_user_status(self, user_id: int) -> UserStatusResponseSchema:
         """
         Получает статус пользователя
         """
-        
+
         redis_storage = AuthRedisStorage()
 
         # Получаем пользователя из БД
@@ -356,9 +358,9 @@ class UserService(HashingMixin, BaseService):
         if not user:
             raise UserNotFoundError(
                 message=f"Пользователь с id {user_id} не найден",
-                extra={"user_id": user_id}
+                extra={"user_id": user_id},
             )
-        
+
         # Получаем онлайн статус напрямую
         is_online = await redis_storage.get_online_status(user_id)
 
@@ -366,10 +368,9 @@ class UserService(HashingMixin, BaseService):
         tokens = await redis_storage.get_user_sessions(user.email)
         last_activity = max(
             [await redis_storage.get_last_activity(token) for token in tokens],
-            default=0
+            default=0,
         )
 
         return UserStatusResponseSchema(
-            is_online=is_online,
-            last_activity=last_activity
+            is_online=is_online, last_activity=last_activity
         )

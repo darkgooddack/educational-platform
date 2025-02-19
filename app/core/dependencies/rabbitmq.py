@@ -1,8 +1,10 @@
 """
 Модуль для подключения к RabbitMQ.
 """
+
 import asyncio
 from typing import Optional
+
 from aio_pika import Connection, connect_robust
 
 from app.core.config import config

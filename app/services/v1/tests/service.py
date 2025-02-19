@@ -7,8 +7,9 @@ from app.models import AnswerModel, QuestionModel, TestModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestAnswerSchema,
                          TestCatalogSchema, TestCompleteResponse,
-                         TestCreateResponse, TestCreateSchema, TestStatus,
-                         TestDeleteResponse, TestSchema, TestUpdateResponse)
+                         TestCreateResponse, TestCreateSchema,
+                         TestDeleteResponse, TestSchema, TestStatus,
+                         TestUpdateResponse)
 from app.services import BaseService
 
 from .data_manager import TestDataManager
@@ -220,7 +221,9 @@ class TestService(BaseService):
         # Пока просто увеличиваем счетчик
         return await self.test_manager.increment_popularity(test_id)
 
-    async def update_test_status(self, test_id: int, status: TestStatus) -> TestUpdateResponse:
+    async def update_test_status(
+        self, test_id: int, status: TestStatus
+    ) -> TestUpdateResponse:
         """
         Обновляет статус теста.
         Args:

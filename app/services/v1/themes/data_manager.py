@@ -1,9 +1,11 @@
 from typing import List, Optional
 
-from sqlalchemy import or_, select, delete
+from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import BaseAPIException, DatabaseError,ThemeExistsError, ThemeNotFoundError, ThemeDeleteError, ThemeUpdateError
+from app.core.exceptions import (BaseAPIException, DatabaseError,
+                                 ThemeDeleteError, ThemeExistsError,
+                                 ThemeNotFoundError, ThemeUpdateError)
 from app.models import ThemeModel
 from app.schemas import (PaginationParams, ThemeCreateResponse,
                          ThemeCreateSchema, ThemeDeleteResponse, ThemeSchema,
@@ -195,7 +197,7 @@ class ThemeDataManager(BaseDataManager):
                 raise ThemeNotFoundError(theme_id)
             statement = delete(self.model).where(self.model.id == theme_id)
             if not await self.delete(statement):
-                    raise ThemeDeleteError(message="Не удалось удалить тему")
+                raise ThemeDeleteError(message="Не удалось удалить тему")
             return ThemeDeleteResponse(id=theme_id)
         except Exception as e:
             raise BaseAPIException(

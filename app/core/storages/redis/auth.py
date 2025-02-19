@@ -150,40 +150,39 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         except Exception as e:
             logger.debug("Ошибка при верификации: %s", str(e))
             raise
-    
+
     async def get_all_tokens(self) -> list[str]:
         """
         Получает все активные токены из Redis
-        
+
         Returns:
             list[str]: Список активных токенов
         """
         # Получаем все ключи по паттерну token:*
-        keys = await self.keys("token:*") 
-        
+        keys = await self.keys("token:*")
+
         # Убираем префикс token: из ключей
         tokens = [key.decode().split(":")[-1] for key in keys]
-        
+
         return tokens
-    
+
     async def update_last_activity(self, token: str) -> None:
         """
         Обновляет время последней активности пользователя
 
         Args:
             token: Токен пользователя
-        
+
         Returns:
             None
         """
         await self.set(
-            f"last_activity:{token}", 
-            str(int(datetime.now(timezone.utc).timestamp()))
+            f"last_activity:{token}", str(int(datetime.now(timezone.utc).timestamp()))
         )
 
     async def get_last_activity(self, token: str) -> Optional[int]:
         """
-        Получает время последней активности пользователя 
+        Получает время последней активности пользователя
 
         Args:
             token: Токен пользователя
@@ -197,11 +196,11 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
     async def set_online_status(self, user_id: int, is_online: bool) -> None:
         """
         Устанавливает статус онлайн/офлайн пользователя
-        
+
         Args:
             user_id: ID пользователя
             is_online: Статус онлайн/офлайн
-        
+
         Returns:
             None
         """
@@ -219,7 +218,7 @@ class AuthRedisStorage(BaseRedisStorage, TokenMixin):
         """
         status = await self.get(f"online:{user_id}")
         return status == "True" if status else False
-    
+
     async def get_user_sessions(self, email: str) -> list[str]:
         """
         Получает все активные сессии пользователя

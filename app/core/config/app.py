@@ -93,6 +93,7 @@ class LogConfig:
         PRETTY_FORMAT (str): Формат для человекочитаемых логов
         JSON_FORMAT (dict): Структура JSON лога
     """
+
     def __init__(self, settings):
         self.LOG_FORMAT = settings.log_format
         self.LOG_FILE = settings.log_file
@@ -109,7 +110,7 @@ class LogConfig:
             "level": "%(levelname)s",
             "module": "%(module)s",
             "function": "%(funcName)s",
-            "message": "%(message)s"
+            "message": "%(message)s",
         }
 
     def to_dict(self) -> dict:
@@ -123,7 +124,7 @@ class LogConfig:
             "format": self.PRETTY_FORMAT if self.LOG_FORMAT == "pretty" else None,
             "json_format": self.JSON_FORMAT if self.LOG_FORMAT == "json" else None,
             "force": True,
-            "file_json": True
+            "file_json": True,
         }
 
 
@@ -188,13 +189,12 @@ class AppConfig:
     )
 
     token_expire_minutes: int = Field(
-        default=1440, #  24 часа
-        description="Время жизни токена в минутах"
+        default=1440, description="Время жизни токена в минутах (24 часа)"  
     )
 
     user_inactive_timeout: int = Field(
-        default=900,  # 15 минут
-        description="Время в секундах после которого пользователь считается неактивным"
+        default=900,
+        description="Время в секундах после которого пользователь считается неактивным (15 минут)",
     )
 
     redis_pool_size: int = Field(

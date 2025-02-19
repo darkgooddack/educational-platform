@@ -14,13 +14,13 @@ from app.core.exceptions.v1.base import BaseAPIException, DatabaseError
 
 
 class TestError(BaseAPIException):
-    def __init__(self, message: str, error_type: str, status_code: int = 400, extra: dict = None):
+    def __init__(
+        self, message: str, error_type: str, status_code: int = 400, extra: dict = None
+    ):
         super().__init__(
-            status_code=status_code,
-            detail=message,
-            error_type=error_type,
-            extra=extra
+            status_code=status_code, detail=message, error_type=error_type, extra=extra
         )
+
 
 class TestGetError(TestError):
     def __init__(self, message: str, extra: dict = None):
@@ -28,8 +28,9 @@ class TestGetError(TestError):
             message=f"Ошибка при получении теста: {message}",
             error_type="test_get_error",
             status_code=500,
-            extra=extra
+            extra=extra,
         )
+
 
 class TestTransformError(TestError):
     def __init__(self, message: str, extra: dict = None):
@@ -37,16 +38,17 @@ class TestTransformError(TestError):
             message=f"Ошибка при преобразовании теста: {message}",
             error_type="test_transform_error",
             status_code=500,
-            extra=extra
+            extra=extra,
         )
-        
+
+
 class TestNotFoundError(TestError):
     def __init__(self, test_id: int = None):
         super().__init__(
             message="Тест не найден",
             error_type="test_not_found",
             status_code=404,
-            extra={"test_id": test_id} if test_id else None
+            extra={"test_id": test_id} if test_id else None,
         )
 
 
@@ -105,26 +107,29 @@ class TestDeleteError(DatabaseError):
     def __init__(self, message: str, extra: dict = None):
         super().__init__(message=f"Ошибка при удалении теста: {message}", extra=extra)
 
+
 class TestCreateError(TestError):
     def __init__(self, message: str, extra: dict = None):
         super().__init__(
             message=f"Ошибка при создании теста: {message}",
             error_type="test_create_error",
-            extra=extra
+            extra=extra,
         )
+
 
 class QuestionCreateError(TestError):
     def __init__(self, message: str, extra: dict = None):
         super().__init__(
             message=f"Ошибка при создании вопроса: {message}",
             error_type="question_create_error",
-            extra=extra
+            extra=extra,
         )
+
 
 class AnswerCreateError(TestError):
     def __init__(self, message: str, extra: dict = None):
         super().__init__(
-            message=f"Ошибка при создании ответа: {message}", 
+            message=f"Ошибка при создании ответа: {message}",
             error_type="answer_create_error",
-            extra=extra
+            extra=extra,
         )

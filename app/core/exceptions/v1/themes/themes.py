@@ -11,14 +11,15 @@
 
 from app.core.exceptions.v1.base import BaseAPIException, DatabaseError
 
+
 class ThemeError(BaseAPIException):
-    def __init__(self, message: str, error_type: str, status_code: int = 400, extra: dict = None):
+    def __init__(
+        self, message: str, error_type: str, status_code: int = 400, extra: dict = None
+    ):
         super().__init__(
-            status_code=status_code,
-            detail=message,
-            error_type=error_type,
-            extra=extra
+            status_code=status_code, detail=message, error_type=error_type, extra=extra
         )
+
 
 class ThemeNotFoundError(ThemeError):
     def __init__(self, theme_id: int = None):
@@ -26,7 +27,7 @@ class ThemeNotFoundError(ThemeError):
             message="Тема не найдена",
             error_type="theme_not_found",
             status_code=404,
-            extra={"theme_id": theme_id} if theme_id else None
+            extra={"theme_id": theme_id} if theme_id else None,
         )
 
 
@@ -46,6 +47,7 @@ class ThemeExistsError(BaseAPIException):
             extra={"theme_name": name},
         )
 
+
 class ThemeUpdateError(DatabaseError):
     """
     Ошибка при обновлении темы в базе данных.
@@ -53,6 +55,7 @@ class ThemeUpdateError(DatabaseError):
 
     def __init__(self, message: str, extra: dict = None):
         super().__init__(message=f"Ошибка при обновлении темы: {message}", extra=extra)
+
 
 class ThemeDeleteError(DatabaseError):
     """

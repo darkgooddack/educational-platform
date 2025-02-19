@@ -5,18 +5,18 @@ from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload, selectinload
 
-from app.core.exceptions import (BaseAPIException, DatabaseError,
-                               QuestionNotFoundError, TestDeleteError,
-                               TestNotFoundError, TestUpdateError,
-                               TestGetError, TestTransformError,
-                               TestCreateError, QuestionCreateError,
-                               AnswerCreateError)
+from app.core.exceptions import (AnswerCreateError, BaseAPIException,
+                                 DatabaseError, QuestionCreateError,
+                                 QuestionNotFoundError, TestCreateError,
+                                 TestDeleteError, TestGetError,
+                                 TestNotFoundError, TestTransformError,
+                                 TestUpdateError)
 from app.models import AnswerModel, QuestionModel, TestModel, ThemeModel
 from app.schemas import (AnswerCreateSchema, PaginationParams,
                          QuestionCreateSchema, TestCatalogSchema,
                          TestCompleteResponse, TestCreateResponse,
                          TestCreateSchema, TestDeleteResponse, TestSchema,
-                         TestUpdateResponse, TestStatus)
+                         TestStatus, TestUpdateResponse)
 from app.services import BaseEntityManager
 
 
@@ -62,7 +62,8 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                     type=q.type,
                     points=q.points,
                     answers=[
-                        AnswerModel(text=a.text, is_correct=a.is_correct) for a in q.answers
+                        AnswerModel(text=a.text, is_correct=a.is_correct)
+                        for a in q.answers
                     ],
                 )
                 for q in questions
@@ -76,8 +77,9 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 status_code=500,
                 detail="Ошибка при создании теста",
                 error_type="test_create_error",
-                extra={"error": str(e), "traceback": traceback.format_exc()}
+                extra={"error": str(e), "traceback": traceback.format_exc()},
             )
+
     def _transform_test(self, item: TestModel) -> dict:
         """
         Преобразует модель теста перед валидацией схемы.
@@ -147,8 +149,9 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 status_code=500,
                 detail="Ошибка при получении тестов",
                 error_type="test_get_error",
-                extra={"error": str(e), "traceback": traceback.format_exc()}
+                extra={"error": str(e), "traceback": traceback.format_exc()},
             )
+
     async def get_tests_paginated(
         self,
         pagination: PaginationParams,
@@ -186,7 +189,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                     or_(
                         self.model.title.ilike(f"%{search}%"),
                         self.model.description.ilike(f"%{search}%"),
-                        ThemeModel.name.ilike(f"%{search}%")
+                        ThemeModel.name.ilike(f"%{search}%"),
                     )
                 )
             items, total = await self.get_paginated(
@@ -203,7 +206,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 status_code=500,
                 detail="Ошибка при получении списка тестов",
                 error_type="test_get_error",
-                extra={"error": str(e), "traceback": traceback.format_exc()}
+                extra={"error": str(e), "traceback": traceback.format_exc()},
             )
 
     async def get_test(self, test_id: int) -> TestSchema:
@@ -228,7 +231,11 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 status_code=500,
                 detail="Ошибка при получении теста",
                 error_type="test_get_error",
-                extra={"test_id": test_id, "error": str(e), "traceback": traceback.format_exc()}
+                extra={
+                    "test_id": test_id,
+                    "error": str(e),
+                    "traceback": traceback.format_exc(),
+                },
             )
 
     async def add_question(
@@ -267,7 +274,11 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 status_code=500,
                 detail="Ошибка при добавлении вопроса",
                 error_type="question_create_error",
-                extra={"test_id": test_id, "error": str(e), "traceback": traceback.format_exc()}
+                extra={
+                    "test_id": test_id,
+                    "error": str(e),
+                    "traceback": traceback.format_exc(),
+                },
             )
 
     async def add_answer(
@@ -306,7 +317,11 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 status_code=500,
                 detail="Ошибка при добавлении ответа",
                 error_type="answer_create_error",
-                extra={"question_id": question_id, "error": str(e), "traceback": traceback.format_exc()}
+                extra={
+                    "question_id": question_id,
+                    "error": str(e),
+                    "traceback": traceback.format_exc(),
+                },
             )
 
     async def update_test(
@@ -418,9 +433,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
 
             found_test.popularity_count += 1
 
-            updated_test = await self.update_one(
-                model_to_update=found_test
-            )
+            updated_test = await self.update_one(model_to_update=found_test)
 
             return TestCompleteResponse(item=updated_test)
 
@@ -447,7 +460,9 @@ class TestDataManager(BaseEntityManager[TestSchema]):
                 },
             ) from e
 
-    async def update_test_status(self, test_id: int, status: TestStatus) -> TestUpdateResponse:
+    async def update_test_status(
+        self, test_id: int, status: TestStatus
+    ) -> TestUpdateResponse:
         try:
             statement = select(self.model).where(self.model.id == test_id)
             found_test = await self.get_one(statement)
@@ -460,7 +475,7 @@ class TestDataManager(BaseEntityManager[TestSchema]):
             return TestUpdateResponse(
                 id=test_id,
                 success=True,
-                message=f"Статус теста изменен на {status.value}"
+                message=f"Статус теста изменен на {status.value}",
             )
         except DatabaseError as db_error:
             raise TestUpdateError(

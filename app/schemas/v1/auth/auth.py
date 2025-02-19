@@ -40,7 +40,8 @@ class TokenResponseSchema(BaseResponseSchema):
     """
     Схема ответа с токеном доступа
 
-    Swagger UI ожидает строго определенный формат ответа для OAuth2 password flow (access_token и token_type обязательны, другие поля игнорируются)
+    Swagger UI ожидает строго определенный формат ответа для OAuth2 password flow 
+    (access_token и token_type обязательны, другие поля игнорируются)
 
     Docs:
         https://swagger.io/docs/specification/authentication/oauth2/

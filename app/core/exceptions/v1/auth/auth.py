@@ -49,8 +49,7 @@ class InvalidEmailFormatError(AuthenticationError):
 
     def __init__(self, email: str):
         super().__init__(
-            message=f"Неверный формат email: {email}",
-            extra={"email": email}
+            message=f"Неверный формат email: {email}", extra={"email": email}
         )
 
 
@@ -60,9 +59,7 @@ class InvalidPasswordError(AuthenticationError):
     """
 
     def __init__(self):
-        super().__init__(
-            message="Неверный пароль"
-        )
+        super().__init__(message="Неверный пароль")
 
 
 class WeakPasswordError(AuthenticationError):
@@ -75,9 +72,7 @@ class WeakPasswordError(AuthenticationError):
 
     def __init__(self):
         def __init__(self):
-            super().__init__(
-                message="Пароль должен быть минимум 8 символов!"
-            )
+            super().__init__(message="Пароль должен быть минимум 8 символов!")
 
 
 class TokenError(AuthenticationError):
@@ -86,10 +81,7 @@ class TokenError(AuthenticationError):
     def __init__(
         self, detail: str, error_type: str = "token_error", extra: dict = None
     ):
-        super().__init__(
-            message=detail,
-            extra=extra or {"token_error": True}
-        )
+        super().__init__(message=detail, extra=extra or {"token_error": True})
 
 
 class TokenMissingError(TokenError):

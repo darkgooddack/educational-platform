@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies import get_db_session
 from app.core.storages.redis.auth import AuthRedisStorage
 from app.schemas import (ManagerSelectSchema, Page, PaginationParams, UserRole,
-                         UserSchema, UserUpdateSchema, UserStatusResponseSchema)
+                         UserSchema, UserStatusResponseSchema,
+                         UserUpdateSchema)
 from app.services import UserService
 
 
@@ -95,11 +96,9 @@ def setup_routes(router: APIRouter):
         """
         return await UserService(db_session).get_managers()
 
-
     @router.get("/users/{user_id}/status", response_model=UserStatusResponseSchema)
     async def get_user_status(
-        user_id: int,
-        db_session: AsyncSession = Depends(get_db_session)
+        user_id: int, db_session: AsyncSession = Depends(get_db_session)
     ) -> UserStatusResponseSchema:
         """
         Получение статуса пользователя.
@@ -110,6 +109,6 @@ def setup_routes(router: APIRouter):
             UserStatusResponseSchema: Статус пользователя.
         """
         return await UserService(db_session).get_user_status(user_id)
-        
+
 
 __all__ = ["setup_routes"]

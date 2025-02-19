@@ -7,10 +7,11 @@
 - Конфигурацию CORS политик
 - Управление доступом к документации API
 """
-import os
+
 import logging
+import os
 import secrets
-from typing import Any, Dict, List, ClassVar
+from typing import Any, ClassVar, Dict, List
 
 from pydantic import AmqpDsn, Field, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -52,13 +53,14 @@ class Settings(BaseSettings):
             'allow_headers': ['*']
         }
     """
+
     app_env: str = Field(default="dev", description="Окружение приложения")
 
     log_format: str = Field(default="pretty", description="Формат логов (pretty/json)")
 
     log_file: str = Field(
-        default="./logs/app.log" if os.name == 'nt' else "/var/log/app.log",
-        description="Путь к файлу логов"
+        default="./logs/app.log" if os.name == "nt" else "/var/log/app.log",
+        description="Путь к файлу логов",
     )
 
     aws_service_name: str = Field(default="s3", description="Сервис AWS")
@@ -99,7 +101,7 @@ class Settings(BaseSettings):
         description="Ссылка для подключения к базе данных",
     )
 
-    rabbitmq_host: ClassVar[str] = 'localhost'
+    rabbitmq_host: ClassVar[str] = "localhost"
     rabbitmq_dsn: AmqpDsn = Field(
         default=f"amqp://guest:guest@{rabbitmq_host}:5672/",
         description="URL подключения к RabbitMQ",

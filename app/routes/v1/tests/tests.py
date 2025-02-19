@@ -20,8 +20,8 @@ from app.schemas import (AnswerCreateSchema, Page, PaginationParams,
                          QuestionCreateSchema, TestAnswerSchema,
                          TestCatalogSchema, TestCompleteResponse,
                          TestCreateResponse, TestCreateSchema,
-                         TestDeleteResponse, TestSchema, TestUpdateResponse,
-                         UserCredentialsSchema, TestStatus)
+                         TestDeleteResponse, TestSchema, TestStatus,
+                         TestUpdateResponse, UserCredentialsSchema)
 from app.services import TestService
 
 logger = logging.getLogger(__name__)
@@ -261,7 +261,7 @@ def setup_routes(router: APIRouter):
         return await service.complete_test_with_answers(
             test_id=test_id, user_id=current_user.id, answers=answers
         )
-    
+
     @router.patch("/{test_id}/status", response_model=TestUpdateResponse)
     async def update_test_status(
         test_id: int,
@@ -274,5 +274,6 @@ def setup_routes(router: APIRouter):
         """
         service = TestService(db_session)
         return await service.update_test_status(test_id, status)
+
 
 __all__ = ["setup_routes"]

@@ -17,6 +17,7 @@ dependencies = [
     "bcrypt>=4.2.1",
     "fastapi[all]>=0.115.6",
     "passlib>=1.7.4",
+    "pre-commit>=4.1.0",
     "pydantic>=2.10.4",
     "pydantic-settings>=2.7.1",
     "python-jose>=3.3.0",

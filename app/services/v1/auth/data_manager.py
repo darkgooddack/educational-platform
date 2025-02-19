@@ -42,20 +42,16 @@ class AuthDataManager(BaseEntityManager[UserSchema]):
             user_id,
             {
                 "is_online": is_online,
-                "last_seen": datetime.now(timezone.utc) if not is_online else None
-            }
+                "last_seen": datetime.now(timezone.utc) if not is_online else None,
+            },
         )
 
     async def update_last_seen(self, user_id: int) -> None:
         """
         Обновляет время последнего визита
         """
-        await self.update_fields(
-            user_id,
-            {
-                "last_seen": datetime.now(timezone.utc)
-            }
-        )
+        await self.update_fields(user_id, {"last_seen": datetime.now(timezone.utc)})
+
 
 # TODO: Добавить методы для работы с данными пользователей, ниже приведены примеры методов
 

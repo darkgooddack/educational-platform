@@ -5,18 +5,17 @@
 
 import logging
 from datetime import datetime, timezone
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import (
-    InvalidCredentialsError, UserInactiveError,
-    TokenExpiredError, TokenInvalidError
-)
+from app.core.config import config
+from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
+                                 TokenInvalidError, UserInactiveError)
 from app.core.security import HashingMixin, TokenMixin
 from app.core.storages.redis.auth import AuthRedisStorage
 from app.schemas import (AuthSchema, TokenResponseSchema, TokenSchema,
                          UserCredentialsSchema)
 from app.services.v1.base import BaseService
-from app.core.config import config
 
 from .data_manager import AuthDataManager
 
@@ -68,31 +67,24 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             extra={
                 "email": credentials.email,
                 "has_password": bool(credentials.password),
-            }
+            },
         )
-
 
         user_model = await self._data_manager.get_user_by_credentials(credentials.email)
 
         logger.info(
             "Начало аутентификации",
-            extra={
-                "email": credentials.email,
-                "user_found": bool(user_model)
-            }
+            extra={"email": credentials.email, "user_found": bool(user_model)},
         )
 
         if not user_model:
-            logger.warning(
-                "Пользователь не найден",
-                extra={"email": credentials.email}
-            )
+            logger.warning("Пользователь не найден", extra={"email": credentials.email})
             raise InvalidCredentialsError()
 
         if not user_model.is_active:
             logger.warning(
                 "Попытка входа в неактивный аккаунт",
-                extra={"email": credentials.email, "user_id": user_model.id}
+                extra={"email": credentials.email, "user_id": user_model.id},
             )
             raise UserInactiveError(
                 message="Аккаунт деактивирован", extra={"email": credentials.email}
@@ -103,7 +95,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         ):
             logger.warning(
                 "Неверный пароль",
-                extra={"email": credentials.email, "user_id": user_model.id}
+                extra={"email": credentials.email, "user_id": user_model.id},
             )
             raise InvalidCredentialsError()
 
@@ -114,8 +106,8 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             extra={
                 "user_id": user_schema.id,
                 "email": user_schema.email,
-                **({"role": user_schema.role} if hasattr(user_schema, "role") else {})
-            }
+                **({"role": user_schema.role} if hasattr(user_schema, "role") else {}),
+            },
         )
 
         # Обновляем статус при входе через redis, снимая тем самым нагрузку с базы данных
@@ -129,8 +121,8 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             extra={
                 "user_id": user_schema.id,
                 "email": user_schema.email,
-                "is_online": True
-            }
+                "is_online": True,
+            },
         )
 
         token = await self.create_token(user_schema)
@@ -160,10 +152,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         await self._redis_storage.save_token(user_schema, token)
         logger.info(
             "Токен сохранен в Redis",
-            extra={
-                "user_id": user_schema.id,
-                "token_length": len(token)
-            }
+            extra={"user_id": user_schema.id, "token_length": len(token)},
         )
 
         return TokenResponseSchema(
@@ -202,10 +191,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
                 await self._redis_storage.set_online_status(user.id, False)
                 logger.debug(
                     "Пользователь вышел из системы",
-                    extra={
-                        "user_id": user.id,
-                        "is_online": False
-                    }
+                    extra={"user_id": user.id, "is_online": False},
                 )
                 # Последнюю активность сохраняем в момент выхода
                 await self._redis_storage.update_last_activity(token)
@@ -251,7 +237,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
                                 "last_activity": last_activity,
                                 "now": now,
                                 "timeout": config.user_inactive_timeout,
-                            }
+                            },
                         )
                     await self._redis_storage.remove_token(token)
             except TokenExpiredError:
@@ -268,7 +254,7 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
                             "email": user.email,
                             "last_activity": last_activity,
                             "now": now,
-                        }
+                        },
                     )
                 await self._redis_storage.remove_token(token)
 
@@ -277,11 +263,12 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
         users = await self._data_manager.get_all_users()
         for user in users:
             is_online = await self._redis_storage.get_online_status(user.id)
-            last_activity = await self._redis_storage.get_last_activity(f"token:{user.id}")
+            last_activity = await self._redis_storage.get_last_activity(
+                f"token:{user.id}"
+            )
 
             if last_activity:
                 last_seen = datetime.fromtimestamp(int(last_activity), tz=timezone.utc)
-                await self._data_manager.update_fields(user.id, {
-                    "is_online": is_online,
-                    "last_seen": last_seen
-                })
+                await self._data_manager.update_fields(
+                    user.id, {"is_online": is_online, "last_seen": last_seen}
+                )

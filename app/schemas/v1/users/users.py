@@ -2,14 +2,16 @@
 Модуль схем пользователя.
 """
 
+from datetime import datetime
 from enum import Enum
 from typing import Optional
-from datetime import datetime
+
 from pydantic import EmailStr, Field
 
 from app.schemas.v1.auth.register import RegistrationSchema
 
-from ..base import BaseResponseSchema, BaseInputSchema, BaseSchema, ListResponseSchema
+from ..base import (BaseInputSchema, BaseResponseSchema, BaseSchema,
+                    ListResponseSchema)
 
 
 class UserRole(str, Enum):
@@ -56,7 +58,6 @@ class UserSchema(BaseSchema):
     is_active: bool = True
     is_online: bool = False
     last_seen: Optional[datetime] = None
-    
 
 
 class UserCredentialsSchema(BaseInputSchema):
@@ -134,6 +135,7 @@ class ManagerSelectSchema(BaseResponseSchema):
     success: bool = True
     message: str = "Менеджеры успешно получены."
 
+
 class UserResponseSchema(BaseResponseSchema):
     """
     Схема ответа пользователя.
@@ -152,6 +154,7 @@ class UserResponseSchema(BaseResponseSchema):
     success: bool = True
     message: str = "Пользовател успешно получен."
 
+
 class UserStatusResponseSchema(BaseResponseSchema):
     """
     Схема ответа статуса пользователя.
@@ -162,14 +165,17 @@ class UserStatusResponseSchema(BaseResponseSchema):
         is_online (bool): Онлайн ли пользователь
         last_activity (Optional[int]): Время последней активности в Unix timestamp
     """
+
     success: bool = True
     message: str = "Статус пользователя успешно получен"
     is_online: bool
     last_activity: Optional[int] = None
 
+
 class UserStatusesListResponseSchema(ListResponseSchema[UserStatusResponseSchema]):
     """
     Схема ответа со списком статусов пользователей
     """
-    success: bool = True 
+
+    success: bool = True
     message: str = "Статусы пользователей успешно получены"

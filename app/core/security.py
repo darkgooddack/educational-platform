@@ -22,13 +22,8 @@ from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
 
-
-from app.core.exceptions import (
-    InvalidCredentialsError,
-    TokenExpiredError,
-    TokenInvalidError,
-    TokenMissingError,
-)
+from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
+                                 TokenInvalidError, TokenMissingError)
 from app.schemas import UserCredentialsSchema
 
 pwd_context = CryptContext(
@@ -102,10 +97,9 @@ class TokenMixin:
             JWT токен
         """
         from app.core.config import config
+
         return jwt.encode(
-            payload, 
-            key=TokenMixin.get_token_key(), 
-            algorithm=config.token_algorithm
+            payload, key=TokenMixin.get_token_key(), algorithm=config.token_algorithm
         )
 
     @staticmethod
@@ -123,6 +117,7 @@ class TokenMixin:
             AuthError: При невалидном токене
         """
         from app.core.config import config
+
         try:
             return jwt.decode(
                 token,
@@ -160,6 +155,7 @@ class TokenMixin:
             str: Секретный ключ для токена.
         """
         from app.core.config import config
+
         return config.token_key.get_secret_value()
 
     @staticmethod
@@ -174,6 +170,7 @@ class TokenMixin:
             int: Количество секунд до истечения токена
         """
         from app.core.config import config
+
         return config.token_expire_minutes * 60
 
     @staticmethod

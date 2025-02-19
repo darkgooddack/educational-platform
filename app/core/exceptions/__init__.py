@@ -7,7 +7,7 @@ Example:
     >>> from app.core.exceptions import UserNotFoundError, UserExistsError
     >>> raise UserNotFoundError(user_id=42)
 """
-from .v1.core.scheduler import SessionCheckError, StatusSyncError
+
 from .v1.auth.auth import (AuthenticationError, InvalidCredentialsError,
                            InvalidEmailFormatError, InvalidPasswordError,
                            WeakPasswordError)
@@ -19,18 +19,16 @@ from .v1.auth.oauth import (InvalidCallbackError, InvalidProviderError,
 from .v1.auth.security import (TokenExpiredError, TokenInvalidError,
                                TokenMissingError)
 from .v1.base import BaseAPIException, DatabaseError, ValueNotFoundError
+from .v1.core.scheduler import SessionCheckError, StatusSyncError
 from .v1.feedback.feedback import (FeedbackAddError, FeedbackDeleteError,
                                    FeedbackGetError, FeedbackUpdateError)
-from .v1.tests.tests import (QuestionNotFoundError, TestDeleteError,
-                             TestExistsError, TestNotFoundError, TestUpdateError,
-                            TestGetError, TestTransformError, TestCreateError,
-                            QuestionCreateError, AnswerCreateError)
-from .v1.themes.themes import (
-    ThemeExistsError,
-    ThemeNotFoundError,
-    ThemeUpdateError,
-    ThemeDeleteError
-)
+from .v1.tests.tests import (AnswerCreateError, QuestionCreateError,
+                             QuestionNotFoundError, TestCreateError,
+                             TestDeleteError, TestExistsError, TestGetError,
+                             TestNotFoundError, TestTransformError,
+                             TestUpdateError)
+from .v1.themes.themes import (ThemeDeleteError, ThemeExistsError,
+                               ThemeNotFoundError, ThemeUpdateError)
 from .v1.users.users import (UserCreationError, UserExistsError,
                              UserInactiveError, UserNotFoundError)
 
@@ -71,10 +69,10 @@ __all__ = [
     "TestExistsError",
     "TestUpdateError",
     "TestDeleteError",
-    "TestGetError", 
-    "TestTransformError", 
+    "TestGetError",
+    "TestTransformError",
     "TestCreateError",
-    "QuestionCreateError", 
+    "QuestionCreateError",
     "AnswerCreateError",
     "QuestionNotFoundError",
     "SessionCheckError",

@@ -13,7 +13,8 @@ from typing import List, Optional
 
 from pydantic import Field, field_validator
 
-from ..base import BaseSchema, BaseInputSchema, BaseResponseSchema, CommonBaseSchema
+from ..base import (BaseInputSchema, BaseResponseSchema, BaseSchema,
+                    CommonBaseSchema)
 
 
 class QuestionType(str, Enum):
@@ -182,6 +183,7 @@ class TestCreateSchema(BaseInputSchema):
     lecture_id: Optional[int] = None
     questions: List[QuestionCreateSchema]
     status: TestStatus = TestStatus.DRAFT
+
 
 # Схемы для ответов
 class AnswerSchema(AnswerBase):

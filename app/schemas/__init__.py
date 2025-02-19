@@ -29,7 +29,7 @@ from .v1.tests.tests import (AnswerCreateSchema, AnswerSchema,
                              QuestionType, TestAnswerSchema, TestCatalogSchema,
                              TestCompleteResponse, TestCreateResponse,
                              TestCreateSchema, TestDeleteResponse, TestSchema,
-                             TestUpdateResponse, TestStatus)
+                             TestStatus, TestUpdateResponse)
 from .v1.themes.themes import (ThemeBase, ThemeCreateResponse,
                                ThemeCreateSchema, ThemeDeleteResponse,
                                ThemeListResponse, ThemeSchema,
@@ -37,7 +37,7 @@ from .v1.themes.themes import (ThemeBase, ThemeCreateResponse,
                                ThemeUpdateResponse)
 from .v1.users.users import (ManagerSelectSchema, UserCredentialsSchema,
                              UserResponseSchema, UserRole, UserSchema,
-                             UserUpdateSchema, UserStatusResponseSchema)
+                             UserStatusResponseSchema, UserUpdateSchema)
 from .v1.videos.videos import (VideoLectureCreateResponse,
                                VideoLectureCreateSchema,
                                VideoLectureDeleteResponse,
