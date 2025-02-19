@@ -45,6 +45,7 @@ class TestBase(CommonBaseSchema):
         lecture_id: ID связанной лекции (опционально)
         popularity_count: Количество прохождения теста (популярность)
         status: Статус теста (draft, published, archived)
+        author_id: ID автора теста
     """
 
     title: str = Field(max_length=150, description="Название теста")
@@ -57,6 +58,7 @@ class TestBase(CommonBaseSchema):
     lecture_id: Optional[int] = None
     popularity_count: int
     status: TestStatus = TestStatus.DRAFT
+    author_id: int = Field(description="ID автора теста")
 
     @field_validator("title")
     @classmethod
