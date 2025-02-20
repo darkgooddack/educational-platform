@@ -122,7 +122,7 @@ class AIChatService(BaseService):
             raise
 
 
-@dataclass
+#@dataclass
 class PricingCalculator:
     """
     Калькулятор стоимости использования моделей
