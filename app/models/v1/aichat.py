@@ -1,13 +1,14 @@
 # from sqlalchemy import ForeignKey, String, Text
 # from sqlalchemy.orm import Mapped, mapped_column, relationship
 # from app.schemas import MessageRole, ModelType, ModelVersion
-# from app.models import BaseModel
+from app.models import BaseModel
 # from app.models.v1 import TYPE_CHECKING
 
 # if TYPE_CHECKING:
 #     from app.models.v1.users import UserModel
 
-# class ChatModel(BaseModel):
+class ChatModel(BaseModel):
+    pass
 #     """
 #     Модель для хранения чатов
 
