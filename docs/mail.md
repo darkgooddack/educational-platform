@@ -48,13 +48,13 @@ class EmailProducer:
     async def send_email_task(self, to_email: str, subject: str, body: str):
         if not self.connection:
             await self.connect()
-            
+
         message = {
             "to_email": to_email,
             "subject": subject,
             "body": body
         }
-        
+
         await self.channel.default_exchange.publish(
             Message(json.dumps(message).encode()),
             routing_key=self.queue_name
@@ -67,7 +67,7 @@ import json
 import asyncio
 from aio_pika import connect_robust
 from app.core.config import config
-from app.core.services.email import EmailService
+from app.core.services.v1.email import EmailService
 
 class EmailConsumer:
     def __init__(self):
@@ -93,7 +93,7 @@ class EmailConsumer:
     async def run(self):
         if not self.connection:
             await self.connect()
-            
+
         async with self.queue.iterator() as queue_iter:
             async for message in queue_iter:
                 await self.process_message(message)
@@ -123,7 +123,7 @@ async def send_email(to_email: str, subject: str, body: str):
 ```python
 class Settings(BaseSettings):
     smtp_server: str = Field("mail.ebtest.ru", description="SMTP сервер")
-    smtp_port: int = Field(587, description="SMTP порт") 
+    smtp_port: int = Field(587, description="SMTP порт")
     sender_email: str = Field("noreply@ebtest.ru", description="Email отправителя")
     smtp_password: SecretStr
 ```
@@ -266,7 +266,7 @@ mail._domainkey.ebtest.ru TXT "v=DKIM1; k=ed25519; p=<your_public_key>"
 Добавь mail.ebtest.ru в список доменов
 Выбери challenge type (http или dns)
 Дождись выпуска сертификата
-После этого можно будет настраивать AI и другие крутые фичи! 
+После этого можно будет настраивать AI и другие крутые фичи!
 
 Stalwart может использовать AI для:
 

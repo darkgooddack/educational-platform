@@ -1,7 +1,7 @@
 import json
 from aio_pika import connect_robust
 from app.core.config import config
-from app.services import EmailService
+from app.services.v1.email.service import EmailService
 
 class EmailConsumer:
     def __init__(self):
