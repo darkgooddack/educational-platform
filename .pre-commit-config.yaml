@@ -6,3 +6,5 @@ repos:
         entry: uv run format
         language: system
         pass_filenames: false
+        stages: [commit]
+        always_run: true
