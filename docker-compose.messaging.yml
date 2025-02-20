@@ -19,22 +19,6 @@ services:
     networks:
       - dokploy-network
 
-  mailserver:
-    image: stalwartlabs/mail-server:latest
-    container_name: stalwart-mail
-    ports:
-      - "25:25"     # SMTP
-      - "587:587"   # SMTP с TLS
-      - "465:465"   # SMTP SSL
-      - "143:143"   # IMAP
-      - "993:993"   # IMAP SSL
-      - "8081:8080" # Веб-интерфейс
-    volumes:
-      - ./mail_data:/opt/stalwart-mail
-    restart: unless-stopped
-    networks:
-      - dokploy-network
-
 networks:
   dokploy-network:
     external: true
