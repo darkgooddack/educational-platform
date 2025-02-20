@@ -56,12 +56,15 @@ class BaseHttpClient:
             session = await self._get_session()
             self.logger.debug("POST запрос к %s с данными %s", url, data)
             # Проверяем Content-Type
-            if headers and headers.get("Content-Type") == "application/x-www-form-urlencoded":
-            # Для OAuth используем data как есть
+            if (
+                headers
+                and headers.get("Content-Type") == "application/x-www-form-urlencoded"
+            ):
+                # Для OAuth используем data как есть
                 async with session.post(url, data=data, headers=headers) as resp:
                     return await resp.json()
             else:
-            # Для остальных запросов используем json
+                # Для остальных запросов используем json
                 async with session.post(url, json=data, headers=headers) as resp:
                     return await resp.json()
         finally:

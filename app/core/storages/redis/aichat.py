@@ -1,7 +1,9 @@
 import json
 from typing import List
+
 from app.core.storages.redis.base import BaseRedisStorage
 from app.schemas import Message
+
 
 class AIChatRedisStorage(BaseRedisStorage):
     """

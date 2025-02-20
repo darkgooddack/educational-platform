@@ -1,9 +1,11 @@
-
 import json
-from app.schemas import AIChatRequest, AIChatResponse, Result
-from app.core.exceptions import AIChatAuthError, AIChatCompletionError
+
 from app.core.config import config
+from app.core.exceptions import AIChatAuthError, AIChatCompletionError
+from app.schemas import AIChatRequest, AIChatResponse, Result
+
 from .base import BaseHttpClient
+
 
 class AIChatHttpClient(BaseHttpClient):
     """
@@ -25,7 +27,7 @@ class AIChatHttpClient(BaseHttpClient):
         """
         headers = {
             "Authorization": f"Api-Key {config.yandex_api_key.get_secret_value()}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         if not config.yandex_api_key:
@@ -41,9 +43,7 @@ class AIChatHttpClient(BaseHttpClient):
             self.logger.debug("Request data: %s", request_data)
 
             response = await self.post(
-                url=config.yandex_api_url,
-                headers=headers,
-                data=request_data
+                url=config.yandex_api_url, headers=headers, data=request_data
             )
 
             self.logger.debug("Raw response from API: %s", response)
@@ -64,7 +64,9 @@ class AIChatHttpClient(BaseHttpClient):
 
             result_data = response.get("result", {})
 
-            if not all(key in result_data for key in ["alternatives", "usage", "modelVersion"]):
+            if not all(
+                key in result_data for key in ["alternatives", "usage", "modelVersion"]
+            ):
                 self.logger.error("Invalid response structure: %s", response)
                 raise AIChatCompletionError("Неверная структура ответа от API")
 
@@ -74,10 +76,7 @@ class AIChatHttpClient(BaseHttpClient):
             #     "modelVersion": response.get("modelVersion", "unknown")
             # }
 
-            return AIChatResponse(
-                success=True,
-                result=Result(**result_data)
-            )
+            return AIChatResponse(success=True, result=Result(**result_data))
 
         except Exception as e:
             self.logger.error("Ошибка при запросе к API Yandex: %s", str(e))

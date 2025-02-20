@@ -4,6 +4,8 @@
 Предоставляет единую точку доступа ко всем Pydantic схемам.
 """
 
+from .v1.aichat.aichat import (AIChatRequest, AIChatResponse,
+                               CompletionOptions, Message, MessageRole, Result)
 from .v1.auth.auth import AuthSchema, TokenResponseSchema, TokenSchema
 from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema
 from .v1.base import (BaseInputSchema, BaseResponseSchema, BaseSchema,
@@ -43,7 +45,6 @@ from .v1.videos.videos import (VideoLectureCreateResponse,
                                VideoLectureDeleteResponse,
                                VideoLectureListResponse, VideoLectureSchema,
                                VideoLectureUpdateResponse)
-from .v1.aichat.aichat import (Message, MessageRole, AIChatRequest, AIChatResponse, CompletionOptions, Result)
 
 __all__ = [
     "BaseSchema",

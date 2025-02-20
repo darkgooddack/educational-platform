@@ -1,14 +1,16 @@
-
 import logging
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas import Message, MessageRole, AIChatResponse, AIChatRequest, CompletionOptions
-from app.services.v1.base import BaseService
-from app.core.http.aichat import AIChatHttpClient
-from app.core.storages.redis.aichat import AIChatRedisStorage
 
 from app.core.config import config
+from app.core.http.aichat import AIChatHttpClient
+from app.core.storages.redis.aichat import AIChatRedisStorage
+from app.schemas import (AIChatRequest, AIChatResponse, CompletionOptions,
+                         Message, MessageRole)
+from app.services.v1.base import BaseService
 
 logger = logging.getLogger(__name__)
+
 
 class AIChatService(BaseService):
     """
@@ -18,6 +20,7 @@ class AIChatService(BaseService):
         session: Сессия базы данных
         http_client: HTTP клиент для работы с AI API
     """
+
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.session = session
@@ -25,9 +28,13 @@ class AIChatService(BaseService):
         self.storage = AIChatRedisStorage()
         self.max_tokens = 4000  # Максимальное количество токенов в сообщении
 
-    SYSTEM_MESSAGE = Message(role="system", text="Ты умный ассистент, который помогает пользователям")
+    SYSTEM_MESSAGE = Message(
+        role="system", text="Ты умный ассистент, который помогает пользователям"
+    )
 
-    async def get_completion(self, message: str, user_id: int, role: MessageRole = MessageRole.USER) -> AIChatResponse:
+    async def get_completion(
+        self, message: str, user_id: int, role: MessageRole = MessageRole.USER
+    ) -> AIChatResponse:
         """
         Получает ответ от модели на основе истории сообщений
 
@@ -53,7 +60,7 @@ class AIChatService(BaseService):
             request = AIChatRequest(
                 modelUri=config.yandex_model_uri,
                 completionOptions=CompletionOptions(maxTokens=str(self.max_tokens)),
-                messages=messages
+                messages=messages,
             )
 
             async with self.http_client as client:
@@ -63,7 +70,7 @@ class AIChatService(BaseService):
                 if response.success:
                     assistant_message = Message(
                         role=MessageRole.ASSISTANT,
-                        text=response.result.alternatives[0].message.text
+                        text=response.result.alternatives[0].message.text,
                     )
                     message_history.append(assistant_message)
 

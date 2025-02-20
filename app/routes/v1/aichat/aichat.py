@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, Form
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.dependencies import get_current_user, get_db_session
 from app.schemas import AIChatResponse, UserCredentialsSchema
 from app.services import AIChatService
+
 
 def setup_routes(router: APIRouter):
 
@@ -49,5 +51,6 @@ def setup_routes(router: APIRouter):
         """
         aichat_service = AIChatService(db_session)
         return await aichat_service.get_completion(message, current_user.id)
+
 
 __all__ = ["setup_routes"]

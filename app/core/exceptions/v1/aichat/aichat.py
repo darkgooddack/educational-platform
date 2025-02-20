@@ -16,7 +16,7 @@ class AIChatCompletionError(AIChatError):
             message=f"Ошибка при получении ответа от AI: {message}",
             error_type="ai_completion_error",
             status_code=500,
-            extra=extra
+            extra=extra,
         )
 
 
@@ -26,14 +26,10 @@ class AIChatConfigError(AIChatError):
             message=f"Ошибка конфигурации AI: {message}",
             error_type="ai_config_error",
             status_code=500,
-            extra=extra
+            extra=extra,
         )
 
 
 class AIChatAuthError(AIChatError):
     def __init__(self, message: str = "Ошибка авторизации в API"):
-        super().__init__(
-            message=message,
-            error_type="ai_auth_error",
-            status_code=401
-        )
+        super().__init__(message=message, error_type="ai_auth_error", status_code=401)

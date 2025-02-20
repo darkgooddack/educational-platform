@@ -8,6 +8,7 @@ Example:
     >>> raise UserNotFoundError(user_id=42)
 """
 
+from .v1.aichat.aichat import AIChatAuthError, AIChatCompletionError
 from .v1.auth.auth import (AuthenticationError, InvalidCredentialsError,
                            InvalidEmailFormatError, InvalidPasswordError,
                            WeakPasswordError)
@@ -31,7 +32,6 @@ from .v1.themes.themes import (ThemeDeleteError, ThemeExistsError,
                                ThemeNotFoundError, ThemeUpdateError)
 from .v1.users.users import (UserCreationError, UserExistsError,
                              UserInactiveError, UserNotFoundError)
-from .v1.aichat.aichat import (AIChatAuthError, AIChatCompletionError)
 
 __all__ = [
     "BaseAPIException",

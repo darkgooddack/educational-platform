@@ -62,31 +62,23 @@ class Settings(BaseSettings):
     smtp_password: SecretStr
 
     yandex_model_name: str = Field(
-        default="yandexgpt-lite",
-        description="Название модели Yandex GPT"
+        default="yandexgpt-lite", description="Название модели Yandex GPT"
     )
 
     yandex_api_url: str = Field(
         default="https://llm.api.cloud.yandex.net/foundationModels/v1/completion",
-        description="URL API Yandex GPT"
+        description="URL API Yandex GPT",
     )
     # Ключ доступа к API Yandex GPT
     yandex_api_key: SecretStr
 
-
-    yandex_folder_id: str = Field(
-        description="ID каталога в Yandex Cloud"
-    )
+    yandex_folder_id: str = Field(description="ID каталога в Yandex Cloud")
 
     yandex_max_tokens: int = Field(
-        default=2000,
-        description="Максимальное количество токенов"
+        default=2000, description="Максимальное количество токенов"
     )
 
-    yandex_temperature: float = Field(
-        default=0.6,
-        description="Температура генерации"
-    )
+    yandex_temperature: float = Field(default=0.6, description="Температура генерации")
 
     @property
     def yandex_model_uri(self) -> str:
@@ -97,6 +89,7 @@ class Settings(BaseSettings):
             str: URI в формате gpt://{folder_id}/{model_name}
         """
         return f"gpt://{self.yandex_folder_id}/{self.yandex_model_name}"
+
     log_format: str = Field(default="pretty", description="Формат логов (pretty/json)")
 
     log_file: str = Field(
