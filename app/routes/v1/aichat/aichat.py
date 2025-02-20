@@ -11,7 +11,7 @@ def setup_routes(router: APIRouter):
     @router.post("/completion", response_model=AIChatResponse)
     async def get_aichat_completion(
         message: str = Form(...),
-        async_mode: bool = Query(False, description="Использовать асинхронный режим"),
+        # async_mode: bool = Query(False, description="Использовать асинхронный режим"),
         current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ):
@@ -55,8 +55,8 @@ def setup_routes(router: APIRouter):
         ```
         """
         aichat_service = AIChatService(db_session)
-        if async_mode:
-            return await aichat_service.get_completion_async(message, current_user.id)
+        # if async_mode:
+            # return await aichat_service.get_completion_async(message, current_user.id)
         return await aichat_service.get_completion(message, current_user.id)
 
 
