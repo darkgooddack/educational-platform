@@ -20,6 +20,7 @@ from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import BaseModel
+from app.models.v1.aichat import ChatModel, UsageModel
 from app.models.v1.feedbacks import FeedbackModel
 from app.models.v1.lectures import LectureModel
 from app.models.v1.posts import PostModel
@@ -54,6 +55,8 @@ class UserModel(BaseModel):
         tests (list[TestModel]): Список тестов, созданных пользователем.
         lectures (list[LectureModel]): Список лекций, созданных пользователем.
         posts (list[PostModel]): Список постов, созданных пользователем.
+        chats (list[ChatModel]): Список чатов, созданных пользователем.
+        aichat_usage (list[AIChatUsageModel]): Список использования AI пользователя.
     """
 
     __tablename__ = "users"
@@ -87,4 +90,9 @@ class UserModel(BaseModel):
     )
     posts: Mapped[list["PostModel"]] = relationship(
         "PostModel", back_populates="author"
+    )
+    chats: Mapped[list["ChatModel"]] = relationship("ChatModel", back_populates="user")
+
+    aichat_usage: Mapped[list["UsageModel"]] = relationship(
+        "UsageModel", back_populates="user"
     )

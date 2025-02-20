@@ -48,14 +48,6 @@ class AIChatHttpClient(BaseHttpClient):
 
             self.logger.debug("Raw response from API: %s", response)
 
-            # Всегда парсим ответ как JSON
-            # response = json.loads(raw_response) if isinstance(raw_response, str) else raw_response
-
-            # self.logger.debug("Parsed response: %s", response)
-
-            # if isinstance(response, str):
-            #     response = json.loads(response)
-
             if not isinstance(response, dict):
                 raise AIChatCompletionError("Невалидный ответ от API")
 
@@ -70,14 +62,50 @@ class AIChatHttpClient(BaseHttpClient):
                 self.logger.error("Invalid response structure: %s", response)
                 raise AIChatCompletionError("Неверная структура ответа от API")
 
-            # result_data = {
-            #     "alternatives": response.get("alternatives", []),
-            #     "usage": response.get("usage", {}),
-            #     "modelVersion": response.get("modelVersion", "unknown")
-            # }
-
             return AIChatResponse(success=True, result=Result(**result_data))
 
         except Exception as e:
             self.logger.error("Ошибка при запросе к API Yandex: %s", str(e))
             raise AIChatCompletionError(str(e))
+
+    async def get_completion_async(self, chat_request: AIChatRequest) -> str:
+        """
+        Получение ответа от Yandex API асинхронно
+        (https://yandex.cloud/ru/docs/foundation-models/operations/yandexgpt/async-request#curl_2)
+
+        Args:
+            chat_request: Запрос к API
+
+        Returns:
+                AIChatResponse: Ответ от API
+            Raises:
+                HTTPException: При ошибках запроса
+        """
+        headers = {
+            "Authorization": f"Bearer {config.yandex_iam_token}",
+            "x-folder-id": config.yandex_folder_id,
+        }
+
+        response = await self.post(
+            url="https://llm.api.cloud.yandex.net/foundationModels/v1/completionAsync",
+            headers=headers,
+            data=chat_request.model_dump(),
+        )
+        return response["id"]  # ID операции
+
+    async def get_operation_result(self, operation_id: str) -> AIChatResponse:
+        """
+        Получение результата операции (используется с асинхронным запросом)
+
+        Args:
+            operation_id: ID операции
+
+        Returns:
+            AIChatResponse: Ответ от API
+        """
+        headers = {"Authorization": f"Bearer {config.yandex_iam_token}"}
+        response = await self.get(
+            url=f"https://operation.api.cloud.yandex.net/operations/{operation_id}",
+            headers=headers,
+        )
+        return AIChatResponse.model_validate(response["response"])

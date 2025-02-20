@@ -5,7 +5,8 @@
 """
 
 from .v1.aichat.aichat import (AIChatRequest, AIChatResponse,
-                               CompletionOptions, Message, MessageRole, Result)
+                               CompletionOptions, Message, MessageRole,
+                               ModelPricing, ModelType, ModelVersion, Result)
 from .v1.auth.auth import AuthSchema, TokenResponseSchema, TokenSchema
 from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema
 from .v1.base import (BaseInputSchema, BaseResponseSchema, BaseSchema,

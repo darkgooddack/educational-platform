@@ -11,45 +11,52 @@ def setup_routes(router: APIRouter):
     @router.post("/completion", response_model=AIChatResponse)
     async def get_aichat_completion(
         message: str = Form(...),
+        async_mode: bool = Query(False, description="Использовать асинхронный режим"),
         current_user: UserCredentialsSchema = Depends(get_current_user),
         db_session: AsyncSession = Depends(get_db_session),
     ):
         """
-        # Получение ответа от AI модели (Данные ниже нужно переписать)
+        # Получение ответа от YandexGPT
 
         ## Args
-        * **request** - Запрос к AI модели с параметрами:
-            * **stream** - Потоковая генерация (true/false)
-            * **temperature** - Креативность ответов (0.0-1.0)
-            * **maxTokens** - Ограничение длины ответа
-            * **messages** - Массив сообщений:
-                * **role** - Роль (user/system/assistant)
-                * **text** - Текст сообщения
+        * **message** - Текст сообщения пользователя
+        * **async_mode** - Использовать асинхронный режим (дешевле в 2 раза)
+        * **current_user** - Данные текущего пользователя
         * **db_session** - Сессия базы данных
 
         ## Returns
         * **AIChatResponse** - Ответ от модели:
-            * **text** - Сгенерированный текст
-            * **status** - Статус выполнения
             * **success** - Признак успеха
+            * **result** - Результат генерации:
+                * **alternatives** - Варианты ответа
+                * **usage** - Статистика использования токенов
+                * **modelVersion** - Версия модели
 
-        ## Пример запроса
+        ## Пример ответа
         ```json
         {
-            "messages": [
-                {
-                    "role": "system",
-                    "text": "Ты умный ассистент"
+            "success": true,
+            "result": {
+                "alternatives": [{
+                    "message": {
+                        "role": "assistant",
+                        "text": "Ответ на ваш вопрос..."
+                    },
+                    "status": "ALTERNATIVE_STATUS_FINAL"
+                }],
+                "usage": {
+                    "inputTextTokens": "19",
+                    "completionTokens": "6",
+                    "totalTokens": "25"
                 },
-                {
-                    "role": "user",
-                    "text": "Привет! Какими науками занимался Альберт Эйнштейн?"
-                }
-            ]
+                "modelVersion": "23.10.2024"
+            }
         }
         ```
         """
         aichat_service = AIChatService(db_session)
+        if async_mode:
+            return await aichat_service.get_completion_async(message, current_user.id)
         return await aichat_service.get_completion(message, current_user.id)
 
 

@@ -61,6 +61,8 @@ class Settings(BaseSettings):
     sender_email: str = Field("noreply@ebtest.ru", description="Email отправителя")
     smtp_password: SecretStr
 
+    pre_instruction: str = "Ты умный ассистент, который помогает пользователям"
+
     yandex_model_name: str = Field(
         default="yandexgpt-lite", description="Название модели Yandex GPT"
     )
@@ -71,6 +73,9 @@ class Settings(BaseSettings):
     )
     # Ключ доступа к API Yandex GPT
     yandex_api_key: SecretStr
+
+    # Ключ доступа к IAM Yandex Cloud
+    yandex_iam_token: SecretStr
 
     yandex_folder_id: str = Field(description="ID каталога в Yandex Cloud")
 

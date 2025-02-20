@@ -12,6 +12,38 @@ class MessageRole(str, Enum):
     ASSISTANT = "assistant"
 
 
+class ModelType(str, Enum):
+    YANDEX_GPT_LITE = "yandexgpt-lite"
+    YANDEX_GPT_PRO = "yandexgpt"
+    YANDEX_GPT_PRO_32K = "yandexgpt-32k"
+    LLAMA_8B = "llama-lite"
+    LLAMA_70B = "llama"
+    CUSTOM = "custom"
+
+
+class ModelVersion(str, Enum):
+    DEPRECATED = "deprecated"
+    LATEST = "latest"
+    RC = "rc"
+
+
+class ModelPricing(Enum):
+    """
+    Цены и юниты для разных моделей и режимов
+    """
+
+    YANDEX_GPT_LITE_SYNC = (1, 0.20)  # (юниты, цена в рублях за 1000 токенов)
+    YANDEX_GPT_LITE_ASYNC = (0.5, 0.10)
+    YANDEX_GPT_PRO_SYNC = (6, 1.20)
+    YANDEX_GPT_PRO_ASYNC = (3, 0.60)
+    DATASPHERE_SYNC = (6, 1.20)
+    DATASPHERE_ASYNC = (3, 0.60)
+    LLAMA_8B_SYNC = (1, 0.20)
+    LLAMA_8B_ASYNC = (0.5, 0.10)
+    LLAMA_70B_SYNC = (6, 1.20)
+    LLAMA_70B_ASYNC = (3, 0.60)
+
+
 class Message(BaseInputSchema):
     """
     Схема сообщения для чата с AI
