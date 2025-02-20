@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
-from typing import Optional
-
+from typing import Optional, List
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import UserModel
@@ -52,6 +52,12 @@ class AuthDataManager(BaseEntityManager[UserSchema]):
         """
         await self.update_fields(user_id, {"last_seen": datetime.now(timezone.utc)})
 
+    async def get_all_users(self) -> List[UserModel]:
+        """
+        Получает список всех пользователей.
+        """
+        statement = select(self.model)
+        return await self.get_items(statement)
 
 # TODO: Добавить методы для работы с данными пользователей, ниже приведены примеры методов
 

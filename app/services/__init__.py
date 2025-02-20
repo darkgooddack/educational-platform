@@ -13,6 +13,7 @@ from .v1.tests import TestDataManager, TestService
 from .v1.themes import ThemeService
 from .v1.users import UserDataManager, UserService
 from .v1.videos import VideoLectureDataManager, VideoLectureService
+# from .v1.email import EmailService # circular import
 
 __all__ = [
     "BaseService",
@@ -30,4 +31,5 @@ __all__ = [
     "TestService",
     "TestDataManager",
     "AIChatService",
+    # "EmailService", # circular import
 ]

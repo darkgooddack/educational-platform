@@ -2,11 +2,9 @@
 Схемы для регистрации пользователей.
 """
 
-from typing import Optional
-
 from pydantic import EmailStr, Field
 
-from ..base import BaseInputSchema
+from ..base import BaseInputSchema, BaseResponseSchema
 
 
 class RegistrationSchema(BaseInputSchema):
@@ -39,7 +37,7 @@ class RegistrationSchema(BaseInputSchema):
     password: str = Field(min_length=8, description="Пароль минимум 8 символов")
 
 
-class RegistrationResponseSchema(BaseInputSchema):
+class RegistrationResponseSchema(BaseResponseSchema):
     """
     Схема ответа при успешной регистрации
 
@@ -52,3 +50,16 @@ class RegistrationResponseSchema(BaseInputSchema):
     user_id: int
     email: EmailStr
     message: str = "Регистрация успешно завершена"
+
+class VerificationResponseSchema(BaseResponseSchema):
+    """
+    Схема ответа при успешной верификации email
+
+    Attributes:
+        user_id (int): ID пользователя
+        success (bool): Успешно ли подтвержден email
+        message (str): Сообщение об успешной верификации
+    """
+    user_id: int
+    success: bool = True
+    message: str = "Email успешно подтвержден"

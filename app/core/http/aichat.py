@@ -1,6 +1,5 @@
-import json
-
 from app.core.config import config
+from app.core.security import TokenMixin
 from app.core.exceptions import AIChatAuthError, AIChatCompletionError
 from app.schemas import AIChatRequest, AIChatResponse, Result
 
@@ -81,17 +80,34 @@ class AIChatHttpClient(BaseHttpClient):
             Raises:
                 HTTPException: При ошибках запроса
         """
+        jwt_token = TokenMixin.get_iam_token(
+            config.yandex_private_key.get_secret_value(),
+            config.yandex_key_id
+        )
         headers = {
-            "Authorization": f"Bearer {config.yandex_iam_token}",
+            "Authorization": f"Bearer {jwt_token}",
             "x-folder-id": config.yandex_folder_id,
         }
-
+        self.logger.debug("Отправляем асинхронный запрос с данными: %s", chat_request.model_dump())
+        self.logger.debug("Заголовки запроса: %s", headers)
         response = await self.post(
             url="https://llm.api.cloud.yandex.net/foundationModels/v1/completionAsync",
             headers=headers,
             data=chat_request.model_dump(),
         )
-        return response["id"]  # ID операции
+        self.logger.debug("Получен ответ от API: %s", response)
+        operation_id = response.get("id")
+        if not operation_id:
+            self.logger.error("ID операции отсутствует в ответе: %s", response)
+            raise ValueError("Не получен ID операции")
+        self.logger.debug("ID операции: %s", operation_id)
+        # Второй запрос - получаем результат по operation_id
+        result = await self.get(
+            url=f"https://operation.api.cloud.yandex.net/operations/{operation_id}",
+            headers={"Authorization": f"Bearer {config.yandex_api_key}"}
+        )
+
+        return result
 
     async def get_operation_result(self, operation_id: str) -> AIChatResponse:
         """
@@ -103,7 +119,7 @@ class AIChatHttpClient(BaseHttpClient):
         Returns:
             AIChatResponse: Ответ от API
         """
-        headers = {"Authorization": f"Bearer {config.yandex_iam_token}"}
+        headers = {"Authorization": f"Bearer {config.yandex_api_key}"}
         response = await self.get(
             url=f"https://operation.api.cloud.yandex.net/operations/{operation_id}",
             headers=headers,

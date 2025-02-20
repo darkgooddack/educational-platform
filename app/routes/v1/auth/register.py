@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_db_session
-from app.schemas import RegistrationResponseSchema, RegistrationSchema
+from app.schemas import RegistrationResponseSchema, RegistrationSchema, VerificationResponseSchema
 from app.services import UserService
 
 
@@ -40,5 +40,21 @@ def setup_routes(router: APIRouter):
 
         return await UserService(db_session).create_user(user)
 
+
+    @router.get("/verify-email/{token}")
+    async def verify_email(
+        token: str,
+        db_session: AsyncSession = Depends(get_db_session)
+    ) -> VerificationResponseSchema:
+        """
+        ✉️ Подтверждение email адреса пользователя.
+
+        Args:
+            token: Токен подтверждения из письма
+
+        Returns:
+            VerificationResponseSchema: Результат подтверждения
+        """
+        return await UserService(db_session).verify_email(token)
 
 __all__ = ["setup_routes"]

@@ -8,7 +8,7 @@ from .v1.aichat.aichat import (AIChatRequest, AIChatResponse,
                                CompletionOptions, Message, MessageRole,
                                ModelPricing, ModelType, ModelVersion, Result)
 from .v1.auth.auth import AuthSchema, TokenResponseSchema, TokenSchema
-from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema
+from .v1.auth.register import RegistrationResponseSchema, RegistrationSchema, VerificationResponseSchema
 from .v1.base import (BaseInputSchema, BaseResponseSchema, BaseSchema,
                       CommonBaseSchema, ErrorResponseSchema,
                       ItemResponseSchema, ListResponseSchema)
@@ -67,6 +67,7 @@ __all__ = [
     "VKOAuthParams",
     "RegistrationSchema",
     "RegistrationResponseSchema",
+    "VerificationResponseSchema",
     "UserSchema",
     "UserCredentialsSchema",
     "UserUpdateSchema",
@@ -106,6 +107,7 @@ __all__ = [
     "ThemeDeleteResponse",
     "ThemeSelectResponse",
     "ThemeTreeResponse",
+    "ThemeListResponse",
     "VKOAuthTokenParams",
     "VKTokenData",
     "GoogleTokenData",
@@ -129,4 +131,7 @@ __all__ = [
     "MessageRole",
     "CompletionOptions",
     "Result",
+    "ModelPricing",
+    "ModelType",
+    "ModelVersion",
 ]

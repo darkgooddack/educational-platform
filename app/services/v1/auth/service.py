@@ -13,7 +13,7 @@ from app.core.exceptions import (InvalidCredentialsError, TokenExpiredError,
                                  TokenInvalidError, UserInactiveError)
 from app.core.security import HashingMixin, TokenMixin
 from app.core.storages.redis.auth import AuthRedisStorage
-from app.schemas import (AuthSchema, TokenResponseSchema, TokenSchema,
+from app.schemas import (AuthSchema, TokenResponseSchema,
                          UserCredentialsSchema)
 from app.services.v1.base import BaseService
 
@@ -109,12 +109,6 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
                 **({"role": user_schema.role} if hasattr(user_schema, "role") else {}),
             },
         )
-
-        # Обновляем статус при входе через redis, снимая тем самым нагрузку с базы данных
-        # await self._data_manager.update_online_status(
-        #     user_id=user_model.id,
-        #     is_online=True
-        # )
         await self._redis_storage.set_online_status(user_schema.id, True)
         logger.info(
             "Пользователь вошел в систему",
@@ -183,11 +177,6 @@ class AuthService(HashingMixin, TokenMixin, BaseService):
             user = await self._data_manager.get_user_by_credentials(user_email)
 
             if user:
-                # Обновляем статус через redis, снимая тем самым нагрузку с базы данных
-                # await self._data_manager.update_online_status(
-                #     user_id=user.id,
-                #     is_online=False
-                # )
                 await self._redis_storage.set_online_status(user.id, False)
                 logger.debug(
                     "Пользователь вышел из системы",

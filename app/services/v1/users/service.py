@@ -16,17 +16,17 @@
     user = await service.create_user(user_data)
     user_by_email = await service.get_user_by_email("test@test.com")
 """
-
+from datetime import datetime, timezone
 from typing import Any, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (UserCreationError, UserExistsError,
-                                 UserNotFoundError)
-from app.core.security import HashingMixin
+                                 UserNotFoundError, TokenInvalidError, TokenExpiredError)
+from app.core.security import HashingMixin, TokenMixin
 from app.core.storages.redis.auth import AuthRedisStorage
 from app.models import UserModel
-from app.schemas import (ManagerSelectSchema, OAuthUserSchema, Page,
+from app.schemas import (ManagerSelectSchema, OAuthUserSchema,
                          PaginationParams, RegistrationResponseSchema,
                          RegistrationSchema, UserCredentialsSchema, UserRole,
                          UserSchema, UserStatusResponseSchema,
@@ -36,7 +36,7 @@ from app.services import BaseService
 from .data_manager import UserDataManager
 
 
-class UserService(HashingMixin, BaseService):
+class UserService(HashingMixin, TokenMixin, BaseService):
     """
     Сервис для управления пользователями.
 
@@ -110,8 +110,17 @@ class UserService(HashingMixin, BaseService):
         Returns:
             RegistrationResponseSchema: Схема ответа с id, email и сообщением об успехе
         """
+        from app.services.v1.email.service import EmailService
 
         created_user = await self._create_user_internal(user)
+
+        verification_token = self.generate_verification_token(created_user.id)
+        email_service = EmailService()
+        await email_service.send_verification_email(
+            to_email=created_user.email,
+            user_name=created_user.name,
+            verification_token=verification_token
+        )
 
         return RegistrationResponseSchema(
             user_id=created_user.id,
@@ -357,8 +366,8 @@ class UserService(HashingMixin, BaseService):
         user = await self._data_manager.get_user_by_field("id", user_id)
         if not user:
             raise UserNotFoundError(
-                message=f"Пользователь с id {user_id} не найден",
-                extra={"user_id": user_id},
+                field="id",
+                value=user_id,
             )
 
         # Получаем онлайн статус напрямую
@@ -374,3 +383,54 @@ class UserService(HashingMixin, BaseService):
         return UserStatusResponseSchema(
             is_online=is_online, last_activity=last_activity
         )
+
+    def generate_verification_token(self, user_id: int) -> str:
+        """
+        Генерирует токен для подтверждения email
+
+        Args:
+            user_id: Идентификатор пользователя
+
+        Returns:
+            str: Токен для подтверждения email
+        """
+        payload = {
+            'sub': str(user_id),
+            'type': 'email_verification',
+            'expires_at': (
+                int(datetime.now(timezone.utc).timestamp()) +
+                TokenMixin.get_token_expiration()
+            )
+        }
+        return TokenMixin.generate_token(payload)
+
+    async def verify_email(self, token: str) -> UserCredentialsSchema:
+        """
+        Подтверждает email пользователя
+
+        Args:
+            token: Токен для подтверждения email
+
+        Returns:
+            UserCredentialsSchema: Данные пользователя
+        """
+        try:
+            payload = TokenMixin.verify_token(token)
+            user_id = int(payload['sub'])
+
+            if payload.get('type') != 'email_verification':
+                raise TokenInvalidError()
+
+            user = await self._data_manager.get_user_by_field("id", user_id)
+            if not user:
+                raise UserNotFoundError(field="id", value=user_id)
+
+            await self._data_manager.update_fields(
+                user_id,
+                {"is_verified": True}
+            )
+            return user
+
+        except (TokenExpiredError, TokenInvalidError) as e:
+            self.logger.error("Ошибка верификации токена: %s", e)
+            raise

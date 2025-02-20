@@ -74,8 +74,9 @@ class Settings(BaseSettings):
     # Ключ доступа к API Yandex GPT
     yandex_api_key: SecretStr
 
-    # Ключ доступа к IAM Yandex Cloud
-    yandex_iam_token: SecretStr
+    yandex_private_key: SecretStr
+
+    yandex_key_id: str
 
     yandex_folder_id: str = Field(description="ID каталога в Yandex Cloud")
 

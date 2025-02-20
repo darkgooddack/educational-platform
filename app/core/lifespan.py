@@ -32,7 +32,10 @@ async def lifespan(_app: FastAPI):
     logging.info("Планировщик успешно запущен")
 
     for attempt in range(RabbitMQClient._max_retries):
-        await RedisClient.get_instance()
+        try:
+            await RedisClient.get_instance()
+        except Exception as redis_error:
+            logging.error("Redis: ошибка подключения %s", redis_error)
         await RabbitMQClient.get_instance()
 
         if await RabbitMQClient.health_check():

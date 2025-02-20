@@ -15,9 +15,10 @@ Example:
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import passlib
+
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
@@ -228,3 +229,22 @@ class TokenMixin:
             raise TokenExpiredError()
 
         return email
+
+    @staticmethod
+    def get_iam_token(private_key: str, key_id: str) -> str:
+        now = datetime.now(timezone.utc)
+        payload = {
+            'aud': 'https://iam.api.cloud.yandex.net/iam/v1/tokens',
+            'iss': key_id,
+            'iat': now,
+            'exp': now + timedelta(hours=1)
+        }
+
+        jwt_token = jwt.encode(
+            payload,
+            private_key,
+            algorithm='RS256',
+            headers={'kid': key_id}
+        )
+
+        return jwt_token
