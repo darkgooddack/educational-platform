@@ -1,9 +1,12 @@
+import logging
 from email.mime.text import MIMEText
 import smtplib
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from app.core.messaging import EmailProducer
 from app.core.config import config
+
+logger = logging.getLogger(__name__)
 
 class EmailService:
     def __init__(self):
@@ -13,6 +16,8 @@ class EmailService:
         self.password = config.smtp_password.get_secret_value()
 
         template_dir = Path(__file__).parents[3] / 'templates' / 'email'
+        logger.debug(f"Template dir: {template_dir}")
+
         self.env = Environment(loader=FileSystemLoader(str(template_dir)))
     async def send_email(self, to_email: str, subject: str, body: str):
         msg = MIMEText(body, 'html')
@@ -27,7 +32,7 @@ class EmailService:
 
     async def send_verification_email(self, to_email: str, user_name: str, verification_token: str):
         template = self.env.get_template('verification.html')
-        verification_url = f"http://localhost:8000/api/v1/auth/verify-email/{verification_token}"
+        verification_url = f"{config.verification_url}/api/v1/register/verify-email/{verification_token}"
 
         html_content = template.render(
             user_name=user_name,
