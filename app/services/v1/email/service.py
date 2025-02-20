@@ -1,24 +1,11 @@
-import logging
 from email.mime.text import MIMEText
 import smtplib
-from pathlib import Path
-from jinja2 import Environment, FileSystemLoader
 from app.core.messaging import EmailProducer
 from app.core.config import config
+from app.services.v1.base import BaseEmailService
 
-logger = logging.getLogger(__name__)
+class EmailService(BaseEmailService):
 
-class EmailService:
-    def __init__(self):
-        self.smtp_server = config.smtp_server
-        self.smtp_port = config.smtp_port
-        self.sender_email = config.sender_email
-        self.password = config.smtp_password.get_secret_value()
-
-        template_dir = Path(__file__).parents[3] / 'templates' / 'email'
-        logger.debug(f"Template dir: {template_dir}")
-
-        self.env = Environment(loader=FileSystemLoader(str(template_dir)))
     async def send_email(self, to_email: str, subject: str, body: str):
         msg = MIMEText(body, 'html')
         msg['Subject'] = subject

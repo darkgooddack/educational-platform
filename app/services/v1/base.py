@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Callable, Generic, List, Optional, Type, TypeVar
-
+from pathlib import Path
+from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import asc, delete, desc, func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +10,7 @@ from sqlalchemy.sql.expression import Executable
 from app.models import BaseModel
 from app.schemas import BaseSchema, PaginationParams
 
+from app.core.config import config
 M = TypeVar("M", bound=BaseModel)
 T = TypeVar("T", bound=BaseSchema)
 
@@ -36,6 +38,17 @@ class BaseService(SessionMixin):
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
 
+
+class BaseEmailService(BaseService):
+    def __init__(self):
+        self.smtp_server = config.smtp_server
+        self.smtp_port = config.smtp_port
+        self.sender_email = config.sender_email
+        self.password = config.smtp_password.get_secret_value()
+        template_dir = Path(__file__).parents[3] / 'templates' / 'email'
+        self.logger.debug(f"Template dir: {template_dir}")
+
+        self.env = Environment(loader=FileSystemLoader(str(template_dir)))
 
 class BaseDataManager(SessionMixin, Generic[T]):
     """
