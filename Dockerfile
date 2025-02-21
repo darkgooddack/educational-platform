@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 RUN apk update
-RUN apk add -v --no-cache --virtual .build-deps gcc
+RUN apk add -v -f --no-cache --virtual .build-deps gcc
 RUN apk add -v --no-cache --virtual .build-deps python3-dev
 RUN apk add -v --no-cache --virtual .build-deps musl-dev
 RUN apk add -v --no-cache --virtual .build-deps postgresql16-dev
