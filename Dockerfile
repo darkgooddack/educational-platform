@@ -10,9 +10,9 @@ RUN apk update && \
     gcc \
     python3-dev \
     musl-dev \
-    postgresql16-dev \
+    postgresql-dev \
     && apk add --no-cache \
-    postgresql16-client \
+    postgresql-client \
     libpq \
     poppler-utils
 
