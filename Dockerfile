@@ -21,6 +21,7 @@ EXPOSE 8000
 
 COPY . /usr/src/app/
 
+ENV UV_HTTP_TIMEOUT=60
 RUN uv sync --frozen --no-cache
 
 RUN chmod +x /usr/src/app/docker-entrypoint.sh
